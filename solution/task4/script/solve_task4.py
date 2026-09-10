@@ -9,19 +9,24 @@
 附件 2 的分段线性插值，移动坐标项 b*xi*T_xi（b=-Rdot/R）用一阶后向
 迎风差分，并与扩散项一起隐式求解。
 
-本阶段只负责数值状态和验证接口，不生成问题四 answer 文件。后续结果
-生成器可直接使用 solve_task4 返回的每 60 s 完整 xi 状态与终止状态。
+求解器同时提供 result4.xlsx、论文表6和完整长表CSV的生成与独立回读
+验收；--no-write 可只运行数值求解和计算验证而不创建答案文件。
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
+import re
 import time as wall_time
+from copy import copy
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font
 from scipy.linalg import solve_banded
 
 
@@ -47,8 +52,26 @@ PICARD_MAX_ITER = 50
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_AIR_DATA_PATH = REPO_ROOT / "problem" / "附件" / "附件1.xlsx"
 DEFAULT_RADIUS_DATA_PATH = REPO_ROOT / "problem" / "附件" / "附件2.xlsx"
+DEFAULT_TEMPLATE_PATH = REPO_ROOT / "problem" / "附件" / "附件3" / "result4.xlsx"
+DEFAULT_ANSWER_DIR = Path(__file__).resolve().parents[1] / "answer"
+DEFAULT_XLSX_PATH = DEFAULT_ANSWER_DIR / "result4.xlsx"
+DEFAULT_PAPER_PATH = DEFAULT_ANSWER_DIR / "task4_paper_table.xlsx"
+DEFAULT_CSV_PATH = DEFAULT_ANSWER_DIR / "task4_all_answers.csv"
 # 附件 2 的最后一个数据时刻；求解不会超出该时刻，也不会外推 R(t)。
 DEFAULT_MAX_TIME_S = 259200.0
+
+OUTPUT_RADIUS_CM = np.arange(0.0, 2.0000001, 0.1)
+PAPER_RADIUS_CM = np.array([0.0, 0.5, 1.0], dtype=float)
+CSV_COLUMNS = [
+    "record_type",
+    "time_s",
+    "time_h",
+    "radius_cm",
+    "r_cm",
+    "is_surface",
+    "temperature_C",
+    "moisture_kgkg",
+]
 
 
 def _required_columns(frame: pd.DataFrame, required: tuple[str, ...]) -> dict[str, Any]:
@@ -746,18 +769,11 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
     if lower_temperature.shape != xi.shape or lower_moisture.shape != xi.shape:
         raise ValueError("终止下端状态不是完整xi网格")
 
-    # 附件2已知数据点必须被原样读取；半径单位检查同时覆盖 cm->m。
-    known_indices = np.unique(
-        np.array([0, radius_data_time_s.size // 2, radius_data_time_s.size - 1])
+    # 附件2的每个已知数据点都必须被原样读取；半径单位检查同时覆盖 cm->m。
+    interpolated_known = np.array(
+        [radius_at(t, radius_data_time_s, radius_data_m) for t in radius_data_time_s]
     )
-    known_radius_error = 0.0
-    for index in known_indices:
-        interpolated = radius_at(
-            radius_data_time_s[index], radius_data_time_s, radius_data_m
-        )
-        known_radius_error = max(
-            known_radius_error, abs(interpolated - radius_data_m[index])
-        )
+    known_radius_error = float(np.max(np.abs(interpolated_known - radius_data_m)))
     if known_radius_error > 1.0e-14:
         raise ValueError("附件2已知时间点半径插值不一致")
 
@@ -811,6 +827,7 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
         "termination_lower_max_kgkg": lower_max,
         "termination_bracket_width_s": upper_time - lower_time,
         "radius_known_point_max_error_m": known_radius_error,
+        "radius_known_point_count": int(radius_data_time_s.size),
         "temperature_min_C": float(solution["min_temperature_C"]),
         "temperature_max_C": float(solution["max_temperature_C"]),
         "moisture_min_kgkg": float(solution["min_internal_moisture_kgkg"]),
@@ -821,6 +838,661 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
         "internal_node_count": int(xi.size),
         "center_boundary_zero_flux_and_zero_advection": center_boundary_ok,
         "kelvin_reference_D_m2_s": float(computed_D[0]),
+    }
+
+
+def _regular_sample_indices(solution: dict[str, Any]) -> np.ndarray:
+    """返回 result4/CSV 使用的 60 s 状态索引（严格从60 s开始）。"""
+
+    times = np.asarray(solution["sampled_times_s"], dtype=float)
+    termination_time = float(solution["termination_time_s"])
+    last_time = np.floor(termination_time / OUTPUT_DT_S + 1.0e-12) * OUTPUT_DT_S
+    indices = np.flatnonzero(
+        (times >= OUTPUT_DT_S - 1.0e-8) & (times <= last_time + 1.0e-8)
+    )
+    selected = times[indices]
+    if selected.size and not np.allclose(
+        selected, np.arange(OUTPUT_DT_S, last_time + 0.1, OUTPUT_DT_S), atol=1.0e-8
+    ):
+        raise ValueError("求解器60 s状态与结果文件采样网格不一致")
+    return indices
+
+
+def _paper_regular_hours(solution: dict[str, Any]) -> list[int]:
+    """返回表6中的6 h、12 h、...常规行。"""
+
+    termination_hours = float(solution["termination_time_s"]) / 3600.0
+    last_regular_hour = int(np.floor(termination_hours / 6.0 + 1.0e-12) * 6)
+    return list(range(6, last_regular_hour + 1, 6))
+
+
+def _sample_index_at_time(solution: dict[str, Any], time_s: float) -> int:
+    times = np.asarray(solution["sampled_times_s"], dtype=float)
+    matches = np.flatnonzero(np.isclose(times, time_s, rtol=0.0, atol=1.0e-8))
+    if matches.size != 1:
+        raise ValueError(f"缺少精确的 {time_s:g}s 完整xi状态")
+    return int(matches[0])
+
+
+def _fixed_state_values(
+    xi: np.ndarray,
+    temperature_C: np.ndarray,
+    moisture_kgkg: np.ndarray,
+    radius_m: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """按绝对半径采样；返回温度、水分和有效位置掩码。"""
+
+    fixed_temperature = np.full(OUTPUT_RADIUS_CM.size, np.nan, dtype=float)
+    fixed_moisture = np.full(OUTPUT_RADIUS_CM.size, np.nan, dtype=float)
+    valid = OUTPUT_RADIUS_CM / 100.0 <= radius_m + 1.0e-12
+    for index, radius_cm in enumerate(OUTPUT_RADIUS_CM):
+        if not valid[index]:
+            continue
+        xi_target = min(1.0, (radius_cm / 100.0) / radius_m)
+        fixed_temperature[index] = float(np.interp(xi_target, xi, temperature_C))
+        fixed_moisture[index] = float(np.interp(xi_target, xi, moisture_kgkg))
+    return fixed_temperature, fixed_moisture, valid
+
+
+def _surface_values(
+    temperature_C: np.ndarray, moisture_kgkg: np.ndarray
+) -> tuple[float, float]:
+    """药材表面直接取固定xi网格的 xi=1 节点。"""
+
+    return float(temperature_C[-1]), float(moisture_kgkg[-1])
+
+
+def write_result_xlsx(
+    solution: dict[str, Any],
+    output_path: str | Path = DEFAULT_XLSX_PATH,
+    template_path: str | Path = DEFAULT_TEMPLATE_PATH,
+) -> None:
+    """复制 result4 模板并写入60 s固定绝对位置和真实移动表面。"""
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    workbook = load_workbook(Path(template_path))
+    if workbook.sheetnames != ["Sheet1"]:
+        raise ValueError(f"result4模板工作表不符合要求: {workbook.sheetnames}")
+    worksheet = workbook["Sheet1"]
+    header_style = copy(worksheet.cell(row=1, column=2)._style)
+    time_style = copy(worksheet.cell(row=2, column=1)._style)
+    value_style = copy(worksheet.cell(row=2, column=2)._style)
+    if worksheet.max_row > 1:
+        worksheet.delete_rows(2, worksheet.max_row - 1)
+
+    # A1 保留官方模板语义；B:V 是固定绝对位置，W 是真实移动表面。
+    worksheet.cell(row=1, column=1).value = "时间\\到药材中心的距离"
+    for column_index, radius_cm in enumerate(OUTPUT_RADIUS_CM, start=2):
+        cell = worksheet.cell(row=1, column=column_index, value=float(radius_cm))
+        cell._style = copy(header_style)
+        cell.number_format = "0.0"
+    surface_header = worksheet.cell(row=1, column=OUTPUT_RADIUS_CM.size + 2, value="药材表面")
+    surface_header._style = copy(header_style)
+
+    xi = np.asarray(solution["xi"], dtype=float)
+    sampled_indices = _regular_sample_indices(solution)
+    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
+    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
+    sampled_temperature = np.asarray(
+        solution["sampled_temperature_internal_C"], dtype=float
+    )
+    sampled_moisture = np.asarray(
+        solution["sampled_moisture_internal_kgkg"], dtype=float
+    )
+    for row_index, state_index in enumerate(sampled_indices, start=2):
+        time_cell = worksheet.cell(row=row_index, column=1, value=int(round(sampled_times[state_index])))
+        time_cell._style = copy(time_style)
+        time_cell.number_format = "0"
+        _, fixed_moisture, valid = _fixed_state_values(
+            xi,
+            sampled_temperature[state_index],
+            sampled_moisture[state_index],
+            float(sampled_radius[state_index]),
+        )
+        for column_index, (value, is_valid) in enumerate(
+            zip(fixed_moisture, valid), start=2
+        ):
+            cell = worksheet.cell(row=row_index, column=column_index)
+            cell._style = copy(value_style)
+            if is_valid:
+                cell.value = float(f"{value:.4f}")
+                cell.number_format = "0.0000"
+            else:
+                cell.value = None
+        surface_value = float(f"{sampled_moisture[state_index, -1]:.4f}")
+        surface_cell = worksheet.cell(
+            row=row_index, column=OUTPUT_RADIUS_CM.size + 2, value=surface_value
+        )
+        surface_cell._style = copy(value_style)
+        surface_cell.number_format = "0.0000"
+    workbook.save(output_path)
+
+
+def _csv_state_rows(
+    record_prefix: str,
+    time_s: float,
+    radius_m: float,
+    temperature_C: np.ndarray,
+    moisture_kgkg: np.ndarray,
+    xi: np.ndarray,
+    sample_time: bool,
+) -> list[dict[str, str]]:
+    """将一个完整xi状态展开为固定位置记录和单独表面记录。"""
+
+    fixed_temperature, fixed_moisture, valid = _fixed_state_values(
+        xi, temperature_C, moisture_kgkg, radius_m
+    )
+    if sample_time:
+        time_token = str(int(round(time_s)))
+        fixed_type = "sample_fixed"
+        surface_type = "sample_surface"
+    else:
+        time_token = f"{time_s:.6f}"
+        fixed_type = "drying_end_fixed"
+        surface_type = "drying_end_surface"
+    hour_token = f"{time_s / 3600.0:.8f}"
+    radius_token = f"{radius_m * 100.0:.4f}"
+    rows: list[dict[str, str]] = []
+    for index, radius_cm in enumerate(OUTPUT_RADIUS_CM):
+        if not valid[index]:
+            continue
+        rows.append(
+            {
+                "record_type": fixed_type,
+                "time_s": time_token,
+                "time_h": hour_token,
+                "radius_cm": radius_token,
+                "r_cm": f"{radius_cm:.4f}",
+                "is_surface": "0",
+                "temperature_C": f"{fixed_temperature[index]:.4f}",
+                "moisture_kgkg": f"{fixed_moisture[index]:.4f}",
+            }
+        )
+    surface_temperature, surface_moisture = _surface_values(
+        temperature_C, moisture_kgkg
+    )
+    rows.append(
+        {
+            "record_type": surface_type,
+            "time_s": time_token,
+            "time_h": hour_token,
+            "radius_cm": radius_token,
+            "r_cm": radius_token,
+            "is_surface": "1",
+            "temperature_C": f"{surface_temperature:.4f}",
+            "moisture_kgkg": f"{surface_moisture:.4f}",
+        }
+    )
+    return rows
+
+
+def write_result_csv(
+    solution: dict[str, Any], output_path: str | Path = DEFAULT_CSV_PATH
+) -> None:
+    """写入包含固定位置、真实表面和终止状态的完整长表CSV。"""
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    xi = np.asarray(solution["xi"], dtype=float)
+    sampled_indices = _regular_sample_indices(solution)
+    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
+    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
+    sampled_temperature = np.asarray(
+        solution["sampled_temperature_internal_C"], dtype=float
+    )
+    sampled_moisture = np.asarray(
+        solution["sampled_moisture_internal_kgkg"], dtype=float
+    )
+    rows: list[dict[str, str]] = []
+    for state_index in sampled_indices:
+        rows.extend(
+            _csv_state_rows(
+                "sample",
+                float(sampled_times[state_index]),
+                float(sampled_radius[state_index]),
+                sampled_temperature[state_index],
+                sampled_moisture[state_index],
+                xi,
+                sample_time=True,
+            )
+        )
+    rows.extend(
+        _csv_state_rows(
+            "drying_end",
+            float(solution["termination_time_s"]),
+            float(solution["termination_radius_m"]),
+            np.asarray(solution["termination_temperature_internal_C"], dtype=float),
+            np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float),
+            xi,
+            sample_time=False,
+        )
+    )
+    with output_path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=CSV_COLUMNS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _paper_rows(solution: dict[str, Any]) -> list[list[Any]]:
+    """生成表6的常规6 h行和精确终止行。"""
+
+    xi = np.asarray(solution["xi"], dtype=float)
+    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
+    sampled_temperature = np.asarray(
+        solution["sampled_temperature_internal_C"], dtype=float
+    )
+    sampled_moisture = np.asarray(
+        solution["sampled_moisture_internal_kgkg"], dtype=float
+    )
+    rows: list[list[Any]] = []
+    for hour in _paper_regular_hours(solution):
+        state_index = _sample_index_at_time(solution, hour * 3600.0)
+        _, fixed_moisture, valid = _fixed_state_values(
+            xi,
+            sampled_temperature[state_index],
+            sampled_moisture[state_index],
+            float(sampled_radius[state_index]),
+        )
+        _, surface_moisture = _surface_values(
+            sampled_temperature[state_index], sampled_moisture[state_index]
+        )
+        rows.append(
+            [
+                float(hour),
+                float(fixed_moisture[0]) if valid[0] else None,
+                float(fixed_moisture[5]) if valid[5] else None,
+                float(fixed_moisture[10]) if valid[10] else None,
+                float(surface_moisture),
+            ]
+        )
+    termination_moisture = np.asarray(
+        solution["termination_moisture_internal_kgkg"], dtype=float
+    )
+    termination_temperature = np.asarray(
+        solution["termination_temperature_internal_C"], dtype=float
+    )
+    _, fixed_moisture, valid = _fixed_state_values(
+        xi,
+        termination_temperature,
+        termination_moisture,
+        float(solution["termination_radius_m"]),
+    )
+    _, surface_moisture = _surface_values(termination_temperature, termination_moisture)
+    termination_hours = float(solution["termination_time_s"]) / 3600.0
+    rows.append(
+        [
+            f"烘干结束时间（{termination_hours:.4f} h）",
+            float(fixed_moisture[0]) if valid[0] else None,
+            float(fixed_moisture[5]) if valid[5] else None,
+            float(fixed_moisture[10]) if valid[10] else None,
+            float(surface_moisture),
+        ]
+    )
+    return rows
+
+
+def write_paper_table(
+    solution: dict[str, Any], output_path: str | Path = DEFAULT_PAPER_PATH
+) -> None:
+    """生成论文表6工作表，不把绝对位置之外的数值外推到表格中。"""
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "表6"
+    headers = ["时间/h", "0 cm", "0.5 cm", "1.0 cm", "药材表面"]
+    for column_index, header in enumerate(headers, start=1):
+        cell = worksheet.cell(row=1, column=column_index, value=header)
+        cell.font = Font(bold=True)
+    for row_index, row_values in enumerate(_paper_rows(solution), start=2):
+        for column_index, value in enumerate(row_values, start=1):
+            cell = worksheet.cell(row=row_index, column=column_index, value=value)
+            if column_index == 1 and isinstance(value, (int, float)):
+                cell.number_format = "0.0"
+            elif column_index > 1 and value is not None:
+                cell.value = float(f"{float(value):.4f}")
+                cell.number_format = "0.0000"
+    summary_row = 2 + len(_paper_rows(solution)) + 1
+    worksheet.cell(row=summary_row, column=1, value="最终烘干时长/h")
+    duration_cell = worksheet.cell(
+        row=summary_row,
+        column=2,
+        value=float(f"{float(solution['termination_time_s']) / 3600.0:.4f}"),
+    )
+    duration_cell.number_format = "0.0000"
+    workbook.save(output_path)
+
+
+def _fixed_valid_count(
+    radius_m: float,
+) -> int:
+    return int(np.count_nonzero(OUTPUT_RADIUS_CM / 100.0 <= radius_m + 1.0e-12))
+
+
+def _format_pattern_ok(value: str, decimals: int) -> bool:
+    return re.fullmatch(rf"\d+\.\d{{{decimals}}}", value) is not None
+
+
+def validate_written_outputs(
+    solution: dict[str, Any],
+    xlsx_path: str | Path = DEFAULT_XLSX_PATH,
+    paper_path: str | Path = DEFAULT_PAPER_PATH,
+    csv_path: str | Path = DEFAULT_CSV_PATH,
+) -> dict[str, Any]:
+    """独立回读三个文件并检查结构、掩码、格式及全量数值一致性。"""
+
+    summary = validate_solution(solution)
+    xi = np.asarray(solution["xi"], dtype=float)
+    sampled_indices = _regular_sample_indices(solution)
+    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
+    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
+    sampled_temperature = np.asarray(
+        solution["sampled_temperature_internal_C"], dtype=float
+    )
+    sampled_moisture = np.asarray(
+        solution["sampled_moisture_internal_kgkg"], dtype=float
+    )
+
+    workbook = load_workbook(Path(xlsx_path), read_only=True, data_only=True)
+    if workbook.sheetnames != ["Sheet1"]:
+        raise ValueError(f"result4答案工作表错误: {workbook.sheetnames}")
+    worksheet = workbook["Sheet1"]
+    xlsx_rows = list(
+        worksheet.iter_rows(
+            min_row=1,
+            max_row=worksheet.max_row,
+            min_col=1,
+            max_col=worksheet.max_column,
+            values_only=True,
+        )
+    )
+    expected_xlsx_rows = sampled_indices.size + 1
+    expected_xlsx_columns = OUTPUT_RADIUS_CM.size + 2
+    if worksheet.max_row != expected_xlsx_rows or worksheet.max_column != expected_xlsx_columns:
+        raise ValueError(
+            f"result4尺寸错误: {(worksheet.max_row, worksheet.max_column)}，"
+            f"期望 {(expected_xlsx_rows, expected_xlsx_columns)}"
+        )
+    header = xlsx_rows[0]
+    expected_header = ["时间\\到药材中心的距离"] + [
+        float(radius) for radius in OUTPUT_RADIUS_CM
+    ] + ["药材表面"]
+    header_positions_ok = (
+        len(header) == len(expected_header)
+        and header[0] == expected_header[0]
+        and header[-1] == expected_header[-1]
+        and np.allclose(
+            np.asarray(header[1:-1], dtype=float), OUTPUT_RADIUS_CM, rtol=0.0, atol=1.0e-12
+        )
+    )
+    if not header_positions_ok:
+        raise ValueError(f"result4表头错误: {header!r}")
+    fixed_blank_count = 0
+    max_xlsx_expected_difference = 0.0
+    xlsx_fixed_map: dict[tuple[int, str], float] = {}
+    xlsx_surface_map: dict[int, float] = {}
+    for row_offset, state_index in enumerate(sampled_indices, start=1):
+        row = xlsx_rows[row_offset]
+        expected_time = int(round(sampled_times[state_index]))
+        if row[0] != expected_time:
+            raise ValueError("result4时间行不是严格60 s整数网格")
+        fixed_temperature, expected_moisture, valid = _fixed_state_values(
+            xi,
+            sampled_temperature[state_index],
+            sampled_moisture[state_index],
+            float(sampled_radius[state_index]),
+        )
+        del fixed_temperature
+        for position_index, is_valid in enumerate(valid):
+            value = row[position_index + 1]
+            if not is_valid:
+                fixed_blank_count += 1
+                if value is not None:
+                    raise ValueError("result4在移动表面之外存在外推值")
+                continue
+            if value is None or not np.isfinite(float(value)) or float(value) < 0.0:
+                raise ValueError("result4固定位置包含空值、非有限值或负水分")
+            expected_value = float(f"{expected_moisture[position_index]:.4f}")
+            max_xlsx_expected_difference = max(
+                max_xlsx_expected_difference, abs(float(value) - expected_value)
+            )
+            xlsx_fixed_map[(expected_time, f"{OUTPUT_RADIUS_CM[position_index]:.4f}")] = float(value)
+        surface_value = row[-1]
+        if surface_value is None or not np.isfinite(float(surface_value)) or float(surface_value) < 0.0:
+            raise ValueError("result4表面列包含无效水分")
+        expected_surface = float(f"{sampled_moisture[state_index, -1]:.4f}")
+        max_xlsx_expected_difference = max(
+            max_xlsx_expected_difference, abs(float(surface_value) - expected_surface)
+        )
+        xlsx_surface_map[expected_time] = float(surface_value)
+    if max_xlsx_expected_difference > 0.0:
+        raise ValueError("result4回读值与求解器四位小数结果不一致")
+
+    with Path(csv_path).open("r", newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if reader.fieldnames != CSV_COLUMNS:
+            raise ValueError(f"CSV字段错误: {reader.fieldnames!r}")
+        csv_rows = list(reader)
+    termination_radius = float(solution["termination_radius_m"])
+    expected_csv_rows = int(
+        sum(_fixed_valid_count(float(sampled_radius[index])) + 1 for index in sampled_indices)
+        + _fixed_valid_count(termination_radius)
+        + 1
+    )
+    if len(csv_rows) != expected_csv_rows:
+        raise ValueError(f"CSV行数为 {len(csv_rows)}，期望 {expected_csv_rows}")
+    record_counts = {
+        record_type: sum(row["record_type"] == record_type for row in csv_rows)
+        for record_type in (
+            "sample_fixed",
+            "sample_surface",
+            "drying_end_fixed",
+            "drying_end_surface",
+        )
+    }
+    expected_record_counts = {
+        "sample_fixed": int(sum(_fixed_valid_count(float(sampled_radius[index])) for index in sampled_indices)),
+        "sample_surface": int(sampled_indices.size),
+        "drying_end_fixed": _fixed_valid_count(termination_radius),
+        "drying_end_surface": 1,
+    }
+    if record_counts != expected_record_counts:
+        raise ValueError(f"CSV record_type结构错误: {record_counts!r}")
+    csv_seen: set[tuple[str, str, str]] = set()
+    max_csv_xlsx_difference = 0.0
+    for row in csv_rows:
+        record_type = row["record_type"]
+        if record_type not in expected_record_counts:
+            raise ValueError(f"CSV包含未知record_type: {record_type}")
+        if not _format_pattern_ok(row["time_h"], 8):
+            raise ValueError("CSV time_h 不是八位小数")
+        if not np.isclose(
+            float(row["time_h"]), float(row["time_s"]) / 3600.0, rtol=0.0, atol=5.0e-9
+        ):
+            raise ValueError("CSV time_h 与 time_s 不一致")
+        if not _format_pattern_ok(row["radius_cm"], 4) or not _format_pattern_ok(row["r_cm"], 4):
+            raise ValueError("CSV半径字段不是四位小数")
+        if not _format_pattern_ok(row["temperature_C"], 4) or not _format_pattern_ok(row["moisture_kgkg"], 4):
+            raise ValueError("CSV温度/水分不是四位小数字符串")
+        if row["is_surface"] not in {"0", "1"}:
+            raise ValueError("CSV is_surface 不是0/1")
+        if record_type.startswith("sample_"):
+            if re.fullmatch(r"\d+", row["time_s"]) is None:
+                raise ValueError("CSV sample time_s 不是整数秒")
+            sample_time = int(row["time_s"])
+            if sample_time not in xlsx_surface_map and record_type == "sample_surface":
+                raise ValueError("CSV sample表面时刻无法对应result4")
+            sample_matches = np.flatnonzero(
+                np.isclose(sampled_times, sample_time, rtol=0.0, atol=1.0e-8)
+            )
+            if sample_matches.size != 1:
+                raise ValueError("CSV sample时刻无法对应求解器状态")
+            expected_sample_radius_cm = float(sampled_radius[sample_matches[0]]) * 100.0
+            if not np.isclose(
+                float(row["radius_cm"]), expected_sample_radius_cm, rtol=0.0, atol=5.0e-5
+            ):
+                raise ValueError("CSV sample radius_cm 与 R(t) 不一致")
+            if record_type == "sample_fixed":
+                key = (sample_time, row["r_cm"])
+                if key not in xlsx_fixed_map:
+                    raise ValueError("CSV fixed记录无法对应result4固定位置")
+                if row["is_surface"] != "0":
+                    raise ValueError("CSV fixed记录的is_surface必须为0")
+                expected_moisture = xlsx_fixed_map[key]
+            else:
+                if not np.isclose(
+                    float(row["r_cm"]), expected_sample_radius_cm, rtol=0.0, atol=5.0e-5
+                ):
+                    raise ValueError("CSV sample表面 r_cm 与 R(t) 不一致")
+                expected_moisture = xlsx_surface_map[sample_time]
+        else:
+            if re.fullmatch(r"\d+\.\d{6}", row["time_s"]) is None:
+                raise ValueError("CSV终止 time_s 不是六位小数")
+            termination_time = float(row["time_s"])
+            if not np.isclose(termination_time, float(solution["termination_time_s"]), atol=5.0e-7, rtol=0.0):
+                raise ValueError("CSV终止时刻与求解器不一致")
+            if not np.isclose(
+                float(row["radius_cm"]), termination_radius * 100.0, rtol=0.0, atol=5.0e-5
+            ):
+                raise ValueError("CSV终止 radius_cm 与真实表面半径不一致")
+            termination_temperature = np.asarray(solution["termination_temperature_internal_C"], dtype=float)
+            termination_moisture_array = np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float)
+            fixed_temperature, fixed_moisture, valid = _fixed_state_values(
+                xi, termination_temperature, termination_moisture_array, termination_radius
+            )
+            del fixed_temperature
+            if record_type == "drying_end_fixed":
+                radius_index = int(round(float(row["r_cm"]) * 10.0))
+                if (
+                    radius_index < 0
+                    or radius_index >= OUTPUT_RADIUS_CM.size
+                    or not valid[radius_index]
+                    or not np.isclose(
+                        float(row["r_cm"]),
+                        float(OUTPUT_RADIUS_CM[radius_index]),
+                        rtol=0.0,
+                        atol=5.0e-5,
+                    )
+                ):
+                    raise ValueError("CSV终止固定位置无效")
+                if row["is_surface"] != "0":
+                    raise ValueError("CSV终止fixed记录的is_surface必须为0")
+                expected_moisture = float(f"{fixed_moisture[radius_index]:.4f}")
+            else:
+                if not np.isclose(
+                    float(row["radius_cm"]), termination_radius * 100.0, rtol=0.0, atol=5.0e-5
+                ) or not np.isclose(
+                    float(row["r_cm"]), termination_radius * 100.0, rtol=0.0, atol=5.0e-5
+                ):
+                    raise ValueError("CSV终止表面半径字段错误")
+                expected_moisture = float(f"{termination_moisture_array[-1]:.4f}")
+        key = (record_type, row["time_s"], row["r_cm"])
+        if key in csv_seen:
+            raise ValueError("CSV存在重复记录")
+        csv_seen.add(key)
+        if (record_type.endswith("surface")) != (row["is_surface"] == "1"):
+            raise ValueError("CSV surface标记与record_type不一致")
+        actual_moisture = float(row["moisture_kgkg"])
+        if not np.isfinite(actual_moisture) or actual_moisture < 0.0:
+            raise ValueError("CSV水分包含非有限值或负值")
+        max_csv_xlsx_difference = max(
+            max_csv_xlsx_difference, abs(actual_moisture - expected_moisture)
+        )
+    if max_csv_xlsx_difference > 0.0:
+        raise ValueError("CSV与result4对应水分值不一致")
+
+    paper_workbook = load_workbook(Path(paper_path), read_only=True, data_only=True)
+    if paper_workbook.sheetnames != ["表6"]:
+        raise ValueError(f"论文表工作表错误: {paper_workbook.sheetnames}")
+    paper_sheet = paper_workbook["表6"]
+    paper_rows = list(
+        paper_sheet.iter_rows(
+            min_row=1,
+            max_row=paper_sheet.max_row,
+            min_col=1,
+            max_col=paper_sheet.max_column,
+            values_only=True,
+        )
+    )
+    paper_hours = _paper_regular_hours(solution)
+    # 表头 + 常规行 + 终止行 + 一个空行 + 最终时长摘要行。
+    expected_paper_rows = len(paper_hours) + 4
+    if paper_sheet.max_row != expected_paper_rows or paper_sheet.max_column != 5:
+        raise ValueError(
+            f"论文表尺寸错误: {(paper_sheet.max_row, paper_sheet.max_column)}，"
+            f"期望 {(expected_paper_rows, 5)}"
+        )
+    if list(paper_rows[0]) != ["时间/h", "0 cm", "0.5 cm", "1.0 cm", "药材表面"]:
+        raise ValueError("论文表表头错误")
+    max_paper_difference = 0.0
+    for row_index, hour in enumerate(paper_hours, start=1):
+        row = paper_rows[row_index]
+        if not np.isclose(float(row[0]), hour, atol=1.0e-12, rtol=0.0):
+            raise ValueError("论文表常规时间行错误")
+        expected_index = _sample_index_at_time(solution, hour * 3600.0)
+        _, fixed_moisture, valid = _fixed_state_values(
+            xi,
+            sampled_temperature[expected_index],
+            sampled_moisture[expected_index],
+            float(sampled_radius[expected_index]),
+        )
+        expected_values = [fixed_moisture[0], fixed_moisture[5], fixed_moisture[10], sampled_moisture[expected_index, -1]]
+        for column_index, expected_value in enumerate(expected_values, start=1):
+            if expected_value is None or (column_index <= 3 and not valid[[0, 5, 10][column_index - 1]]):
+                continue
+            actual_value = row[column_index]
+            if actual_value is None or not np.isfinite(float(actual_value)):
+                raise ValueError("论文表常规水分为空或非有限")
+            max_paper_difference = max(
+                max_paper_difference,
+                abs(float(actual_value) - float(f"{expected_value:.4f}")),
+            )
+    termination_row_index = 1 + len(paper_hours) + 0
+    termination_row = paper_rows[termination_row_index]
+    expected_termination_text = f"烘干结束时间（{float(solution['termination_time_s']) / 3600.0:.4f} h）"
+    if termination_row[0] != expected_termination_text:
+        raise ValueError("论文表终止时间文本错误")
+    termination_temperature = np.asarray(solution["termination_temperature_internal_C"], dtype=float)
+    termination_moisture_array = np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float)
+    _, fixed_moisture, valid = _fixed_state_values(
+        xi, termination_temperature, termination_moisture_array, termination_radius
+    )
+    expected_values = [fixed_moisture[0], fixed_moisture[5], fixed_moisture[10], termination_moisture_array[-1]]
+    for column_index, expected_value in enumerate(expected_values, start=1):
+        if column_index <= 3 and not valid[[0, 5, 10][column_index - 1]]:
+            continue
+        actual_value = termination_row[column_index]
+        if actual_value is None or not np.isfinite(float(actual_value)):
+            raise ValueError("论文表终止水分为空或非有限")
+        max_paper_difference = max(
+            max_paper_difference,
+            abs(float(actual_value) - float(f"{expected_value:.4f}")),
+        )
+    summary_row = paper_rows[-1]
+    if summary_row[0] != "最终烘干时长/h" or not np.isclose(
+        float(summary_row[1]), float(solution["termination_time_s"]) / 3600.0, atol=5.0e-5
+    ):
+        raise ValueError("论文表最终烘干时长摘要错误")
+    if max_paper_difference > 0.0:
+        raise ValueError("论文表水分值与求解器结果不一致")
+
+    return {
+        **summary,
+        "xlsx_rows": int(worksheet.max_row),
+        "xlsx_columns": int(worksheet.max_column),
+        "csv_rows": int(len(csv_rows)),
+        "paper_rows": int(paper_sheet.max_row),
+        "paper_columns": int(paper_sheet.max_column),
+        "sample_start_s": int(round(sampled_times[sampled_indices[0]])) if sampled_indices.size else None,
+        "sample_end_s": int(round(sampled_times[sampled_indices[-1]])) if sampled_indices.size else None,
+        "sample_count": int(sampled_indices.size),
+        "fixed_blank_count": int(fixed_blank_count),
+        "max_abs_xlsx_expected_difference": float(max_xlsx_expected_difference),
+        "max_abs_csv_xlsx_difference": float(max_csv_xlsx_difference),
+        "max_abs_paper_difference": float(max_paper_difference),
+        "csv_record_counts": record_counts,
     }
 
 
@@ -906,6 +1578,15 @@ def main() -> None:
         )
     if args.no_write:
         print("--no-write: 本阶段未生成任何 answer 文件")
+    else:
+        write_result_xlsx(solution)
+        write_result_csv(solution)
+        write_paper_table(solution)
+        output_summary = validate_written_outputs(solution)
+        print(f"答案文件回读验收: {output_summary}")
+        print(f"已生成: {DEFAULT_XLSX_PATH}")
+        print(f"已生成: {DEFAULT_PAPER_PATH}")
+        print(f"已生成: {DEFAULT_CSV_PATH}")
     print(f"总耗时: {wall_time.perf_counter() - started:.2f}s")
 
 
