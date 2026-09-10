@@ -164,7 +164,7 @@ b(t)=-\frac{\dot R(t)}{R(t)}.
 \rho(\widetilde C)c_p(\widetilde C)
 \left(
 \frac{\partial\widetilde T}{\partial t}
- b\xi\frac{\partial\widetilde T}{\partial\xi}
+ + b\xi\frac{\partial\widetilde T}{\partial\xi}
 \right)
 =\frac1{R(t)^2\xi}\frac{\partial}{\partial\xi}
 \left(
@@ -174,7 +174,7 @@ b(t)=-\frac{\dot R(t)}{R(t)}.
 
 \[
 \frac{\partial\widetilde C}{\partial t}
- b\xi\frac{\partial\widetilde C}{\partial\xi}
+ + b\xi\frac{\partial\widetilde C}{\partial\xi}
 =\frac1{R(t)^2\xi}\frac{\partial}{\partial\xi}
 \left(
 \xi D(\widetilde T,\widetilde C)
@@ -245,7 +245,7 @@ D=4.2\times10^{-4}
 T_K=T_{^\circ\mathrm C}+273.15.
 \]
 
-耦合链条是：上一轮的 \((T,C)\) 猜测先更新 \(\rho,c_p,k,D\)；用 \(\rho c_p,k\) 隐式求温度；再用更新后的温度（转 Kelvin）和水分场更新 \(D\)，隐式求水分；重复 Picard 迭代，直到
+实际 `_picard_step` 的第 \(m\) 轮使用同一个猜测状态 \((T^{(m)},C^{(m)})\) 计算并冻结 \(\rho(C^{(m)}),c_p(C^{(m)}),k(C^{(m)}),D(T^{(m)},C^{(m)})\)。在这组相同的冻结物性下，分别组装并求解温度和水分两个线性三对角系统，得到 \((T^{(m+1)},C^{(m+1)})\)；温度新解不会在同一轮立即进入 \(D\) 的计算。然后同时用新旧两场的最大差检查收敛，未收敛才将两者一起更新为下一轮猜测，直到
 
 \[
 \|\Delta T\|_\infty\le10^{-8}\ ^\circ\mathrm C,
