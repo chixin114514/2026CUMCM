@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import time as wall_time
+from copy import copy
 from pathlib import Path
 from typing import Any
 
@@ -455,6 +456,11 @@ def write_result_xlsx(
 
     for sheet_name, values in (("温度", temperature), ("水分浓度", moisture)):
         worksheet = workbook[sheet_name]
+        # 模板的两张表字体略有不同；在删除示例数据行前分别保存三类
+        # 参考样式，确保扩展出的完整结果仍与对应模板一致。
+        header_style = copy(worksheet.cell(row=1, column=2)._style)
+        time_style = copy(worksheet.cell(row=2, column=1)._style)
+        value_style = copy(worksheet.cell(row=2, column=2)._style)
         if worksheet.max_row > 1:
             worksheet.delete_rows(2, worksheet.max_row - 1)
         # 保留模板左上角的文字；距离表头按题目要求改为完整的 0--2 cm。
@@ -462,14 +468,17 @@ def write_result_xlsx(
             cell = worksheet.cell(
                 row=1, column=column_index, value=round(float(radius), 1)
             )
+            cell._style = copy(header_style)
             cell.number_format = "0.0"
         for row_index, time_value in enumerate(time_s, start=2):
             time_cell = worksheet.cell(row=row_index, column=1, value=int(round(time_value)))
+            time_cell._style = copy(time_style)
             time_cell.number_format = "0"
             for column_index, value in enumerate(values[row_index - 2], start=2):
                 cell = worksheet.cell(
                     row=row_index, column=column_index, value=float(np.round(value, 4))
                 )
+                cell._style = copy(value_style)
                 cell.number_format = "0.0000"
     workbook.save(output_path)
 
