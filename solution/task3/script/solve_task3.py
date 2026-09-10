@@ -404,21 +404,20 @@ def validate_written_outputs(
     worksheet = workbook["Sheet1"]
     if worksheet.max_row != expected_times.size + 1 or worksheet.max_column != expected_radius.size + 1:
         raise ValueError("问题三答案xlsx尺寸错误")
-    xlsx_times = np.asarray(
-        [worksheet.cell(row=row, column=1).value for row in range(2, worksheet.max_row + 1)],
-        dtype=int,
+    # ReadOnlyWorksheet.cell() restarts the XML parser for every cell.  Consume
+    # the worksheet once by rows so validation remains fast for the long file.
+    rows = list(
+        worksheet.iter_rows(
+            min_row=1,
+            max_row=worksheet.max_row,
+            min_col=1,
+            max_col=worksheet.max_column,
+            values_only=True,
+        )
     )
-    xlsx_radius = np.asarray(
-        [worksheet.cell(row=1, column=column).value for column in range(2, worksheet.max_column + 1)],
-        dtype=float,
-    )
-    xlsx_values = np.asarray(
-        [
-            [worksheet.cell(row=row, column=column).value for column in range(2, worksheet.max_column + 1)]
-            for row in range(2, worksheet.max_row + 1)
-        ],
-        dtype=float,
-    )
+    xlsx_times = np.asarray([row[0] for row in rows[1:]], dtype=int)
+    xlsx_radius = np.asarray(rows[0][1:], dtype=float)
+    xlsx_values = np.asarray([row[1:] for row in rows[1:]], dtype=float)
     if not np.array_equal(xlsx_times, expected_times) or not np.allclose(
         xlsx_radius, expected_radius, atol=1.0e-12
     ):
