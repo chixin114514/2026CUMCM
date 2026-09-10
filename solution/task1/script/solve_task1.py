@@ -22,7 +22,7 @@ from scipy.integrate import solve_ivp
 # Geometry and initial state (SI units internally).
 RADIUS_M = 0.02
 LENGTH_M = 0.25  # retained as a documented problem parameter; it cancels in 1-D radial balance
-BASE_DR_M = 0.001
+BASE_DR_M = 0.000125
 INITIAL_TEMPERATURE_C = 28.0
 INITIAL_MOISTURE_KGKG = 2.55
 
@@ -205,8 +205,8 @@ def solve_task1(
     t_end_s: float = 1800.0,
     output_dt_s: float = 1.0,
     dr_m: float = BASE_DR_M,
-    rtol: float = 1.0e-6,
-    atol: float = 1.0e-8,
+    rtol: float = 1.0e-8,
+    atol: float = 1.0e-10,
     max_step_s: float = 30.0,
 ) -> dict[str, np.ndarray | object]:
     """Solve Problem 1 and return arrays sampled every ``output_dt_s``.
@@ -359,10 +359,16 @@ def print_key_samples(solution: dict[str, np.ndarray | object]) -> None:
     radius_m = np.asarray(solution["radius_m"], dtype=float)
     temperature = np.asarray(solution["temperature_C"], dtype=float)
     moisture = np.asarray(solution["moisture_kgkg"], dtype=float)
-    time_indices = [int(np.argmin(np.abs(time_s - target))) for target in KEY_TIMES_S]
-    radius_indices = [
-        int(np.argmin(np.abs(radius_m - target * 1.0e-2))) for target in KEY_RADII_CM
-    ]
+    time_indices = np.searchsorted(time_s, KEY_TIMES_S, side="left")
+    radius_indices = np.searchsorted(radius_m, KEY_RADII_CM * 1.0e-2, side="left")
+    if np.any(time_indices >= time_s.size) or np.any(radius_indices >= radius_m.size):
+        raise ValueError("问题1关键采样点不在结果网格内")
+    if not np.allclose(time_s[time_indices], KEY_TIMES_S, atol=1.0e-12, rtol=0.0):
+        raise ValueError("问题1关键时间未命中精确输出节点")
+    if not np.allclose(
+        radius_m[radius_indices], KEY_RADII_CM * 1.0e-2, atol=1.0e-12, rtol=0.0
+    ):
+        raise ValueError("问题1关键半径未命中精确空间节点")
     print("temperature_C (columns: radius_cm=" + ",".join(f"{r:g}" for r in KEY_RADII_CM) + ")")
     for i, target in zip(time_indices, KEY_TIMES_S):
         values = " ".join(f"{value:.4f}" for value in temperature[i, radius_indices])
@@ -373,11 +379,85 @@ def print_key_samples(solution: dict[str, np.ndarray | object]) -> None:
         print(f"t={target:4.0f} s | {values}")
 
 
+def run_grid_sensitivity(
+    base_solution: dict[str, np.ndarray | object],
+) -> dict[str, object]:
+    """Compare the base grid with a refined ``dr=0.0000625 m`` grid."""
+
+    refined_solution = solve_task1(
+        t_end_s=1800.0,
+        output_dt_s=1.0,
+        dr_m=0.0000625,
+        rtol=1.0e-8,
+        atol=1.0e-10,
+        max_step_s=30.0,
+    )
+    validate_solution(refined_solution)
+    comparison_times = KEY_TIMES_S
+    comparison_radii_cm = KEY_RADII_CM
+    target_radii_m = comparison_radii_cm * 1.0e-2
+
+    def exact_indices(grid: np.ndarray, targets: np.ndarray, label: str) -> np.ndarray:
+        indices = np.searchsorted(grid, targets, side="left")
+        if np.any(indices >= grid.size) or not np.allclose(
+            grid[indices[indices < grid.size]],
+            targets[indices < grid.size],
+            atol=1.0e-12,
+            rtol=0.0,
+        ):
+            raise ValueError(f"{label}缺少指定的精确比较节点")
+        return indices
+
+    base_time = np.asarray(base_solution["time_s"], dtype=float)
+    refined_time = np.asarray(refined_solution["time_s"], dtype=float)
+    base_radius = np.asarray(base_solution["radius_m"], dtype=float)
+    refined_radius = np.asarray(refined_solution["radius_m"], dtype=float)
+    base_indices = (
+        exact_indices(base_time, comparison_times, "基准时间网格"),
+        exact_indices(base_radius, target_radii_m, "基准半径网格"),
+    )
+    refined_indices = (
+        exact_indices(refined_time, comparison_times, "细化时间网格"),
+        exact_indices(refined_radius, target_radii_m, "细化半径网格"),
+    )
+
+    def max_difference(key: str) -> tuple[float, dict[str, float]]:
+        base_values = np.asarray(base_solution[key], dtype=float)[np.ix_(*base_indices)]
+        refined_values = np.asarray(refined_solution[key], dtype=float)[
+            np.ix_(*refined_indices)
+        ]
+        difference = np.abs(refined_values - base_values)
+        location = np.unravel_index(int(np.argmax(difference)), difference.shape)
+        return float(difference[location]), {
+            "time_s": float(comparison_times[location[0]]),
+            "radius_cm": float(comparison_radii_cm[location[1]]),
+        }
+
+    max_temperature_difference, temperature_location = max_difference("temperature_C")
+    max_moisture_difference, moisture_location = max_difference("moisture_kgkg")
+    print(
+        "grid sensitivity (dr=0.0000625 m vs 0.000125 m): "
+        f"max |delta T|={max_temperature_difference:.10e} C at "
+        f"t={temperature_location['time_s']:.0f} s, "
+        f"r={temperature_location['radius_cm']:g} cm; "
+        f"max |delta C|={max_moisture_difference:.10e} kg/kg at "
+        f"t={moisture_location['time_s']:.0f} s, "
+        f"r={moisture_location['radius_cm']:g} cm"
+    )
+    return {
+        "max_abs_temperature_difference_C": max_temperature_difference,
+        "max_abs_moisture_difference_kgkg": max_moisture_difference,
+        "temperature_max_location": temperature_location,
+        "moisture_max_location": moisture_location,
+    }
+
+
 if __name__ == "__main__":
     try:
         result = solve_task1()
         validate_solution(result)
         print("validation: PASS")
         print_key_samples(result)
+        run_grid_sensitivity(result)
     except (RuntimeError, ValueError) as error:
         raise SystemExit(f"问题1求解/验证失败: {error}") from error
