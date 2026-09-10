@@ -459,7 +459,9 @@ def write_result_xlsx(
             worksheet.delete_rows(2, worksheet.max_row - 1)
         # 保留模板左上角的文字；距离表头按题目要求改为完整的 0--2 cm。
         for column_index, radius in enumerate(radius_cm, start=2):
-            cell = worksheet.cell(row=1, column=column_index, value=float(radius))
+            cell = worksheet.cell(
+                row=1, column=column_index, value=round(float(radius), 1)
+            )
             cell.number_format = "0.0"
         for row_index, time_value in enumerate(time_s, start=2):
             time_cell = worksheet.cell(row=row_index, column=1, value=int(round(time_value)))
@@ -528,8 +530,26 @@ def time_step_sensitivity(
         dr_m=BASE_DR_M,
         progress=True,
     )
-    key_times_s, base_temperature, base_moisture = key_tables(base_solution)
-    _, fine_temperature, fine_moisture = key_tables(fine_solution)
+    key_times_s = np.array([1800, 3600, 5400, 7200, 9000, 10800], dtype=float)
+    key_radius_indices = np.array([0, 5, 10, 15, 20], dtype=int)
+    base_time_indices = np.array(
+        [int(np.argmin(np.abs(np.asarray(base_solution["time_s"]) - t))) for t in key_times_s]
+    )
+    fine_time_indices = np.array(
+        [int(np.argmin(np.abs(np.asarray(fine_solution["time_s"]) - t))) for t in key_times_s]
+    )
+    base_temperature = np.asarray(base_solution["temperature_C"])[
+        base_time_indices[:, None], key_radius_indices[None, :]
+    ]
+    fine_temperature = np.asarray(fine_solution["temperature_C"])[
+        fine_time_indices[:, None], key_radius_indices[None, :]
+    ]
+    base_moisture = np.asarray(base_solution["moisture_kgkg"])[
+        base_time_indices[:, None], key_radius_indices[None, :]
+    ]
+    fine_moisture = np.asarray(fine_solution["moisture_kgkg"])[
+        fine_time_indices[:, None], key_radius_indices[None, :]
+    ]
     temperature_difference = np.abs(fine_temperature - base_temperature)
     moisture_difference = np.abs(fine_moisture - base_moisture)
     temperature_position = np.unravel_index(
@@ -544,12 +564,12 @@ def time_step_sensitivity(
         "temperature_max_abs_difference_C": float(np.max(temperature_difference)),
         "temperature_difference_position": (
             float(key_times_s[temperature_position[0]]),
-            float(OUTPUT_RADIUS_CM[temperature_position[1]]),
+            float(OUTPUT_RADIUS_CM[key_radius_indices[temperature_position[1]]]),
         ),
         "moisture_max_abs_difference_kgkg": float(np.max(moisture_difference)),
         "moisture_difference_position": (
             float(key_times_s[moisture_position[0]]),
-            float(OUTPUT_RADIUS_CM[moisture_position[1]]),
+            float(OUTPUT_RADIUS_CM[key_radius_indices[moisture_position[1]]]),
         ),
     }
 
