@@ -224,7 +224,7 @@ def _picard_step(
 ) -> tuple[np.ndarray, np.ndarray, int, float, float]:
     """使用当前时间步内的 Picard 外迭代求 T、C 自洽解。"""
 
-    del time_new_s  # 保留参数以明确边界取值属于当前时间步。
+    # time_new_s 同时用于异常信息，明确边界取值属于当前时间步。
     guess_temperature_C = old_temperature_C.copy()
     guess_moisture_kgkg = old_moisture_kgkg.copy()
     last_delta_temperature = np.inf
