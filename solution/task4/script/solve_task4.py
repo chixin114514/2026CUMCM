@@ -33,9 +33,9 @@ INITIAL_MOISTURE_KGKG = 2.55
 HEAT_TRANSFER_W_M2_K = 25.0
 MASS_TRANSFER_M_S = 8.0e-7
 
-# 问题四数值默认值。
-N_DEFAULT = 160  # xi 区间数，dxi=1/160
-TIME_STEP_S_DEFAULT = 1.0
+# 问题四数值默认值：最终结果采用加密网格；粗解仅作为对照。
+N_DEFAULT = 320  # xi 区间数，dxi=1/320
+TIME_STEP_S_DEFAULT = 0.5
 OUTPUT_DT_S = 60.0
 DRYING_THRESHOLD_KGKG = 0.15
 EVENT_TOL_S = 1.0e-3
@@ -176,13 +176,6 @@ def material_properties(
     return rho, cp, conductivity, diffusivity
 
 
-def _harmonic_mean(left: np.ndarray, right: np.ndarray) -> np.ndarray:
-    denominator = left + right
-    if np.any(denominator <= 0.0):
-        raise ValueError("界面物性必须为正")
-    return 2.0 * left * right / denominator
-
-
 def _solve_tridiagonal(
     lower: np.ndarray,
     diagonal: np.ndarray,
@@ -221,7 +214,9 @@ def _assemble_temperature_system(
         guess_temperature_C, guess_moisture_kgkg
     )
     storage = rho * cp * measure
-    face_conductivity = _harmonic_mean(conductivity[:-1], conductivity[1:])
+    # 继承 task2/task3 实际求解器的界面物性算术平均；问题四只改变
+    # 题目指定的物性公式和移动边界，不额外改变固定边界模型的界面离散。
+    face_conductivity = 0.5 * (conductivity[:-1] + conductivity[1:])
     # 固定xi控制体扩散导通量：1/R^2 * xi_face*k_face/dxi。
     conductance = face_conductivity * faces / (radius_m**2 * dxi)
     b = -radius_rate_m_s / radius_m
@@ -276,7 +271,8 @@ def _assemble_moisture_system(
         guess_temperature_C, guess_moisture_kgkg
     )
     storage = measure.copy()
-    face_diffusivity = _harmonic_mean(diffusivity[:-1], diffusivity[1:])
+    # 同 task2/task3，界面扩散系数使用算术平均。
+    face_diffusivity = 0.5 * (diffusivity[:-1] + diffusivity[1:])
     conductance = face_diffusivity * faces / (radius_m**2 * dxi)
     b = -radius_rate_m_s / radius_m
     if b < -1.0e-12:
@@ -423,16 +419,31 @@ def _event_bisection(
     air_temperature_C: np.ndarray,
     air_moisture_kgkg: np.ndarray,
 ) -> dict[str, Any]:
-    """首次跨阈值后，用同一前一状态的局部时间段二分终止时刻。"""
+    """首次跨阈值后，从固定 base 状态二分终止时刻。
+
+    每个候选时刻都计算统一函数
+
+        F(t) = max_xi C(t; base_state -> t) - 0.15,
+
+    其中 ``base_state`` 是首次跨阈值时间步前的状态。lower/upper 只更新
+    候选时刻及其由 base_state 直接积分得到的状态，不能把更新后的 lower
+    状态作为下一次候选的起点。
+    """
 
     if not (lower_max_kgkg >= DRYING_THRESHOLD_KGKG):
         raise ValueError("事件二分下端不在阈值上方")
     if not (upper_max_kgkg < DRYING_THRESHOLD_KGKG):
         raise ValueError("事件二分上端未严格低于阈值")
-    lower_time = float(lower_time_s)
+    # 固定首次跨阈值前的 base 状态；所有候选都从它重新推进。
+    base_time = float(lower_time_s)
+    base_temperature = lower_temperature_C.copy()
+    base_moisture = lower_moisture_kgkg.copy()
+    base_radius = radius_at(base_time, radius_time_s, radius_m)
+
+    lower_time = base_time
     upper_time = float(upper_time_s)
-    lower_temperature = lower_temperature_C.copy()
-    lower_moisture = lower_moisture_kgkg.copy()
+    lower_temperature = base_temperature.copy()
+    lower_moisture = base_moisture.copy()
     lower_max = float(lower_max_kgkg)
     upper_temperature = upper_temperature_C.copy()
     upper_moisture = upper_moisture_kgkg.copy()
@@ -441,17 +452,16 @@ def _event_bisection(
     while upper_time - lower_time > EVENT_TOL_S:
         midpoint = 0.5 * (lower_time + upper_time)
         midpoint_radius = radius_at(midpoint, radius_time_s, radius_m)
-        old_radius = radius_at(lower_time, radius_time_s, radius_m)
         midpoint_temperature, midpoint_moisture, _, _, _ = _picard_step(
-            lower_temperature,
-            lower_moisture,
+            base_temperature,
+            base_moisture,
             xi,
             faces,
             measure,
             dxi,
-            old_radius,
+            base_radius,
             midpoint_radius,
-            midpoint - lower_time,
+            midpoint - base_time,
             _air_at(midpoint, air_time_s, air_temperature_C),
             _air_at(midpoint, air_time_s, air_moisture_kgkg),
         )
@@ -814,21 +824,21 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def run_sensitivity(
+def run_coarse_comparison(
     air_data_path: str | Path = DEFAULT_AIR_DATA_PATH,
     radius_data_path: str | Path = DEFAULT_RADIUS_DATA_PATH,
     max_time_s: float = DEFAULT_MAX_TIME_S,
     progress: bool = False,
 ) -> dict[str, Any]:
-    """接口：N=320、dt=0.5 s 的低成本加密复算。"""
+    """运行 N=160、dt=1 s 的粗网格对照解。"""
 
     solution = solve_task4(
         air_data_path=air_data_path,
         radius_data_path=radius_data_path,
         max_time_s=max_time_s,
-        time_step_s=0.5,
+        time_step_s=1.0,
         output_dt_s=OUTPUT_DT_S,
-        n_intervals=320,
+        n_intervals=160,
         progress=progress,
     )
     return validate_solution(solution)
@@ -846,14 +856,14 @@ def main() -> None:
     parser.add_argument(
         "--skip-sensitivity",
         action="store_true",
-        help="跳过 N=320、dt=0.5 s 的加密敏感性计算",
+        help="跳过 N=160、dt=1 s 的粗网格对照计算",
     )
     parser.add_argument("--progress", action="store_true", help="按6 h打印推进进度")
     args = parser.parse_args()
 
     started = wall_time.perf_counter()
     print(
-        "问题四求解开始: "
+        "问题四最终加密解开始: "
         f"N={args.n}, dxi={1.0 / args.n:g}, dt={args.time_step:g}s, "
         f"output_dt={args.output_dt:g}s, threshold C<{DRYING_THRESHOLD_KGKG:g}"
     )
@@ -867,7 +877,7 @@ def main() -> None:
         progress=args.progress,
     )
     summary = validate_solution(solution)
-    print(f"基线数值检查: {summary}")
+    print(f"最终加密解数值检查: {summary}")
     print(
         "终止证据: "
         f"lower t={summary['termination_lower_time_s']:.6f}s "
@@ -879,16 +889,20 @@ def main() -> None:
         f"(xi={summary['termination_max_xi']:.6f})"
     )
     if not args.skip_sensitivity:
-        sensitivity_started = wall_time.perf_counter()
-        sensitivity_summary = run_sensitivity(
+        coarse_started = wall_time.perf_counter()
+        coarse_summary = run_coarse_comparison(
             air_data_path=args.air_data_path,
             radius_data_path=args.radius_data_path,
             max_time_s=args.max_time,
             progress=args.progress,
         )
-        print(f"N=320, dt=0.5s 敏感性检查: {sensitivity_summary}")
+        print(f"N=160, dt=1s 粗网格对照: {coarse_summary}")
         print(
-            f"敏感性计算耗时: {wall_time.perf_counter() - sensitivity_started:.2f}s"
+            f"结束时间差（加密-粗解）: "
+            f"{summary['termination_time_h'] - coarse_summary['termination_time_h']:.8f} h"
+        )
+        print(
+            f"粗网格对照耗时: {wall_time.perf_counter() - coarse_started:.2f}s"
         )
     if args.no_write:
         print("--no-write: 本阶段未生成任何 answer 文件")
