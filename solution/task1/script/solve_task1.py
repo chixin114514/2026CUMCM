@@ -33,6 +33,9 @@ THERMAL_CONDUCTIVITY_W_M_K = 0.36
 HEAT_TRANSFER_W_M2_K = 25.0
 MASS_TRANSFER_M_S = 8.0e-7
 
+KEY_TIMES_S = np.array([100, 300, 600, 900, 1200, 1500, 1800], dtype=float)
+KEY_RADII_CM = np.array([0.0, 0.5, 1.0, 1.5, 2.0], dtype=float)
+
 DEFAULT_DATA_PATH = (
     Path(__file__).resolve().parents[3] / "problem" / "附件" / "附件1.xlsx"
 )
@@ -294,16 +297,87 @@ def solve_task1(
     }
 
 
+def validate_solution(solution: dict[str, np.ndarray | object]) -> None:
+    """Run the direct numerical and physical checks for the computed result."""
+
+    required = ("time_s", "radius_m", "temperature_C", "moisture_kgkg")
+    if any(key not in solution for key in required):
+        raise ValueError("问题1结果缺少必需数组")
+
+    time_s = np.asarray(solution["time_s"], dtype=float)
+    radius_m = np.asarray(solution["radius_m"], dtype=float)
+    temperature = np.asarray(solution["temperature_C"], dtype=float)
+    moisture = np.asarray(solution["moisture_kgkg"], dtype=float)
+    if time_s.ndim != 1 or radius_m.ndim != 1 or time_s.size < 2 or radius_m.size < 2:
+        raise ValueError("问题1时间和半径网格形状错误")
+    expected_shape = (time_s.size, radius_m.size)
+    if temperature.shape != expected_shape or moisture.shape != expected_shape:
+        raise ValueError(
+            f"问题1场数组 shape 错误: 期望 {expected_shape}, "
+            f"实际 T={temperature.shape}, C={moisture.shape}"
+        )
+    if not all(np.all(np.isfinite(array)) for array in (time_s, radius_m, temperature, moisture)):
+        raise ValueError("问题1结果包含 NaN 或 Inf")
+    if np.any(np.diff(time_s) <= 0.0) or np.any(np.diff(radius_m) <= 0.0):
+        raise ValueError("问题1时间和半径必须严格递增")
+
+    if not np.allclose(temperature[0], INITIAL_TEMPERATURE_C, atol=1.0e-8, rtol=0.0):
+        raise ValueError("问题1初始温度未全场等于 28 C")
+    if not np.allclose(moisture[0], INITIAL_MOISTURE_KGKG, atol=1.0e-8, rtol=0.0):
+        raise ValueError("问题1初始水分未全场等于 2.55 kg/kg")
+    if np.min(moisture) < 0.0:
+        raise ValueError(f"问题1水分出现负值: {moisture.min():.6g} kg/kg")
+
+    temperature_step_min = float(np.min(np.diff(temperature, axis=0)))
+    moisture_step_max = float(np.max(np.diff(moisture, axis=0)))
+    if temperature_step_min < -1.0e-5:
+        raise ValueError(f"问题1温度逐时明显下降: 最小变化 {temperature_step_min:.6g} C")
+    if moisture_step_max > 1.0e-5:
+        raise ValueError(f"问题1水分逐时明显增加: 最大变化 {moisture_step_max:.6g} kg/kg")
+
+    if temperature[-1, -1] <= temperature[-1, 0]:
+        raise ValueError("问题1末时刻表面温度未高于中心")
+    if moisture[-1, -1] >= moisture[-1, 0]:
+        raise ValueError("问题1末时刻表面水分未低于中心")
+
+    dr_m = float(np.mean(np.diff(radius_m)))
+    if not np.allclose(np.diff(radius_m), dr_m, atol=1.0e-12, rtol=0.0):
+        raise ValueError("问题1半径网格必须均匀以计算体积加权平均")
+    radial_measure = control_volume_geometry(radius_m[-1], dr_m)[2]
+    average_initial = float(np.dot(radial_measure, moisture[0]) / radial_measure.sum())
+    average_final = float(np.dot(radial_measure, moisture[-1]) / radial_measure.sum())
+    if average_final >= average_initial:
+        raise ValueError(
+            f"问题1体积加权平均水分未下降: {average_initial:.6g} -> {average_final:.6g}"
+        )
+
+
+def print_key_samples(solution: dict[str, np.ndarray | object]) -> None:
+    """Print temperature and moisture at the requested time/radius points."""
+
+    time_s = np.asarray(solution["time_s"], dtype=float)
+    radius_m = np.asarray(solution["radius_m"], dtype=float)
+    temperature = np.asarray(solution["temperature_C"], dtype=float)
+    moisture = np.asarray(solution["moisture_kgkg"], dtype=float)
+    time_indices = [int(np.argmin(np.abs(time_s - target))) for target in KEY_TIMES_S]
+    radius_indices = [
+        int(np.argmin(np.abs(radius_m - target * 1.0e-2))) for target in KEY_RADII_CM
+    ]
+    print("temperature_C (columns: radius_cm=" + ",".join(f"{r:g}" for r in KEY_RADII_CM) + ")")
+    for i, target in zip(time_indices, KEY_TIMES_S):
+        values = " ".join(f"{value:.4f}" for value in temperature[i, radius_indices])
+        print(f"t={target:4.0f} s | {values}")
+    print("moisture_kgkg (columns: radius_cm=" + ",".join(f"{r:g}" for r in KEY_RADII_CM) + ")")
+    for i, target in zip(time_indices, KEY_TIMES_S):
+        values = " ".join(f"{value:.4f}" for value in moisture[i, radius_indices])
+        print(f"t={target:4.0f} s | {values}")
+
+
 if __name__ == "__main__":
-    solution = solve_task1()
-    temperatures = solution["temperature_C"]
-    moistures = solution["moisture_kgkg"]
-    print(f"BDF success: {solution['solver_result'].success}")
-    print(f"output shape: temperature={temperatures.shape}, moisture={moistures.shape}")
-    print(
-        "final state: "
-        f"T(center)={temperatures[-1, 0]:.6f} C, "
-        f"T(surface)={temperatures[-1, -1]:.6f} C, "
-        f"C(center)={moistures[-1, 0]:.6f} kg/kg, "
-        f"C(surface)={moistures[-1, -1]:.6f} kg/kg"
-    )
+    try:
+        result = solve_task1()
+        validate_solution(result)
+        print("validation: PASS")
+        print_key_samples(result)
+    except (RuntimeError, ValueError) as error:
+        raise SystemExit(f"问题1求解/验证失败: {error}") from error
