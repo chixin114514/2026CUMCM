@@ -27,7 +27,6 @@ LENGTH_M = 0.25  # 一维径向守恒式中约去，保留作题目参数记录�
 BASE_DR_M = 0.000125
 INITIAL_TEMPERATURE_C = 28.0
 INITIAL_MOISTURE_KGKG = 2.55
-AIR_PREHEAT_END_S = 1800.0
 FINAL_TIME_S = 10800.0
 OUTPUT_DT_S = 1.0
 OUTPUT_RADIUS_CM = np.arange(0.0, 2.0000001, 0.1)
@@ -60,13 +59,9 @@ DEFAULT_CSV_PATH = (
 
 def load_air_data(
     path: str | Path = DEFAULT_DATA_PATH,
-    preheat_end_s: float = AIR_PREHEAT_END_S,
+    required_end_s: float = FINAL_TIME_S,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """读取附件1的预热段，并对 1800 s 后使用末端值保持。
-
-    附件中可能还包含 1800 s 以后的记录；问题二按题目给出的最小假设，
-    只把 0--1800 s 作为预热边界，后续时间由 np.interp 的端点保持处理。
-    """
+    """读取附件1的全部烘房边界数据，供求解区间内分段线性插值。"""
 
     frame = pd.read_excel(Path(path))
     column_map = {str(column).strip(): column for column in frame.columns}
@@ -80,17 +75,16 @@ def load_air_data(
     for column in required:
         selected[column] = pd.to_numeric(selected[column], errors="raise")
     selected = selected.sort_values("时间").drop_duplicates("时间", keep="last")
-    selected = selected[selected["时间"] <= preheat_end_s + 1.0e-10]
 
     time_s = selected["时间"].to_numpy(dtype=float)
     air_temperature_C = selected["温度"].to_numpy(dtype=float)
     air_moisture_kgkg = selected["水分浓度"].to_numpy(dtype=float)
     if time_s.size < 2 or np.any(np.diff(time_s) <= 0.0):
-        raise ValueError("附件1预热段时间必须包含至少两个严格递增时间点")
-    if time_s[0] > 1.0e-10 or time_s[-1] < preheat_end_s - 1.0e-10:
-        raise ValueError("附件1预热段未覆盖 0--1800 s")
+        raise ValueError("附件1时间必须包含至少两个严格递增时间点")
+    if time_s[0] > 1.0e-10 or time_s[-1] < required_end_s - 1.0e-10:
+        raise ValueError(f"附件1烘房边界数据未覆盖 0--{required_end_s:g} s")
     if not np.all(np.isfinite(np.column_stack((time_s, air_temperature_C, air_moisture_kgkg)))):
-        raise ValueError("附件1预热段包含非有限数值")
+        raise ValueError("附件1烘房边界数据包含非有限数值")
     return time_s, air_temperature_C, air_moisture_kgkg
 
 
@@ -317,7 +311,9 @@ def solve_task2(
     if not np.isclose(ratio, output_stride, atol=1.0e-10):
         raise ValueError("为避免额外插值，output_dt_s 必须是 time_step_s 的整数倍")
 
-    air_time_s, air_temperature, air_moisture = load_air_data(data_path)
+    air_time_s, air_temperature, air_moisture = load_air_data(
+        data_path, required_end_s=t_end_s
+    )
     radii_m, faces_m, radial_measure_m2 = control_volume_geometry(RADIUS_M, dr_m)
     output_indices = _output_indices(radii_m)
     n_nodes = radii_m.size
