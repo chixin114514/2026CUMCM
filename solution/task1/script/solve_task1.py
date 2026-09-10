@@ -5,12 +5,13 @@ Temperature and moisture are solved independently with a cell-centred-at-node
 finite-volume discretisation.  The nodes include both ``r=0`` and ``r=R``;
 the first and last nodes therefore represent half control volumes.
 
-This stage intentionally only returns the one-second solution arrays.  Writing
-the final CSV is handled by a later stage.
+The solver returns the one-second solution arrays, and the module entry point
+also writes the validated base-grid result as a compact long-table CSV.
 """
 
 from __future__ import annotations
 
+import csv
 from pathlib import Path
 from typing import Callable
 
@@ -39,6 +40,10 @@ KEY_RADII_CM = np.array([0.0, 0.5, 1.0, 1.5, 2.0], dtype=float)
 DEFAULT_DATA_PATH = (
     Path(__file__).resolve().parents[3] / "problem" / "附件" / "附件1.xlsx"
 )
+DEFAULT_OUTPUT_PATH = Path(__file__).resolve().parents[1] / "answer" / "task1_result.csv"
+CSV_TIME_COUNT = 1801
+CSV_RADIUS_COUNT = 21
+CSV_DATA_ROW_COUNT = CSV_TIME_COUNT * CSV_RADIUS_COUNT
 
 
 def load_air_data(path: str | Path = DEFAULT_DATA_PATH) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -212,7 +217,8 @@ def solve_task1(
     """Solve Problem 1 and return arrays sampled every ``output_dt_s``.
 
     Returned arrays have shape ``(n_times, n_radial_nodes)`` for temperature
-    and moisture.  No result file is written by this function.
+    and moisture.  The caller may pass the validated result to
+    :func:`write_solution_csv` for the standard base-grid output.
     """
 
     if t_end_s <= 0.0 or output_dt_s <= 0.0:
@@ -452,6 +458,95 @@ def run_grid_sensitivity(
     }
 
 
+def _match_grid_nodes(
+    grid: np.ndarray,
+    targets: np.ndarray,
+    *,
+    label: str,
+    atol: float,
+) -> np.ndarray:
+    """Return indices of grid nodes matching targets within an absolute tolerance.
+
+    ``searchsorted`` alone can select the node on the wrong side when a target
+    is represented by a nearby binary floating-point value.  Checking both
+    neighbouring insertion candidates makes the sampling robust while still
+    requiring every requested point to be an actual internal node.
+    """
+
+    values = np.asarray(grid, dtype=float)
+    requested = np.asarray(targets, dtype=float)
+    if values.ndim != 1 or requested.ndim != 1 or values.size == 0:
+        raise ValueError(f"{label}网格形状错误")
+    insertion = np.searchsorted(values, requested, side="left")
+    right = np.clip(insertion, 0, values.size - 1)
+    left = np.clip(insertion - 1, 0, values.size - 1)
+    right_error = np.abs(values[right] - requested)
+    left_error = np.abs(values[left] - requested)
+    indices = np.where(left_error < right_error, left, right)
+    if np.any(np.abs(values[indices] - requested) > atol):
+        missing = requested[np.abs(values[indices] - requested) > atol]
+        raise ValueError(f"{label}缺少指定的精确节点: {missing.tolist()}")
+    if np.unique(indices).size != requested.size:
+        raise ValueError(f"{label}指定节点重复或无法唯一匹配")
+    return indices.astype(int, copy=False)
+
+
+def write_solution_csv(
+    solution: dict[str, np.ndarray | object],
+    output_path: str | Path = DEFAULT_OUTPUT_PATH,
+) -> tuple[Path, int]:
+    """Write the standard Problem 1 long table and return its path and row count."""
+
+    time_s = np.asarray(solution["time_s"], dtype=float)
+    radius_m = np.asarray(solution["radius_m"], dtype=float)
+    temperature = np.asarray(solution["temperature_C"], dtype=float)
+    moisture = np.asarray(solution["moisture_kgkg"], dtype=float)
+    target_times_s = np.arange(CSV_TIME_COUNT, dtype=float)
+    target_radii_cm = np.arange(CSV_RADIUS_COUNT, dtype=float) / 10.0
+    if radius_m.size != int(round(RADIUS_M / BASE_DR_M)) + 1 or not np.allclose(
+        np.diff(radius_m), BASE_DR_M, atol=1.0e-12, rtol=0.0
+    ):
+        raise ValueError("CSV必须从基准 dr=0.000125 m 网格采样")
+    time_indices = _match_grid_nodes(
+        time_s, target_times_s, label="CSV时间", atol=1.0e-9
+    )
+    radius_indices = _match_grid_nodes(
+        radius_m,
+        target_radii_cm * 1.0e-2,
+        label="CSV半径",
+        atol=1.0e-12,
+    )
+    selected_temperature = temperature[np.ix_(time_indices, radius_indices)]
+    selected_moisture = moisture[np.ix_(time_indices, radius_indices)]
+    if not np.all(np.isfinite(selected_temperature)) or not np.all(
+        np.isfinite(selected_moisture)
+    ):
+        raise ValueError("CSV采样结果包含 NaN 或 Inf")
+
+    destination = Path(output_path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    data_rows = 0
+    with destination.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(("time_s", "radius_cm", "temperature_C", "moisture_kgkg"))
+        for time_position, time_value in enumerate(target_times_s):
+            for radius_position, radius_cm in enumerate(target_radii_cm):
+                writer.writerow(
+                    (
+                        str(int(round(time_value))),
+                        f"{radius_cm:.1f}",
+                        f"{selected_temperature[time_position, radius_position]:.4f}",
+                        f"{selected_moisture[time_position, radius_position]:.4f}",
+                    )
+                )
+                data_rows += 1
+    if data_rows != CSV_DATA_ROW_COUNT:
+        raise RuntimeError(
+            f"CSV数据行数错误: 期望 {CSV_DATA_ROW_COUNT}, 实际 {data_rows}"
+        )
+    return destination, data_rows
+
+
 if __name__ == "__main__":
     try:
         result = solve_task1()
@@ -459,5 +554,7 @@ if __name__ == "__main__":
         print("validation: PASS")
         print_key_samples(result)
         run_grid_sensitivity(result)
+        csv_path, csv_rows = write_solution_csv(result)
+        print(f"CSV written: {csv_path} ({csv_rows} data rows)")
     except (RuntimeError, ValueError) as error:
         raise SystemExit(f"问题1求解/验证失败: {error}") from error
