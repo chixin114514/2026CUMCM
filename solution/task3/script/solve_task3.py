@@ -852,7 +852,11 @@ def compare_sensitivity_tables(
 
     base_times, base_rows = table5_from_solution(base)
     other_times, other_rows = table5_from_solution(other)
-    common = min(base_times.size, other_times.size)
+    if base_times.size != other_times.size or not np.allclose(
+        base_times, other_times, rtol=0.0, atol=1.0e-8
+    ):
+        raise ValueError("两个解的表5常规时间行不一致")
+    common = min(base_rows.shape[0], other_rows.shape[0])
     if common == 0:
         table_difference = 0.0
     else:
@@ -863,7 +867,7 @@ def compare_sensitivity_tables(
         )
         / 3600.0,
         "table5_common_max_abs_difference_kgkg": table_difference,
-        "common_regular_rows": int(common),
+        "common_table_rows": int(common),
     }
 
 
