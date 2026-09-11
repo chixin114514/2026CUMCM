@@ -1,0 +1,48 @@
+[remote] root=/root/2026CUMCM_sensitivity tasks='1 2 3 4' jobs=4 out=solution/sensitivity/results
+{"tasks": [1, 2, 3, 4], "jobs": 4, "out": "solution/sensitivity/results"}
+[sensitivity] 计算基准工况: tasks=[1, 2, 3, 4], workers=4
+  base task1 完成
+  base task2 完成
+  base task3 完成
+  base task4 完成
+[sensitivity] 开始 39 个扰动工况，workers=4
+  [ok] task1 dr_m=0.00025 dT=8.655485765629578e-05 dC=0.0014222210946202019 t_dry= diff_h= (0.924s)
+  [ok] task1 rtol=1e-06 dT=0.0008341709293731014 dC=3.2793945425879656e-06 t_dry= diff_h= (0.369s)
+  [ok] task1 max_step_s=15 dT=0.0 dC=0.0 t_dry= diff_h= (1.598s)
+  [ok] task1 max_step_s=60 dT=0.0 dC=0.0 t_dry= diff_h= (1.6s)
+  [ok] task1 atol=1e-08 dT=1.6332119127326905e-05 dC=1.0634739444626007e-07 t_dry= diff_h= (1.13s)
+  [ok] task1 atol=1e-12 dT=2.20584604448959e-05 dC=1.9863263478470117e-08 t_dry= diff_h= (1.203s)
+  [ok] task1 rtol=1e-10 dT=2.013105654796732e-05 dC=7.945848690127377e-08 t_dry= diff_h= (2.303s)
+  [ok] task1 dr_m=0.0000625 dT=2.405379252934381e-05 dC=0.0003499211934951951 t_dry= diff_h= (4.015s)
+  [ok] task2 time_step_s=1 dT=0.0007381737354421603 dC=4.5686819868606676e-05 t_dry= diff_h= (9.069s)
+  [ok] task2 dr_m=0.0001 dT=8.24173726243771e-06 dC=7.4683852915313764e-06 t_dry= diff_h= (15.372s)
+  [ok] task2 dr_m=0.000025 dT=2.0604309511895735e-06 dC=1.8671952024540417e-06 t_dry= diff_h= (20.685s)
+  [ok] task2 picard_tol_T=1e-06 dT=0.0 dC=0.0 t_dry= diff_h= (17.066s)
+  [ok] task2 time_step_s=0.25 dT=0.00036905958215527335 dC=2.2844816701894644e-05 t_dry= diff_h= (31.581s)
+  [ok] task2 picard_tol_T=1e-10 dT=0.0 dC=0.0 t_dry= diff_h= (16.891s)
+  [ok] task2 picard_tol_C=1e-08 dT=1.2576606422953773e-12 dC=2.842170943040401e-14 t_dry= diff_h= (14.234s)
+  [ok] task2 picard_tol_C=1e-12 dT=1.2434497875801753e-12 dC=1.887379141862766e-14 t_dry= diff_h= (18.701s)
+  [ok] task3 n_intervals=200 dT= dC= t_dry=58.94495310592208 diff_h=1.4730335399743169 (20.829s)
+  [ok] task3 n_intervals=400 dT= dC= t_dry=57.6778896364653 diff_h=0.20597007051753735 (24.119s)
+  [ok] task3 n_intervals=800 dT= dC= t_dry=57.503132355036904 diff_h=0.031212789089138937 (31.381s)
+  [ok] task3 time_step_long_s=20 dT= dC= t_dry=57.47191810421712 diff_h=-1.4617306476338854e-06 (29.862s)
+  [ok] task3 TIME_STEP_EARLY_S=2 dT= dC= t_dry=57.47191956256829 diff_h=-3.379476254394831e-09 (36.219s)
+  [ok] task3 time_step_long_s=5 dT= dC= t_dry=57.47191992789559 diff_h=3.61947826377218e-07 (64.512s)
+  [ok] task3 STABLE_START_S=7200 dT= dC= t_dry=57.536176798251944 diff_h=0.06425723230417901 (42.576s)
+  [ok] task3 TIME_STEP_EARLY_S=0.5 dT= dC= t_dry=57.47191956678902 diff_h=8.412541774305282e-10 (53.781s)
+  [ok] task3 STABLE_START_S=10800 dT= dC= t_dry=57.48278387793352 diff_h=0.010864311985756103 (42.455s)
+  [ok] task3 picard_tol=loosen100x dT= dC= t_dry=57.47191956369434 diff_h=-2.2534223376169393e-09 (31.783s)
+  [ok] task4 n_intervals=400 dT= dC= t_dry=51.10251736111111 diff_h=0.015082465277778567 (44.068s)
+  [ok] task3 picard_tol=tighten100x dT= dC= t_dry=57.471919565959375 diff_h=1.1610268302320037e-11 (51.576s)
+  [ok] task4 time_step_long_s=10 dT= dC= t_dry=51.08743489583333 diff_h=0.0 (36.588s)
+  [ok] task4 n_intervals=1600 dT= dC= t_dry=51.083745659722226 diff_h=-0.0036892361111071637 (69.197s)
+  [ok] task4 time_step_early_s=2 dT= dC= t_dry=51.08743489583333 diff_h=0.0 (46.106s)
+  [ok] task4 time_step_early_s=0.5 dT= dC= t_dry=51.08743489583333 diff_h=0.0 (66.334s)
+  [ok] task4 time_step_long_s=2.5 dT= dC= t_dry=51.08743489583333 diff_h=0.0 (86.917s)
+  [ok] task4 STABLE_START_S=7200 dT= dC= t_dry=51.143055555555556 diff_h=0.055620659722222854 (53.262s)
+  [ok] task4 STABLE_START_S=10800 dT= dC= t_dry=51.096918402777774 diff_h=0.009483506944441444 (53.34s)
+  [ok] task4 picard_tol=loosen100x dT= dC= t_dry=51.08743489583333 diff_h=0.0 (42.104s)
+  [ok] task4 event_tol_s=1 dT= dC= t_dry=51.0875 diff_h=6.510416666571928e-05 (53.173s)
+  [ok] task4 event_tol_s=0.01 dT= dC= t_dry=51.08741590711806 diff_h=-1.89887152757251e-05 (53.111s)
+  [ok] task4 picard_tol=tighten100x dT= dC= t_dry=51.08743489583333 diff_h=0.0 (61.251s)
+[sensitivity] 汇总已写入 solution/sensitivity/results/sensitivity_summary.csv

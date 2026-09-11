@@ -1,0 +1,24 @@
+[remote] root=/root/2026CUMCM_sensitivity tasks='1 2 3 4' jobs=4 out=solution/sensitivity/results
+{"tasks": [1, 2, 3, 4], "jobs": 4, "out": "solution/sensitivity/results"}
+[sensitivity] 计算基准工况: tasks=[1, 2, 3, 4], workers=4
+  base task1 完成
+  base task2 完成
+  base task3 完成
+  base task4 完成
+Traceback (most recent call last):
+  File "/root/2026CUMCM_sensitivity/solution/sensitivity/run_sensitivity.py", line 458, in <module>
+    main()
+  File "/root/2026CUMCM_sensitivity/solution/sensitivity/run_sensitivity.py", line 454, in main
+    run(tasks, args.out, max(1, args.jobs))
+  File "/root/2026CUMCM_sensitivity/solution/sensitivity/run_sensitivity.py", line 406, in run
+    summaries: list[dict[str, Any]] = [_run_base_reuse(job)["summary"] for job in reuse_jobs]
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/2026CUMCM_sensitivity/solution/sensitivity/run_sensitivity.py", line 406, in <listcomp>
+    summaries: list[dict[str, Any]] = [_run_base_reuse(job)["summary"] for job in reuse_jobs]
+                                       ^^^^^^^^^^^^^^^^^^^^
+  File "/root/2026CUMCM_sensitivity/solution/sensitivity/run_sensitivity.py", line 366, in _run_base_reuse
+    _write_task12_csv(Path(job["out_dir"]) / row["run_file"], 2, job["parameter"], job["label"], base["T"], base["C"], base["T"], base["C"])
+  File "/root/2026CUMCM_sensitivity/solution/sensitivity/run_sensitivity.py", line 302, in _write_task12_csv
+    f"{T[ti, ri]:.10g}", f"{C[ti, ri]:.10g}",
+       ~^^^^^^^^
+IndexError: index 6 is out of bounds for axis 0 with size 6
