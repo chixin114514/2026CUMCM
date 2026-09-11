@@ -24,7 +24,7 @@ from scipy.linalg import solve_banded
 # 几何、初始状态和输出约定（内部长度统一使用 m）。
 RADIUS_M = 0.02
 LENGTH_M = 0.25  # 一维径向守恒式中约去，保留作题目参数记录。
-BASE_DR_M = 0.000125
+BASE_DR_M = 0.00005
 INITIAL_TEMPERATURE_C = 28.0
 INITIAL_MOISTURE_KGKG = 2.55
 FINAL_TIME_S = 10800.0
@@ -40,6 +40,7 @@ MASS_TRANSFER_M_S = 8.0e-7
 PICARD_TOL_T_C = 1.0e-8
 PICARD_TOL_C_KGKG = 1.0e-10
 PICARD_MAX_ITER = 50
+LINEAR_RESIDUAL_TOL = 1.0e-9
 
 DEFAULT_DATA_PATH = (
     Path(__file__).resolve().parents[3] / "problem" / "附件" / "附件1.xlsx"
@@ -128,9 +129,27 @@ def material_properties(
     return rho, cp, k, diffusivity
 
 
+def _harmonic_mean_positive(
+    left: np.ndarray, right: np.ndarray, name: str
+) -> np.ndarray:
+    """计算严格正值数组的界面调和平均。"""
+
+    if (
+        np.any(~np.isfinite(left))
+        or np.any(~np.isfinite(right))
+        or np.any(left <= 0.0)
+        or np.any(right <= 0.0)
+    ):
+        raise ValueError(f"{name} 界面调和平均要求两侧物性均为有限正值")
+    result = 2.0 * left * right / (left + right)
+    if np.any(~np.isfinite(result)) or np.any(result <= 0.0):
+        raise ValueError(f"{name} 界面调和平均未得到严格正值")
+    return result
+
+
 def _solve_tridiagonal(
     lower: np.ndarray, diagonal: np.ndarray, upper: np.ndarray, rhs: np.ndarray
-) -> np.ndarray:
+) -> tuple[np.ndarray, float]:
     """解三对角线性系统，矩阵系数均为当前 Picard 冻结值。"""
 
     n = diagonal.size
@@ -138,7 +157,26 @@ def _solve_tridiagonal(
     banded[0, 1:] = upper
     banded[1, :] = diagonal
     banded[2, :-1] = lower
-    return solve_banded((1, 1), banded, rhs, check_finite=False)
+    solution = solve_banded((1, 1), banded, rhs, check_finite=False)
+    residual = diagonal * solution - rhs
+    if n > 1:
+        residual[:-1] += upper * solution[1:]
+        residual[1:] += lower * solution[:-1]
+    scale = max(
+        float(np.max(np.abs(rhs))),
+        float(np.max(np.abs(diagonal * solution))),
+        float(np.max(np.abs(upper * solution[1:]))) if n > 1 else 0.0,
+        float(np.max(np.abs(lower * solution[:-1]))) if n > 1 else 0.0,
+        1.0e-30,
+    )
+    normalized_residual = float(np.max(np.abs(residual)) / scale)
+    if not np.isfinite(normalized_residual) or normalized_residual > LINEAR_RESIDUAL_TOL:
+        raise RuntimeError(
+            "三对角线性系统残差异常: "
+            f"normalized_inf_residual={normalized_residual:.3e}, "
+            f"tol={LINEAR_RESIDUAL_TOL:.3e}"
+        )
+    return solution, normalized_residual
 
 
 def _solve_temperature_linear(
@@ -150,14 +188,14 @@ def _solve_temperature_linear(
     dr_m: float,
     dt_s: float,
     air_temperature_C: float,
-) -> np.ndarray:
+) -> tuple[np.ndarray, float]:
     """在给定 Picard 物性下求解一个后向欧拉温度步。"""
 
     rho, cp, conductivity, _ = material_properties(
         guess_temperature_C, guess_moisture_kgkg
     )
     storage = rho * cp * radial_measure_m2
-    face_k = 0.5 * (conductivity[:-1] + conductivity[1:])
+    face_k = _harmonic_mean_positive(conductivity[:-1], conductivity[1:], "导热系数")
     conductance = face_k * faces_m / dr_m
 
     diagonal = storage.copy()
@@ -182,14 +220,14 @@ def _solve_moisture_linear(
     dr_m: float,
     dt_s: float,
     air_moisture_kgkg: float,
-) -> np.ndarray:
+) -> tuple[np.ndarray, float]:
     """在给定 Picard 物性下求解一个后向欧拉水分步。"""
 
     _, _, _, diffusivity = material_properties(
         guess_temperature_C, guess_moisture_kgkg
     )
     storage = radial_measure_m2
-    face_D = 0.5 * (diffusivity[:-1] + diffusivity[1:])
+    face_D = _harmonic_mean_positive(diffusivity[:-1], diffusivity[1:], "扩散系数")
     conductance = face_D * faces_m / dr_m
 
     diagonal = storage.copy()
@@ -216,7 +254,7 @@ def _picard_step(
     tol_temperature_C: float = PICARD_TOL_T_C,
     tol_moisture_kgkg: float = PICARD_TOL_C_KGKG,
     max_iter: int = PICARD_MAX_ITER,
-) -> tuple[np.ndarray, np.ndarray, int, float, float]:
+) -> tuple[np.ndarray, np.ndarray, int, float, float, float]:
     """使用当前时间步内的 Picard 外迭代求 T、C 自洽解。"""
 
     # time_new_s 同时用于异常信息，明确边界取值属于当前时间步。
@@ -224,9 +262,10 @@ def _picard_step(
     guess_moisture_kgkg = old_moisture_kgkg.copy()
     last_delta_temperature = np.inf
     last_delta_moisture = np.inf
+    max_linear_residual = 0.0
 
     for iteration in range(1, max_iter + 1):
-        new_temperature_C = _solve_temperature_linear(
+        new_temperature_C, temperature_residual = _solve_temperature_linear(
             old_temperature_C,
             guess_temperature_C,
             guess_moisture_kgkg,
@@ -236,7 +275,7 @@ def _picard_step(
             dt_s,
             air_temperature_C,
         )
-        new_moisture_kgkg = _solve_moisture_linear(
+        new_moisture_kgkg, moisture_residual = _solve_moisture_linear(
             old_moisture_kgkg,
             guess_temperature_C,
             guess_moisture_kgkg,
@@ -245,6 +284,9 @@ def _picard_step(
             dr_m,
             dt_s,
             air_moisture_kgkg,
+        )
+        max_linear_residual = max(
+            max_linear_residual, temperature_residual, moisture_residual
         )
         last_delta_temperature = float(
             np.max(np.abs(new_temperature_C - guess_temperature_C))
@@ -264,6 +306,7 @@ def _picard_step(
                 iteration,
                 last_delta_temperature,
                 last_delta_moisture,
+                max_linear_residual,
             )
         guess_temperature_C = new_temperature_C
         guess_moisture_kgkg = new_moisture_kgkg
@@ -289,7 +332,7 @@ def _output_indices(radii_m: np.ndarray) -> np.ndarray:
 def solve_task2(
     data_path: str | Path = DEFAULT_DATA_PATH,
     t_end_s: float = FINAL_TIME_S,
-    time_step_s: float = 1.0,
+    time_step_s: float = 0.5,
     output_dt_s: float = OUTPUT_DT_S,
     dr_m: float = BASE_DR_M,
     progress: bool = False,
@@ -321,6 +364,8 @@ def solve_task2(
     output_times = output_dt_s * np.arange(n_outputs_total, dtype=float)
     temperature_output = np.empty((n_outputs_total, output_indices.size), dtype=float)
     moisture_output = np.empty_like(temperature_output)
+    air_temperature_output = np.interp(output_times, air_time_s, air_temperature)
+    air_moisture_output = np.interp(output_times, air_time_s, air_moisture)
     initial_temperature = np.full(n_nodes, INITIAL_TEMPERATURE_C, dtype=float)
     initial_moisture = np.full(n_nodes, INITIAL_MOISTURE_KGKG, dtype=float)
     current_temperature = initial_temperature.copy()
@@ -330,6 +375,7 @@ def solve_task2(
     iteration_counts = np.empty(n_steps, dtype=int)
     picard_delta_temperature = np.empty(n_steps, dtype=float)
     picard_delta_moisture = np.empty(n_steps, dtype=float)
+    linear_residuals = np.empty(n_steps, dtype=float)
     air_temperature_interp = lambda t: float(np.interp(t, air_time_s, air_temperature))
     air_moisture_interp = lambda t: float(np.interp(t, air_time_s, air_moisture))
 
@@ -341,6 +387,7 @@ def solve_task2(
             iteration_counts[step - 1],
             picard_delta_temperature[step - 1],
             picard_delta_moisture[step - 1],
+            linear_residuals[step - 1],
         ) = _picard_step(
             current_temperature,
             current_moisture,
@@ -364,12 +411,18 @@ def solve_task2(
         "radius_cm": OUTPUT_RADIUS_CM.copy(),
         "temperature_C": temperature_output,
         "moisture_kgkg": moisture_output,
+        "air_temperature_C": air_temperature_output,
+        "air_moisture_kgkg": air_moisture_output,
         "radius_m_internal": radii_m,
         "time_step_s": float(time_step_s),
         "dr_m": float(dr_m),
         "iteration_counts": iteration_counts,
         "picard_delta_temperature": picard_delta_temperature,
         "picard_delta_moisture": picard_delta_moisture,
+        "linear_residuals": linear_residuals,
+        "max_linear_residual": float(np.max(linear_residuals)) if n_steps else 0.0,
+        "center_inner_face_radius_m": float(0.0),
+        "center_inner_boundary_coefficient": float(0.0),
         "air_temperature_last_C": air_temperature_interp(t_end_s),
         "air_moisture_last_kgkg": air_moisture_interp(t_end_s),
     }
@@ -382,20 +435,34 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
     radius_cm = np.asarray(solution["radius_cm"], dtype=float)
     temperature = np.asarray(solution["temperature_C"], dtype=float)
     moisture = np.asarray(solution["moisture_kgkg"], dtype=float)
+    air_temperature = np.asarray(solution["air_temperature_C"], dtype=float)
+    air_moisture = np.asarray(solution["air_moisture_kgkg"], dtype=float)
+    if time_s.size != 10801 or radius_cm.size != 21:
+        raise ValueError("完整结果必须为 10801 个时间点和 21 个半径点")
     if temperature.shape != (time_s.size, radius_cm.size):
         raise ValueError("温度输出数组形状错误")
     if moisture.shape != temperature.shape:
         raise ValueError("温度和水分输出数组形状不一致")
+    if air_temperature.shape != time_s.shape or air_moisture.shape != time_s.shape:
+        raise ValueError("烘房边界输出数组形状错误")
     if not np.all(np.isfinite(np.column_stack((temperature.ravel(), moisture.ravel())))):
         raise ValueError("结果包含 NaN 或 Inf")
+    if not np.all(np.isfinite(np.column_stack((air_temperature, air_moisture)))):
+        raise ValueError("烘房边界结果包含 NaN 或 Inf")
     if np.min(moisture) < -1.0e-10:
         raise ValueError(f"结果包含负水分浓度: min={np.min(moisture):.6g}")
-    if not np.isclose(temperature[0, 0], INITIAL_TEMPERATURE_C, atol=1.0e-12):
-        raise ValueError("初始中心温度不符合题设")
-    if not np.isclose(moisture[0, 0], INITIAL_MOISTURE_KGKG, atol=1.0e-12):
-        raise ValueError("初始中心水分不符合题设")
+    if not np.allclose(temperature[0], INITIAL_TEMPERATURE_C, atol=1.0e-12):
+        raise ValueError("初始全径向温度不符合题设")
+    if not np.allclose(moisture[0], INITIAL_MOISTURE_KGKG, atol=1.0e-12):
+        raise ValueError("初始全径向水分不符合题设")
+    if not np.isclose(time_s[0], 0.0, atol=1.0e-12) or not np.isclose(
+        time_s[-1], FINAL_TIME_S, atol=1.0e-10
+    ):
+        raise ValueError("结果时间范围必须完整覆盖 0--10800 s")
     if not np.all(np.diff(time_s) > 0.0):
         raise ValueError("输出时间没有严格递增")
+    if not np.allclose(np.diff(time_s), OUTPUT_DT_S, atol=1.0e-10):
+        raise ValueError("输出时间间隔不是 1 s")
     if not np.isclose(radius_cm[0], 0.0) or not np.isclose(radius_cm[-1], 2.0):
         raise ValueError("输出半径范围不符合 0--2 cm")
 
@@ -412,9 +479,43 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
     if np.max(np.abs(np.diff(moisture, axis=0))) > 0.2:
         raise ValueError("相邻输出时刻水分出现明显跳变")
 
+    heat_boundary_driver = air_temperature - temperature[:, -1]
+    moisture_boundary_driver = air_moisture - moisture[:, -1]
+    heat_inward_fraction = float(np.mean(heat_boundary_driver[1:] >= -1.0e-8))
+    moisture_outward_fraction = float(np.mean(moisture_boundary_driver[1:] <= 1.0e-8))
+    if heat_boundary_driver[1] < -1.0e-8 or heat_boundary_driver[-1] < -1.0e-8:
+        raise ValueError("表面热边界方向异常：起始或末时刻未体现烘房向药材传热")
+    if moisture_boundary_driver[1] > 1.0e-8 or moisture_boundary_driver[-1] > 1.0e-8:
+        raise ValueError("表面传质边界方向异常：起始或末时刻未体现药材向外失水")
+    if heat_inward_fraction < 0.95 or moisture_outward_fraction < 0.95:
+        raise ValueError("表面边界方向异常：主导时段未体现热进入、水分流出")
+
     iterations = np.asarray(solution["iteration_counts"], dtype=int)
     if iterations.size and np.max(iterations) > PICARD_MAX_ITER:
         raise ValueError("Picard 迭代次数超出上限")
+    picard_delta_temperature = np.asarray(
+        solution["picard_delta_temperature"], dtype=float
+    )
+    picard_delta_moisture = np.asarray(solution["picard_delta_moisture"], dtype=float)
+    linear_residuals = np.asarray(solution["linear_residuals"], dtype=float)
+    if (
+        picard_delta_temperature.shape != iterations.shape
+        or picard_delta_moisture.shape != iterations.shape
+        or linear_residuals.shape != iterations.shape
+    ):
+        raise ValueError("Picard 或线性残差记录长度错误")
+    if not np.all(np.isfinite(linear_residuals)) or np.max(linear_residuals) > LINEAR_RESIDUAL_TOL:
+        raise ValueError("三对角线性系统残差超过容差")
+    if np.any(picard_delta_temperature > PICARD_TOL_T_C) or np.any(
+        picard_delta_moisture > PICARD_TOL_C_KGKG
+    ):
+        raise ValueError("存在未达到收敛阈值的 Picard 时间步")
+    center_face_radius = float(solution["center_inner_face_radius_m"])
+    center_boundary_coefficient = float(solution["center_inner_boundary_coefficient"])
+    if not np.isclose(center_face_radius, 0.0, atol=1.0e-15) or not np.isclose(
+        center_boundary_coefficient, 0.0, atol=1.0e-30
+    ):
+        raise ValueError("中心内侧控制面未体现零通量离散")
     return {
         "time_end_s": float(time_s[-1]),
         "temperature_min_C": float(np.min(temperature)),
@@ -423,9 +524,23 @@ def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
         "moisture_max_kgkg": float(np.max(moisture)),
         "max_picard_iterations": int(np.max(iterations)) if iterations.size else 0,
         "mean_picard_iterations": float(np.mean(iterations)) if iterations.size else 0.0,
+        "max_linear_residual": float(np.max(linear_residuals))
+        if linear_residuals.size
+        else 0.0,
         "center_surface_temperature_gap_C": float(final_temperature[-1] - final_temperature[0]),
         "center_surface_moisture_gap_kgkg": float(final_moisture[0] - final_moisture[-1]),
-        "center_flux_zero_discretisation": True,
+        "center_inner_face_radius_m": center_face_radius,
+        "center_inner_boundary_coefficient": center_boundary_coefficient,
+        "center_flux_zero_discretisation": bool(
+            np.isclose(center_face_radius, 0.0, atol=1.0e-15)
+            and np.isclose(center_boundary_coefficient, 0.0, atol=1.0e-30)
+        ),
+        "minimum_heat_boundary_driver_C": float(np.min(heat_boundary_driver[1:])),
+        "heat_inward_fraction": heat_inward_fraction,
+        "maximum_moisture_boundary_driver_kgkg": float(
+            np.max(moisture_boundary_driver[1:])
+        ),
+        "moisture_outward_fraction": moisture_outward_fraction,
     }
 
 
@@ -521,42 +636,128 @@ def key_tables(solution: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.nda
     return target_times, temperature, moisture
 
 
+def _key_point_values(
+    solution: dict[str, Any],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """提取表3/表4的时间和五个关键径向位置。"""
+
+    target_times = np.array([1800, 3600, 5400, 7200, 9000, 10800], dtype=float)
+    time_s = np.asarray(solution["time_s"], dtype=float)
+    time_indices = np.array(
+        [int(np.argmin(np.abs(time_s - target))) for target in target_times]
+    )
+    if not np.allclose(time_s[time_indices], target_times, atol=1.0e-10):
+        raise ValueError("完整结果中缺少敏感性检查要求的时间点")
+    key_radius_indices = np.array([0, 5, 10, 15, 20], dtype=int)
+    return (
+        target_times,
+        OUTPUT_RADIUS_CM[key_radius_indices],
+        np.asarray(solution["temperature_C"])[
+            time_indices[:, None], key_radius_indices[None, :]
+        ],
+        np.asarray(solution["moisture_kgkg"])[
+            time_indices[:, None], key_radius_indices[None, :]
+        ],
+    )
+
+
 def time_step_sensitivity(
-    base_solution: dict[str, Any],
+    base_solution: dict[str, Any] | None = None,
     data_path: str | Path = DEFAULT_DATA_PATH,
 ) -> dict[str, Any]:
-    """比较 dt=1 s 与 dt=0.5 s 在表3/表4点的差异。"""
+    """以最终 dt=0.5 s 为基准，比较 dt=1 s 在表3/表4点的差异。"""
 
-    fine_solution = solve_task2(
+    if base_solution is not None and np.isclose(
+        float(base_solution["time_step_s"]), 0.5
+    ) and np.isclose(float(base_solution["dr_m"]), BASE_DR_M):
+        reference_solution = base_solution
+    else:
+        reference_solution = solve_task2(
+            data_path=data_path,
+            t_end_s=FINAL_TIME_S,
+            time_step_s=0.5,
+            output_dt_s=1.0,
+            dr_m=BASE_DR_M,
+            progress=True,
+        )
+    comparison_solution = solve_task2(
         data_path=data_path,
         t_end_s=FINAL_TIME_S,
-        time_step_s=0.5,
+        time_step_s=1.0,
         output_dt_s=1.0,
         dr_m=BASE_DR_M,
         progress=True,
     )
-    key_times_s = np.array([1800, 3600, 5400, 7200, 9000, 10800], dtype=float)
-    key_radius_indices = np.array([0, 5, 10, 15, 20], dtype=int)
-    base_time_indices = np.array(
-        [int(np.argmin(np.abs(np.asarray(base_solution["time_s"]) - t))) for t in key_times_s]
+    validate_solution(comparison_solution)
+    key_times_s, key_radius_cm, reference_temperature, reference_moisture = (
+        _key_point_values(reference_solution)
     )
-    fine_time_indices = np.array(
-        [int(np.argmin(np.abs(np.asarray(fine_solution["time_s"]) - t))) for t in key_times_s]
+    _, _, comparison_temperature, comparison_moisture = _key_point_values(
+        comparison_solution
     )
-    base_temperature = np.asarray(base_solution["temperature_C"])[
-        base_time_indices[:, None], key_radius_indices[None, :]
-    ]
-    fine_temperature = np.asarray(fine_solution["temperature_C"])[
-        fine_time_indices[:, None], key_radius_indices[None, :]
-    ]
-    base_moisture = np.asarray(base_solution["moisture_kgkg"])[
-        base_time_indices[:, None], key_radius_indices[None, :]
-    ]
-    fine_moisture = np.asarray(fine_solution["moisture_kgkg"])[
-        fine_time_indices[:, None], key_radius_indices[None, :]
-    ]
-    temperature_difference = np.abs(fine_temperature - base_temperature)
-    moisture_difference = np.abs(fine_moisture - base_moisture)
+    temperature_difference = np.abs(comparison_temperature - reference_temperature)
+    moisture_difference = np.abs(comparison_moisture - reference_moisture)
+    temperature_position = np.unravel_index(
+        int(np.argmax(temperature_difference)), temperature_difference.shape
+    )
+    moisture_position = np.unravel_index(
+        int(np.argmax(moisture_difference)), moisture_difference.shape
+    )
+    return {
+        "reference_solution": reference_solution,
+        "comparison_solution": comparison_solution,
+        "reference_time_step_s": 0.5,
+        "comparison_time_step_s": 1.0,
+        "dr_m": BASE_DR_M,
+        "key_times_s": key_times_s,
+        "key_radius_cm": key_radius_cm,
+        "temperature_max_abs_difference_C": float(np.max(temperature_difference)),
+        "temperature_difference_position": (
+            float(key_times_s[temperature_position[0]]),
+            float(key_radius_cm[temperature_position[1]]),
+        ),
+        "moisture_max_abs_difference_kgkg": float(np.max(moisture_difference)),
+        "moisture_difference_position": (
+            float(key_times_s[moisture_position[0]]),
+            float(key_radius_cm[moisture_position[1]]),
+        ),
+    }
+
+
+def space_grid_sensitivity(
+    base_solution: dict[str, Any] | None = None,
+    data_path: str | Path = DEFAULT_DATA_PATH,
+) -> dict[str, Any]:
+    """以 dt=0.5 s 为基准，比较 dr=0.01 cm 与 0.005 cm。"""
+
+    if base_solution is not None and np.isclose(
+        float(base_solution["time_step_s"]), 0.5
+    ) and np.isclose(float(base_solution["dr_m"]), BASE_DR_M):
+        fine_solution = base_solution
+    else:
+        fine_solution = solve_task2(
+            data_path=data_path,
+            t_end_s=FINAL_TIME_S,
+            time_step_s=0.5,
+            output_dt_s=1.0,
+            dr_m=BASE_DR_M,
+            progress=True,
+        )
+    coarse_solution = solve_task2(
+        data_path=data_path,
+        t_end_s=FINAL_TIME_S,
+        time_step_s=0.5,
+        output_dt_s=1.0,
+        dr_m=0.0001,
+        progress=True,
+    )
+    validate_solution(coarse_solution)
+    key_times_s, key_radius_cm, fine_temperature, fine_moisture = _key_point_values(
+        fine_solution
+    )
+    _, _, coarse_temperature, coarse_moisture = _key_point_values(coarse_solution)
+    temperature_difference = np.abs(coarse_temperature - fine_temperature)
+    moisture_difference = np.abs(coarse_moisture - fine_moisture)
     temperature_position = np.unravel_index(
         int(np.argmax(temperature_difference)), temperature_difference.shape
     )
@@ -565,16 +766,21 @@ def time_step_sensitivity(
     )
     return {
         "fine_solution": fine_solution,
+        "coarse_solution": coarse_solution,
+        "fine_dr_m": BASE_DR_M,
+        "coarse_dr_m": 0.0001,
+        "time_step_s": 0.5,
         "key_times_s": key_times_s,
+        "key_radius_cm": key_radius_cm,
         "temperature_max_abs_difference_C": float(np.max(temperature_difference)),
         "temperature_difference_position": (
             float(key_times_s[temperature_position[0]]),
-            float(OUTPUT_RADIUS_CM[key_radius_indices[temperature_position[1]]]),
+            float(key_radius_cm[temperature_position[1]]),
         ),
         "moisture_max_abs_difference_kgkg": float(np.max(moisture_difference)),
         "moisture_difference_position": (
             float(key_times_s[moisture_position[0]]),
-            float(OUTPUT_RADIUS_CM[key_radius_indices[moisture_position[1]]]),
+            float(key_radius_cm[moisture_position[1]]),
         ),
     }
 
@@ -594,7 +800,7 @@ def _print_key_tables(solution: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="求解 A题问题二")
     parser.add_argument("--t-end", type=float, default=FINAL_TIME_S)
-    parser.add_argument("--time-step", type=float, default=1.0)
+    parser.add_argument("--time-step", type=float, default=0.5)
     parser.add_argument("--output-dt", type=float, default=OUTPUT_DT_S)
     parser.add_argument("--no-write", action="store_true", help="只求解和检查，不写答案文件")
     parser.add_argument("--skip-sensitivity", action="store_true")
@@ -623,15 +829,23 @@ def main() -> None:
     if (
         not args.skip_sensitivity
         and np.isclose(args.t_end, FINAL_TIME_S)
-        and np.isclose(args.time_step, 1.0)
+        and np.isclose(args.time_step, 0.5)
     ):
         sensitivity = time_step_sensitivity(solution, data_path=args.data_path)
         print(
-            "时间步敏感性（dt=1 s 对比 dt=0.5 s，表3/表4点）: "
+            "时间步敏感性（基准 dt=0.5 s，对比 dt=1 s，dr=0.005 cm，表3/表4点）: "
             f"max|dT|={sensitivity['temperature_max_abs_difference_C']:.6e} °C "
             f"at (t,r)={sensitivity['temperature_difference_position']}; "
             f"max|dC|={sensitivity['moisture_max_abs_difference_kgkg']:.6e} kg/kg "
             f"at (t,r)={sensitivity['moisture_difference_position']}"
+        )
+        grid_sensitivity = space_grid_sensitivity(solution, data_path=args.data_path)
+        print(
+            "空间网格敏感性（基准 dr=0.005 cm，对比 dr=0.01 cm，dt=0.5 s，表3/表4点）: "
+            f"max|dT|={grid_sensitivity['temperature_max_abs_difference_C']:.6e} °C "
+            f"at (t,r)={grid_sensitivity['temperature_difference_position']}; "
+            f"max|dC|={grid_sensitivity['moisture_max_abs_difference_kgkg']:.6e} kg/kg "
+            f"at (t,r)={grid_sensitivity['moisture_difference_position']}"
         )
         _print_key_tables(solution)
     print(f"总耗时: {wall_time.perf_counter() - started:.2f} s")
