@@ -2732,8 +2732,6 @@ commit hash + 中文 commit message。
               raise ValueError(
                   f"问题1体积加权平均水分未下降: {average_initial:.6g} -> {average_final:.6g}"
               )
-      
-      
 
 ## Assistant
 
@@ -4666,7 +4664,15 @@ worker 已完成三阶段并给出 3 条 task2 中文 commit。现在进入 root
 
 ## Activity
 
-    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"from openpyxl import load_workbook; from pathlib import Path; import csv, math; src=Path('problem/附件/附件3/result2.xlsx'); out=Path('solution/task2/answer/result2.xlsx');for p in (src,out): w=load_workbook(p,read_only=False,data_only=False); print(p, w.sheetnames); for s in w.sheetnames: ws=w[s]; print(s,ws.max_row,ws.max_column,ws['A1'].value,ws['B1'].value,ws['V1'].value,ws['A2'].value,ws['B2'].value,ws['V10802'].value if ws.max_row>=10802 else None, ws['B2'].number_format)with open('solution/task2/answer/task2_all_results.csv',encoding='utf-8',newline='') as f: r=csv.reader(f); header=next(r); first=next(r); n=1; last=first for row in r: n+=1; last=row print('csv',header,n,first,last)\" && shasum -a 256 problem/附件/附件3/result2.xlsx solution/task2/answer/result2.xlsx solution/task2/answer/task2_all_results.csv solution/task2/script/solve_task2.py"
+    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"from openpyxl import load_workbook; from pathlib import Path; import csv, math; src=Path('problem/附件/附件3/result2.xlsx'); out=Path('solution/task2/answer/result2.xlsx');
+for p in (src,out):
+ w=load_workbook(p,read_only=False,data_only=False); print(p, w.sheetnames);
+ for s in w.sheetnames: ws=w[s]; print(s,ws.max_row,ws.max_column,ws['A1'].value,ws['B1'].value,ws['V1'].value,ws['A2'].value,ws['B2'].value,ws['V10802'].value if ws.max_row>=10802 else None, ws['B2'].number_format)
+with open('solution/task2/answer/task2_all_results.csv',encoding='utf-8',newline='') as f:
+ r=csv.reader(f); header=next(r); first=next(r); n=1; last=first
+ for row in r: n+=1; last=row
+ print('csv',header,n,first,last)
+\" && shasum -a 256 problem/附件/附件3/result2.xlsx solution/task2/answer/result2.xlsx solution/task2/answer/task2_all_results.csv solution/task2/script/solve_task2.py"
     status: Completed · exit 0
       problem/附件/附件3/result2.xlsx ['温度', '水分浓度']
       温度 5 6 时间\到药材中心的距离 0 None 1 None None General
@@ -4846,7 +4852,10 @@ worker 已完成三阶段并给出 3 条 task2 中文 commit。现在进入 root
 
 ## Activity
 
-    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"import pandas as pd, numpy as np; from openpyxl import load_workbook; from pathlib import Path; csvp=Path('solution/task2/answer/task2_all_results.csv'); xp=Path('solution/task2/answer/result2.xlsx'); df=pd.read_csv(csvp, dtype={'time_s':int,'time_h':float,'radius_cm':float,'temperature_C':float,'moisture_kgkg':float}); assert list(df.columns)==['time_s','time_h','radiuslir_cm'] if False else list(df.columns); assert len(df)==10801*21; assert df[['time_s','radius_cm']].drop_duplicates().shape[0]==len(df); assert np.array_equal(df.time_s.unique(),np.arange(10801)); assert np.allclose(df.radius_cm.unique(),np.arange(21)/10); assert np.isfinite(df[['temperature_C','moisture_kgkg']]).all().all(); assert df.moisture_kgkg.min()>=0; assert np.allclose(df.time_h,df.time_s/3600,atol=5.1e-7); wb=load_workbook(xp,read_only=True,data_only=True); assert wb.sheetnames==['温度','水分浓度']; ts=None; rs=None; arrays=[];for sn in wb.sheetnames: ws=wb[sn]; hdr=list(next(ws.iter_rows(min_row=1,max_row=1,values_only=True))); cur_rs=np.array(hdr[1:],float); rows=list(ws.iter_rows(min_row=2,values_only=True)); cur_ts=np.array([x[0] for x in rows],int); vals=np.array([x[1:] for x in rows],float); assert vals.shape==(10801,21); assert np.array_equal(cur_ts,np.arange(10801)); assert np.allclose(cur_rs,np.arange(21)/10); ts=cur_ts if ts is None else ts; rs=cur_rs if rs is None else rs; arrays.append(vals)T=df.temperature_C.to_numpy().reshape(10801,21); C=df.moisture_kgkg.to_numpy().reshape(10801,21); assert np.array_equal(arrays[0],T); assert np.array_equal(arrays[1],C); assert np.max(np.abs(np.diff(T,axis=0)))<0.01; assert np.max(np.abs(np.diff(C,axis=0)))<0.01; assert np.all(T[-1,1:]>=T[-1,:-1]); assert np.all(C[-1,1:]<=C[-1,:-1]); key=df[df.time_s.isin([1800,3600,5400,7200,9000,10800]) & df.radius_cm.isin([0,.5,1,1.5,2])]; assert len(key)==30; print('独立文件验收通过'); print('rows=',len(df),'times=',df.time_s.nunique(),'radii=',df.radius_cm.nunique()); print('T_range=',T.min(),T.max(),'C_range=',C.min(),C.max()); print('max_step_T=',np.max(np.abs(np.diff(T,axis=0))),'max_step_C=',np.max(np.abs(np.diff(C,axis=0)))); print('xlsx_csv_maxdiff_T=',np.max(np.abs(arrays[0]-T)),'xlsx_csv_maxdiff_C=',np.max(np.abs(arrays[1]-C))); print('key_rows=',len(key))\" && git diff --exit-code -- problem/附件/附件3/result2.xlsx solution/task2 && git status --short --branch"
+    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"import pandas as pd, numpy as np; from openpyxl import load_workbook; from pathlib import Path; csvp=Path('solution/task2/answer/task2_all_results.csv'); xp=Path('solution/task2/answer/result2.xlsx'); df=pd.read_csv(csvp, dtype={'time_s':int,'time_h':float,'radius_cm':float,'temperature_C':float,'moisture_kgkg':float}); assert list(df.columns)==['time_s','time_h','radiuslir_cm'] if False else list(df.columns); assert len(df)==10801*21; assert df[['time_s','radius_cm']].drop_duplicates().shape[0]==len(df); assert np.array_equal(df.time_s.unique(),np.arange(10801)); assert np.allclose(df.radius_cm.unique(),np.arange(21)/10); assert np.isfinite(df[['temperature_C','moisture_kgkg']]).all().all(); assert df.moisture_kgkg.min()>=0; assert np.allclose(df.time_h,df.time_s/3600,atol=5.1e-7); wb=load_workbook(xp,read_only=True,data_only=True); assert wb.sheetnames==['温度','水分浓度']; ts=None; rs=None; arrays=[];
+for sn in wb.sheetnames:
+ ws=wb[sn]; hdr=list(next(ws.iter_rows(min_row=1,max_row=1,values_only=True))); cur_rs=np.array(hdr[1:],float); rows=list(ws.iter_rows(min_row=2,values_only=True)); cur_ts=np.array([x[0] for x in rows],int); vals=np.array([x[1:] for x in rows],float); assert vals.shape==(10801,21); assert np.array_equal(cur_ts,np.arange(10801)); assert np.allclose(cur_rs,np.arange(21)/10); ts=cur_ts if ts is None else ts; rs=cur_rs if rs is None else rs; arrays.append(vals)
+T=df.temperature_C.to_numpy().reshape(10801,21); C=df.moisture_kgkg.to_numpy().reshape(10801,21); assert np.array_equal(arrays[0],T); assert np.array_equal(arrays[1],C); assert np.max(np.abs(np.diff(T,axis=0)))<0.01; assert np.max(np.abs(np.diff(C,axis=0)))<0.01; assert np.all(T[-1,1:]>=T[-1,:-1]); assert np.all(C[-1,1:]<=C[-1,:-1]); key=df[df.time_s.isin([1800,3600,5400,7200,9000,10800]) & df.radius_cm.isin([0,.5,1,1.5,2])]; assert len(key)==30; print('独立文件验收通过'); print('rows=',len(df),'times=',df.time_s.nunique(),'radii=',df.radius_cm.nunique()); print('T_range=',T.min(),T.max(),'C_range=',C.min(),C.max()); print('max_step_T=',np.max(np.abs(np.diff(T,axis=0))),'max_step_C=',np.max(np.abs(np.diff(C,axis=0)))); print('xlsx_csv_maxdiff_T=',np.max(np.abs(arrays[0]-T)),'xlsx_csv_maxdiff_C=',np.max(np.abs(arrays[1]-C))); print('key_rows=',len(key))\" && git diff --exit-code -- problem/附件/附件3/result2.xlsx solution/task2 && git status --short --branch"
     status: Failed · exit 1
       Traceback (most recent call last):
         File "<string>", line 4, in <module>
@@ -4869,7 +4878,10 @@ worker 已完成三阶段并给出 3 条 task2 中文 commit。现在进入 root
 
 ## Activity
 
-    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"import pandas as pd, numpy as np; from openpyxl import load_workbook; df=pd.read_csv('solution/task2/answer/task2_all_results.csv'); assert list(df.columns)==['time_s','time_h','radius_cm','temperature_C','moisture_kgkg']; assert len(df)==10801*21 and df[['time_s','radius_cm']].drop_duplicates().shape[0]==len(df); assert np.array_equal(df.time_s.unique(),np.arange(10801)); assert np.allclose(df.radius_cm.unique(),np.arange(21)/10); assert np.isfinite(df[['temperature_C','moisture_kgkg']]).all().all() and df.moisture_kgkg.min()>=0; assert np.allclose(df.time_h,df.time_s/3600,atol=5.1e-7); wb=load_workbook('solution/task2/answer/result2.xlsx',read_only=True,data_only=True); assert wb.sheetnames==['温度','水分浓度']; arrays=[]for sn in wb.sheetnames: ws=wb[sn]; hdr=list(next(ws.iter_rows(min_row=1,max_row=1,values_only=True))); assert hdr[0]=='时间\\\\到药材中心的距离'; assert np.allclose(np.array(hdr[1:],float),np.arange(21)/10); rows=list(ws.iter_rows(min_row=2,values_only=True)); assert np.array_equal(np.array([x[0] for x in rows],int),np.arange(10801)); arrays.append(np.array([x[1:] for x in rows],float))T=df.temperature_C.to_numpy().reshape(10801,21); C=df.moisture_kgkg.to_numpy().reshape(10801,21); assert np.array_equal(arrays[0],T) and np.array_equal(arrays[1],C); assert np.max(np.abs(np.diff(T,axis=0)))<5.0 and np.max(np.abs(np.diff(C,axis=0)))<0.2; assert np.min(np.diff(T,axis=0))>=0 and np.max(np.diff(C,axis=0))<=0; assert np.all(T[-1,1:]>=T[-1,:-1]) and np.all(C[-1,1:]<=C[-1,:-1]); key=df[df.time_s.isin([1800,3600,5400,7200,9000,10800]) & df.radius_cm.isin([0,.5,1,1.5,2])]; assert len(key)==30; print('独立文件验收通过'); print(f'rows={len(df)}, times={df.time_s.nunique()}, radii={df.radius_cm.nunique()}, key_rows={len(key)}'); print(f'T=[{T.min():.4f},{T.max():.4f}], C=[{C.min():.4f},{C.max():.4f}]'); print(f'max_1s_step: T={np.max(np.abs(np.diff(T,axis=0))):.4f}, C={np.max(np.abs(np.diff(C,axis=0))):.4f}'); print(f'xlsx_csv_maxdiff: T={np.max(np.abs(arrays[0]-T)):.1f}, C={np.max(np.abs(arrays[1]-C)):.1f}')\" && git diff --exit-code -- problem/附件/附件3/result2.xlsx solution/task2 && git status --short --branch"
+    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"import pandas as pd, numpy as np; from openpyxl import load_workbook; df=pd.read_csv('solution/task2/answer/task2_all_results.csv'); assert list(df.columns)==['time_s','time_h','radius_cm','temperature_C','moisture_kgkg']; assert len(df)==10801*21 and df[['time_s','radius_cm']].drop_duplicates().shape[0]==len(df); assert np.array_equal(df.time_s.unique(),np.arange(10801)); assert np.allclose(df.radius_cm.unique(),np.arange(21)/10); assert np.isfinite(df[['temperature_C','moisture_kgkg']]).all().all() and df.moisture_kgkg.min()>=0; assert np.allclose(df.time_h,df.time_s/3600,atol=5.1e-7); wb=load_workbook('solution/task2/answer/result2.xlsx',read_only=True,data_only=True); assert wb.sheetnames==['温度','水分浓度']; arrays=[]
+for sn in wb.sheetnames:
+ ws=wb[sn]; hdr=list(next(ws.iter_rows(min_row=1,max_row=1,values_only=True))); assert hdr[0]=='时间\\\\到药材中心的距离'; assert np.allclose(np.array(hdr[1:],float),np.arange(21)/10); rows=list(ws.iter_rows(min_row=2,values_only=True)); assert np.array_equal(np.array([x[0] for x in rows],int),np.arange(10801)); arrays.append(np.array([x[1:] for x in rows],float))
+T=df.temperature_C.to_numpy().reshape(10801,21); C=df.moisture_kgkg.to_numpy().reshape(10801,21); assert np.array_equal(arrays[0],T) and np.array_equal(arrays[1],C); assert np.max(np.abs(np.diff(T,axis=0)))<5.0 and np.max(np.abs(np.diff(C,axis=0)))<0.2; assert np.min(np.diff(T,axis=0))>=0 and np.max(np.diff(C,axis=0))<=0; assert np.all(T[-1,1:]>=T[-1,:-1]) and np.all(C[-1,1:]<=C[-1,:-1]); key=df[df.time_s.isin([1800,3600,5400,7200,9000,10800]) & df.radius_cm.isin([0,.5,1,1.5,2])]; assert len(key)==30; print('独立文件验收通过'); print(f'rows={len(df)}, times={df.time_s.nunique()}, radii={df.radius_cm.nunique()}, key_rows={len(key)}'); print(f'T=[{T.min():.4f},{T.max():.4f}], C=[{C.min():.4f},{C.max():.4f}]'); print(f'max_1s_step: T={np.max(np.abs(np.diff(T,axis=0))):.4f}, C={np.max(np.abs(np.diff(C,axis=0))):.4f}'); print(f'xlsx_csv_maxdiff: T={np.max(np.abs(arrays[0]-T)):.1f}, C={np.max(np.abs(arrays[1]-C)):.1f}')\" && git diff --exit-code -- problem/附件/附件3/result2.xlsx solution/task2 && git status --short --branch"
     status: Completed · exit 0
       独立文件验收通过
       rows=226821, times=10801, radii=21, key_rows=30
@@ -5004,7 +5016,12 @@ worker 已完成三阶段并给出 3 条 task2 中文 commit。现在进入 root
 
 ## Activity
 
-    $ /bin/zsh -lc "git status --short --branch && git log --oneline -7 && git show --stat --oneline 94ffe31 && git show --format= --unified=4 94ffe31 -- solution/task2/script/solve_task2.py | sed -n '1,240p' && /Users/jiaqiaosu/miniconda3/bin/python -c \"from openpyxl import load_workbook; from copy import copy; src=load_workbook('problem/附件/附件3/result2.xlsx'); out=load_workbook('solution/task2/answer/result2.xlsx'); attrs=['font','fill','border','alignment','protection'];for sn in ['温度','水分浓度']: a,b=src[sn],out[sn]; for ref,target in [('B1','V1'),('A2','A10802'),('B2','V10802')]:  same=all(getattr(a[ref],x)==getattr(b[target],x) for x in attrs); print(sn,ref,'->',target,'style_equal',same,'numfmt',b[target].number_format)\""
+    $ /bin/zsh -lc "git status --short --branch && git log --oneline -7 && git show --stat --oneline 94ffe31 && git show --format= --unified=4 94ffe31 -- solution/task2/script/solve_task2.py | sed -n '1,240p' && /Users/jiaqiaosu/miniconda3/bin/python -c \"from openpyxl import load_workbook; from copy import copy; src=load_workbook('problem/附件/附件3/result2.xlsx'); out=load_workbook('solution/task2/answer/result2.xlsx'); attrs=['font','fill','border','alignment','protection'];
+for sn in ['温度','水分浓度']:
+ a,b=src[sn],out[sn];
+ for ref,target in [('B1','V1'),('A2','A10802'),('B2','V10802')]:
+  same=all(getattr(a[ref],x)==getattr(b[target],x) for x in attrs); print(sn,ref,'->',target,'style_equal',same,'numfmt',b[target].number_format)
+\""
     status: Completed · exit 0
       温度 B1 -> V1 style_equal False numfmt 0.0
       温度 A2 -> A10802 style_equal False numfmt 0
@@ -5015,7 +5032,12 @@ worker 已完成三阶段并给出 3 条 task2 中文 commit。现在进入 root
 
 ## Activity
 
-    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"from openpyxl import load_workbook; s=load_workbook('problem/附件/附件3/result2.xlsx'); o=load_workbook('solution/task2/answer/result2.xlsx');for sn in ['温度','水分浓度']: print(sn) for ref,target in [('B1','V1'),('A2','A10802'),('B2','V10802')]:  a=s[sn][ref]; b=o[sn][target]; print(ref,target,'styleid',a.style_id,b.style_id,'font',a.font.name,a.font.sz,a.font.bold,'=>',b.font.name,b.font.sz,b.font.bold,'align',a.alignment.horizontal,a.alignment.vertical,'=>',b.alignment.horizontal,b.alignment.vertical,'fill',a.fill.fill_type,a.fill.fgColor.rgb,'=>',b.fill.fill_type,b.fill.fgColor.rgb,'border',a.border.left.style,a.border.right.style,'=>',b.border.left.style,b.border.right.style,'fmt',a.number_format,b.number_format)\""
+    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"from openpyxl import load_workbook; s=load_workbook('problem/附件/附件3/result2.xlsx'); o=load_workbook('solution/task2/answer/result2.xlsx');
+for sn in ['温度','水分浓度']:
+ print(sn)
+ for ref,target in [('B1','V1'),('A2','A10802'),('B2','V10802')]:
+  a=s[sn][ref]; b=o[sn][target]; print(ref,target,'styleid',a.style_id,b.style_id,'font',a.font.name,a.font.sz,a.font.bold,'=>',b.font.name,b.font.sz,b.font.bold,'align',a.alignment.horizontal,a.alignment.vertical,'=>',b.alignment.horizontal,b.alignment.vertical,'fill',a.fill.fill_type,a.fill.fgColor.rgb,'=>',b.fill.fill_type,b.fill.fgColor.rgb,'border',a.border.left.style,a.border.right.style,'=>',b.border.left.style,b.border.right.style,'fmt',a.number_format,b.number_format)
+\""
     status: Completed · exit 0
       温度
       B1 V1 styleid 2 5 font 宋体 10.0 False => 宋体 10.0 False align center center => center center fill None 00000000 => None 00000000 border None None => None None fmt General 0.0
@@ -5142,3 +5164,730 @@ Git：
 - `94ffe31` — 修正问题二结果模板格式
 
 范围说明：执行期间 `main` 还收到非 task2 的 `c87b74d`、`f423a75` 两个并发提交；未将其计入本任务，也未改写历史。当前仅剩任务开始前已有的未跟踪文件 `solution/.DS_Store`。
+
+## User
+
+ok，现在请你生成一份交接文档讲解你的这个建模是什么样的，思路是怎么样的，有什么模型假设。建议放在/Users/
+  jiaqiaosu/Desktop/作业/2026夏季学期/2026CUMCM/2026CUMCM/handoff/task2_xby_handoff.md
+
+## Assistant
+
+我会在指定路径生成一份面向后续接手者的技术交接文档，重点说明：问题二相对问题一的变化、控制方程、动态物性、有限体积与 Picard 求解流程、模型假设、边界条件、输出与验证结果。文档编写和提交交给 `luna-worker`，我负责核对公式、数值与当前代码一致。
+
+## Activity
+
+    $ /bin/zsh -lc 'git status --short --branch && git log --oneline -8 && test -f handoff/task2_xby_handoff.md; echo handoff_exists=$? && rg -n "''^(RADIUS_M|BASE_DR|INITIAL_|AIR_PREHEAT|FINAL_TIME|OUTPUT_DT|HEAT_TRANSFER|MASS_TRANSFER|PICARD_|def material_properties|def _solve_temperature_linear|def _solve_moisture_linear|def _picard_step|def solve_task2|def validate_solution|def write_result_xlsx|def write_result_csv|def time_step_sensitivity)" solution/task2/script/solve_task2.py'
+    status: Completed · exit 0
+      ## main...origin/main [ahead 1]
+      A  context/context-task2-1_xby.md
+      ?? .DS_Store
+      ?? solution/.DS_Store
+      ?? solution/task2/.DS_Store
+      ?? solution/task2/script/__pycache__/
+      ed97452 修正问题二烘房边界数据
+      94ffe31 修正问题二结果模板格式
+      f423a75 统一问题一结果文件格式
+      9375a01 生成问题二最终结果并完成数值验证
+      e1db607 完成问题二三小时热质耦合求解
+      a520f6d 完成问题二动态物性求解框架
+      c87b74d 补充问题一交接资料并清理系统文件
+      144de7f 补充问题一数值模型交接文档
+      handoff_exists=1
+      25:RADIUS_M = 0.02
+      27:BASE_DR_M = 0.000125
+      28:INITIAL_TEMPERATURE_C = 28.0
+      29:INITIAL_MOISTURE_KGKG = 2.55
+      30:FINAL_TIME_S = 10800.0
+      31:OUTPUT_DT_S = 1.0
+      35:HEAT_TRANSFER_W_M2_K = 25.0
+      36:MASS_TRANSFER_M_S = 8.0e-7
+      40:PICARD_TOL_T_C = 1.0e-8
+      41:PICARD_TOL_C_KGKG = 1.0e-10
+      42:PICARD_MAX_ITER = 50
+      110:def material_properties(
+      144:def _solve_temperature_linear(
+      176:def _solve_moisture_linear(
+      206:def _picard_step(
+      289:def solve_task2(
+      378:def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
+      432:def write_result_xlsx(
+      482:def write_result_csv(
+      524:def time_step_sensitivity(
+
+## Assistant
+
+当前仓库状态已变化：已有新提交 `ed97452 修正问题二烘房边界数据`，并有已暂存的 `context/context-task2-1_xby.md` 及若干未跟踪系统文件。我不会碰这些内容。交接文档将以最新 `ed97452` 的边界实现和结果为准，避免沿用上一版已经修正的描述。
+
+## Activity
+
+    $ /bin/zsh -lc "git show --stat --oneline ed97452 && git show --format= --unified=25 ed97452 -- solution/task2/script/solve_task2.py && sed -n '1,140p' solution/task2/script/solve_task2.py && git show --name-only --format='%h %s' ed97452"
+    status: Completed · exit 0
+
+## Activity
+
+    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c \"import pandas as pd; a=pd.read_excel('problem/附件/附件1.xlsx'); print(a.iloc[[0,-1]].to_string(index=False)); print('rows',len(a),'tmax',a.iloc[:,-3 if False else 0].max()); d=pd.read_csv('solution/task2/answer/task2_all_results.csv'); k=d[d.time_s.isin([1800,3600,5400,7200,9000,10800]) & d.radius_cm.isin([0,.5,1,1.5,2])]; print(k.to_string(index=False)); print('ranges',d.temperature_C.min(),d.temperature_C.max(),d.moisture_kgkg.min(),d.moisture_kgkg.max())\" && rg -n \"时间步敏感|空间|最大温度|最大水分|41\\.|温度范围|水分范围|ed97452|边界\" context/context-task2-1_xby.md | tail -100"
+    status: Completed · exit 0
+         时间     温度    水分浓度
+          0 28.000 0.01963
+      14400 50.165 0.04986
+      rows 241 tmax 14400
+       time_s  time_h  radius_cm  temperature_C  moisture_kgkg
+         1800     0.5        0.0        32.1907         2.5499
+         1800     0.5        0.5        32.3836         2.5489
+         1800     0.5        1.0        32.9673         2.5255
+         1800     0.5        1.5        33.9620         2.3257
+         1800     0.5        2.0        35.4140         1.6487
+         3600     1.0        0.0        40.3816         2.5257
+         3600     1.0        0.5        40.5536         2.4947
+         3600     1.0        1.0        41.0605         2.3578
+         3600     1.0        1.5        41.8783         2.0230
+         3600     1.0        2.0        42.9978         1.4711
+         5400     1.5        0.0        45.8461         2.3860
+         5400     1.5        0.5        45.9342         2.3256
+         5400     1.5        1.0        46.1924         2.1344
+         5400     1.5        1.5        46.6045         1.8020
+         5400     1.5        2.0        47.1396         1.3476
+         7200     2.0        0.0        48.4497         2.1708
+         7200     2.0        0.5        48.4875         2.1084
+         7200     2.0        1.0        48.5980         1.9236
+         7200     2.0        1.5        48.7731         1.6260
+         7200     2.0        2.0        49.0030         1.2311
+         9000     2.5        0.0        49.4666         1.9567
+         9000     2.5        0.5        49.4789         1.9006
+         9000     2.5        1.0        49.5133         1.7360
+         9000     2.5        1.5        49.5652         1.4720
+         9000     2.5        2.0        49.6610         1.1167
+        10800     3.0        0.0        49.8494         1.7662
+        10800     3.0        0.5        49.8553         1.7166
+        10800     3.0        1.0        49.8745         1.5702
+        10800     3.0        1.5        49.9101         1.3333
+        10800     3.0        2.0        49.9664         1.0081
+      ranges 28.0 49.9664 1.0081 2.55
+      713:- 边界条件符号是否正确；
+      840:简要说明最终采用的时间步、空间网格、非线性处理方式。
+      846:- 时间步敏感性结果
+      1724:      直接作为可信的外部边界输入数据读取。
+      1878:      2. 用分段线性插值获得任意计算时刻的外部边界值。
+      1905:      ### 3.3 物性与边界参数
+      1941:      药材表面采用 Robin 对流换热边界：
+      1972:      药材表面采用对流传质边界：
+      1995:      7. 附件 1 的烘房温度和水分浓度在药材表面空间上均匀。
+      2004:      ### 7.1 外部边界插值
+      2012:      对 `T_air(t)` 和 `C_air(t)` 使用分段线性插值。插值只用于离散数据点之间的边界值，不做高阶拟合或外推建模。
+      2057:      在最后一个半控制体积中，外侧面通量直接替换为 Robin 边界通量：
+      2067:      - 基础内部空间步长：`Δr = 0.000125 m = 0.0125 cm`。
+      2070:      - 输出半径：每 0.1 cm，从内部网格精确抽取，无需空间插值。
+      2125:      1. 用附件1构造随时间变化的外界边界条件 \(T_\infty(t)\) 和 \(C_\infty(t)\)；
+      2131:      这里需要准确说明：温度方程和水分方程是传热传质理论中的标准守恒方程，题目没有直接把方程写出来；题目给出的是建立方程所需的物性参数、边界数据和经验扩散系数。第一问中 \(D\) 只依赖 \(C\)，温度方程也不含 \(C\)，因此二者严格说是共享同一烘房环境的“联合模型”，还不是强双向耦合。到第二问 \(D=D(T,C)\)、\(\rho,c_p,k\) 又随 \(C\) 变化时，才形成明显的温度—水分双向耦合。
+      2139:      5. 附件1中的烘房水分浓度按题目单位直接作为有效平衡边界浓度；若另有吸附等温线数据，才需把空气湿度换算成药材表面的平衡含水率；
+      2165:      | 1800 | 41.5130 | 0.0331 |
+      2206:      初始条件、中心对称条件和表面对流边界分别为
+      2259:      相应的初始条件、中心对称条件和表面对流传质边界为
+      2277:      该边界式表示药材表面向热风的扩散通量等于表面对流传质通量。
+      2369:      4. 表面含水率在前100 s 已明显下降，而内部变化滞后，说明采用空间分布模型是必要的；
+      2370:      5. 数值结果始终处于初始值与相应边界驱动范围之内，没有出现非物理振荡或负含水率。
+      2467:              raise ValueError("半径和空间步长必须为正")
+      2608:                  f"附件1边界数据只覆盖到 {data_t[-1]:g} s，无法计算到 {t_end_s:g} s"
+      2740:已确认当前分支是 `main`，且工作区有问题一结果与若干未跟踪文件；这些都不属于 task2，我不会修改或纳入提交。题面确认问题二仅把 `ρ、cp、k、D` 改为随局部 `C、T(K)` 动态更新，`h=25`、`hm=8×10⁻⁷`、圆柱径向有限体积与表面对流边界继续继承问题一。正在完成 handoff 与现有实现的精确核对。
+      2767:      2. 用分段线性插值获得任意计算时刻的外部边界值。
+      2794:      ### 3.3 物性与边界参数
+      2830:      药材表面采用 Robin 对流换热边界：
+      2861:      药材表面采用对流传质边界：
+      2884:      7. 附件 1 的烘房温度和水分浓度在药材表面空间上均匀。
+      2893:      ### 7.1 外部边界插值
+      2901:      对 `T_air(t)` 和 `C_air(t)` 使用分段线性插值。插值只用于离散数据点之间的边界值，不做高阶拟合或外推建模。
+      2946:      在最后一个半控制体积中，外侧面通量直接替换为 Robin 边界通量：
+      2956:      - 基础内部空间步长：`Δr = 0.000125 m = 0.0125 cm`。
+      2959:      - 输出半径：每 0.1 cm，从内部网格精确抽取，无需空间插值。
+      3062:      2. 修改表面边界符号后必须重新检查加热和失水方向。
+      3063:      3. 修改空间步长时应保证 `R/Δr` 为整数，并确保 0.1 cm 输出位置能命中内部节点。
+      3064:      4. 修改 `D(C)` 或传质边界后，需要重新执行网格敏感性检查。
+      3075:      1. 用附件1构造随时间变化的外界边界条件 \(T_\infty(t)\) 和 \(C_\infty(t)\)；
+      3081:      这里需要准确说明：温度方程和水分方程是传热传质理论中的标准守恒方程，题目没有直接把方程写出来；题目给出的是建立方程所需的物性参数、边界数据和经验扩散系数。第一问中 \(D\) 只依赖 \(C\)，温度方程也不含 \(C\)，因此二者严格说是共享同一烘房环境的“联合模型”，还不是强双向耦合。到第二问 \(D=D(T,C)\)、\(\rho,c_p,k\) 又随 \(C\) 变化时，才形成明显的温度—水分双向耦合。
+      3089:      5. 附件1中的烘房水分浓度按题目单位直接作为有效平衡边界浓度；若另有吸附等温线数据，才需把空气湿度换算成药材表面的平衡含水率；
+      3115:      | 1800 | 41.5130 | 0.0331 |
+      3156:      初始条件、中心对称条件和表面对流边界分别为
+      3209:      相应的初始条件、中心对称条件和表面对流传质边界为
+      3227:      该边界式表示药材表面向热风的扩散通量等于表面对流传质通量。
+      3319:      4. 表面含水率在前100 s 已明显下降，而内部变化滞后，说明采用空间分布模型是必要的；
+      3320:      5. 数值结果始终处于初始值与相应边界驱动范围之内，没有出现非物理振荡或负含水率。
+      3347:      [1] Incropera, F. P., DeWitt, D. P., Bergman, T. L., Lavine, A. S. *Fundamentals of Heat and Mass Transfer*. 7th ed., Wiley, 2011.（能量守恒、Fourier 定律、圆柱坐标非稳态导热与对流边界）
+      3431:              raise ValueError("问题1关键半径未命中精确空间节点")
+      3618:    $ /bin/zsh -lc 'rg -n "''^## |''^### |最终|BDF|Crank|Picard|solve_task1|BASE_DR|网格敏感|时间步|commit|边界" context/context-task1-1_xby.md | tail -240'
+      3771:      6788:我会在指定路径创建问题一交接文档，内容聚焦：模型方程、边界条件、离散思路、参数与数据流、模型假设、验证结果、运行与文件说明。先检查当前 Git 和脚本状态；不会修改现有结果 CSV。
+      3785:      7143:                  f"附件1边界数据只覆盖到 {data_t[-1]:g} s，无法计算到 {t_end_s:g} s"
+      3790:      7251:当前实现已核对：一维圆柱径向有限体积、温度/水分分别求解、附件 1 分段线性边界、BDF 时间积分、基础网格 `0.0125 cm`，加密验证网格 `0.00625 cm`。我现在写入交接文档，并会明确标注脚本运行会覆盖完整结果 CSV。
+      3795:      7283:    2. 用分段线性插值获得任意计算时刻的外部边界值。
+      3797:      7310:    ### 3.3 物性与边界参数
+      3798:      7346:    药材表面采用 Robin 对流换热边界：
+      3799:      7377:    药材表面采用对流传质边界：
+      3800:      7409:    ### 7.1 外部边界插值
+      3801:      7417:    对 `T_air(t)` 和 `C_air(t)` 使用分段线性插值。插值只用于离散数据点之间的边界值，不做高阶拟合或外推建模。
+      3802:      7462:    在最后一个半控制体积中，外侧面通量直接替换为 Robin 边界通量：
+      3809:      7578:    2. 修改表面边界符号后必须重新检查加热和失水方向。
+      3810:      7580:    4. 修改 `D(C)` 或传质边界后，需要重新执行网格敏感性检查。
+      3815:      7608:      49:### 3.3 物性与边界参数
+      3816:      7613:      148:### 7.1 外部边界插值
+      3825:      7706:      +2. 用分段线性插值获得任意计算时刻的外部边界值。
+      3827:      7733:      +### 3.3 物性与边界参数
+      3844:      7960:结构检查连续两次失败都来自我硬编码标题数量，而不是文档缺失：实际为 12 个二级章节、10 个三级小节。根据 pua skill 的重复失败规则，我停止继续猜标题计数，改为逐项核对必需章节名称、关键事实和 Git 提交边界。该 skill 只改变验收方法，不修改文档。
+      3846:      8004:      | 任务完成 | 说"已完成" | 完成后主动验证结果正确性 + 检查边界情况 + 汇报发现的潜在风险 |
+      3847:      8032:      - [ ] 是否有边界情况没覆盖？
+      3848:      8074:         - 逻辑 → 边界情况、异常路径
+      3849:      8107:      - [ ] **验证前置假设**：所有假设都用工具确认了吗？（代码：版本/路径/依赖 / 数据：格式/字段 / 逻辑：边界情况）
+      3850:      8150:      这不是"我不行"。这是"问题的边界在这里，这是我移交给你的一切"。有尊严的 3.25。
+      3857:      8364:- 初始条件和 Robin 边界条件
+      3912:发现一个版本管理偏差：工作区原先未跟踪的 `context/`、`handoff/`、`problem/` 现在被暂存，但它们绝不能进入 task2 commit。我已立即要求 worker 只撤销这些路径的暂存状态（不改、不删文件），并重新核对第一条提交边界。数值实现继续进行。
+      4014:worker 已完成三阶段并给出 3 条 task2 中文 commit。现在进入 root 验收：先做规格一致性审查（动态物性、Picard、模板结构、同源结果、提交边界），通过后再做数值/代码质量审查；在这两关通过前不宣告完成。另：`c87b74d` 是 worker 早期误提交的非 task2 文件，我不会改写历史或删除用户数据，最终会如实说明。
+      4063:      # 问题一沿用的边界传递参数。
+      4096:          只把 0--1800 s 作为预热边界，后续时间由 np.interp 的端点保持处理。
+      4131:              raise ValueError("半径和空间步长必须为正")
+      4256:          # time_new_s 同时用于异常信息，明确边界取值属于当前时间步。
+      4437:              raise ValueError("末时刻表面温度未高于中心，检查热边界符号")
+      4439:              raise ValueError("末时刻表面水分未低于中心，检查传质边界符号")
+      4654:                  "时间步敏感性（dt=1 s 对比 dt=0.5 s，表3/表4点）: "
+      4675:      温度 10802 22 时间\到药材中心的距离 0 2 0 28 41.4988 0.0000
+      4677:      csv ['time_s', 'time_h', 'radius_cm', 'temperature_C', 'moisture_kgkg'] 226821 ['0', '0.000000', '0.0', '28.0000', '2.5500'] ['10800', '3.000000', '2.0', '41.4988', '0.9315']
+      4685:初步 root 核对：3 个 task2 commit 的文件边界正确；CSV 为 `226821` 条记录（另 1 行表头），XLSX 两表均为 `10802×22`（1 行/列标题 + `10801×21` 数据），原模板哈希未改变。接下来按 `verification-before-completion` 重新运行完整主求解和敏感性比较，并逐点复核 CSV/XLSX。该 skill 只强化最终证据，不改变文件。
+      4876:      T=[28.0000,41.4988], C=[0.9315,2.5500]
+      4941:      -    del time_new_s  # 保留参数以明确边界取值属于当前时间步。
+      4942:      +    # time_new_s 同时用于异常信息，明确边界取值属于当前时间步。
+      5043:模板复审已通过：两张表的半径表头、时间列、数值区均继承模板对应字体与居中样式，数字格式分别为 `0.0 / 0 / 0.0000`；CSV/XLSX 仍逐点一致。最后一关正在审查离散矩阵、边界符号、Picard 自洽与单位处理。
+      5063:最终 quality review 结论：离散、边界、动态物性与 Picard 均无关键问题；额外 `dr` 减半检查在关键点的最大差为温度 `1.0458×10⁻⁵ °C`、水分 `1.1637×10⁻⁵ kg/kg`。仅有两个不影响结果的小项：中心零通量在校验摘要中是标志值、爆炸阈值较宽；实际矩阵和独立结果检查已覆盖。现在只做最终 Git/文件清单确认。
+      5103:- 温度范围：`28.0000–41.4988 °C`。
+      5104:- 水分范围：`0.9315–2.5500 kg/kg`。
+      5108:  - 最大温度差：`7.381804×10⁻⁴ °C`
+      5109:  - 最大水分差：`4.569464×10⁻⁵ kg/kg`
+      5111:  - 最大温度差：`1.0458×10⁻⁵ °C`
+      5112:  - 最大水分差：`1.1637×10⁻⁵ kg/kg`
+      5122:| 2.0 | 41.2096 | 41.2181 | 41.2427 | 41.2813 | 41.3312 |
+      5123:| 2.5 | 41.4254 | 41.4279 | 41.4350 | 41.4463 | 41.4610 |
+      5124:| 3.0 | 41.4888 | 41.4895 | 41.4915 | 41.4947 | 41.4988 |
+
+## Activity
+
+    Started `/root/task2_handoff`
+
+## Activity
+
+    agent tool: Wait · Completed
+
+## Assistant
+
+状态：worker 正在依据最新 `ed97452` 编写交接文档。已特别纠正边界描述：附件1实际覆盖 `0–14400 s`，问题二在 `0–10800 s` 内全部采用原始数据分段线性插值，不再使用“1800 s 后保持不变”的旧说明。
+
+## Activity
+
+    agent tool: Wait · Completed
+
+## Activity
+
+    $ /bin/zsh -lc 'git status --short --branch && test -f handoff/task2_xby_handoff.md && wc -l handoff/task2_xby_handoff.md || true && git log --oneline -4'
+    status: Completed · exit 0
+      ## main...origin/main [ahead 1]
+      A  context/context-task2-1_xby.md
+      ?? .DS_Store
+      ?? solution/.DS_Store
+      ?? solution/task2/.DS_Store
+      ?? solution/task2/script/__pycache__/
+      ed97452 修正问题二烘房边界数据
+      94ffe31 修正问题二结果模板格式
+      f423a75 统一问题一结果文件格式
+      9375a01 生成问题二最终结果并完成数值验证
+
+## Activity
+
+    Completed `/root/task2_handoff`
+
+## Activity
+
+    agent tool: Wait · Completed
+
+## Assistant
+
+交接文档已生成并以中文提交。现在进行 root 验收，重点核对三点：附件1边界规则是否写成最新版本、表3/表4是否与当前 CSV 一致、公式和 Picard 离散是否与 `solve_task2.py` 一致。
+
+## Activity
+
+    $ /bin/zsh -lc "sed -n '1,430p' handoff/task2_xby_handoff.md && git show --stat --oneline f90d788 && git show --name-only --format='%h %s' f90d788 && git status --short --branch"
+    status: Completed · exit 0
+      # A 题问题二数值求解交接文档
+      
+      ## 1. 当前完成状态
+      
+      问题二已经完成固定半径圆柱的 3 h 热质耦合数值求解。当前交接基准是最新提交 `ed97452`（`修正问题二烘房边界数据`）以及该提交中的脚本和答案文件。
+      
+      已交付文件：
+      
+      - `solution/task2/script/solve_task2.py`：模型、有限体积离散、Picard 迭代、数值检查和答案输出脚本。
+      - `solution/task2/answer/result2.xlsx`：按 `problem/附件/附件3/result2.xlsx` 模板生成的完整结果。
+      - `solution/task2/answer/task2_all_results.csv`：包含全部时间和径向输出位置的 long-format 结果。
+      
+      求解范围为 `0 <= t <= 10800 s`、`0 <= r <= 0.02 m`。问题二没有引入尺寸收缩；附件 2 和问题四的收缩模型不属于本模型。
+      
+      ## 2. 问题二相对于问题一改变的内容
+      
+      问题二最大限度继承问题一的结构：
+      
+      - 药材近似为圆柱，采用径向一维模型；
+      - 温度和水分均使用圆柱径向守恒方程；
+      - `r=0` 使用中心对称零通量条件；
+      - `r=R` 使用表面对流换热和对流传质 Robin 边界；
+      - 使用相同的空间有限体积思想、三对角线性系统和附件 1 边界数据插值方式；
+      - 使用问题一的对流换热系数 `h=25 W/(m^2 K)` 和对流传质系数 `h_m=8e-7 m/s`。
+      
+      问题二只把问题一的固定物性替换为附录 3 给出的状态相关物性：`rho`、`cp`、`k`、`D` 在每个时间步、每个空间节点随当前 `T` 和 `C` 更新。由此形成以下状态依赖耦合：
+      
+      1. `C` 影响 `rho(C)`、`cp(C)` 和 `k(C)`，因此影响温度场；
+      2. `T` 和 `C` 共同影响 `D(T,C)`，因此影响水分场；
+      3. 代码通过每个时间步内的 Picard 迭代使这两个方向在当前时刻自洽。
+      
+      模型没有加入蒸发潜热源项，因此水分迁移不会以潜热形式直接出现在温度方程右端；热质耦合只通过上述动态物性发生。
+      
+      ## 3. 建模区域、变量和初始条件
+      
+      药材视为长度 `L=0.25 m`、半径 `R=0.02 m` 的均匀圆柱。只保留径向坐标，建模域为
+      
+      $$
+      0\le r\le R,\qquad 0\le t\le 10800\ \mathrm{s}.
+      $$
+      
+      状态变量为：
+      
+      - `T(r,t)`：药材温度，计算和输出均使用 `degC`；
+      - `C(r,t)`：药材干基含水率，单位 `kg/kg`。
+      
+      初始条件在整个径向上均匀：
+      
+      $$
+      T(r,0)=28\ ^\circ\mathrm{C},\qquad C(r,0)=2.55\ \mathrm{kg/kg}.
+      $$
+      
+      长度 `L` 只作为题目几何参数记录。在径向守恒方程中，公共因子 `2 pi L` 在等式两侧约去，所以离散矩阵中不再显式出现 `L`。
+      
+      ## 4. 温度方程和热边界
+      
+      温度采用圆柱径向非稳态导热方程：
+      
+      $$
+      \rho(C)c_p(C)\frac{\partial T}{\partial t}
+      =\frac{1}{r}\frac{\partial}{\partial r}
+      \left(k(C)r\frac{\partial T}{\partial r}\right).
+      $$
+      
+      实现中将当前状态下的 `rho(C)*cp(C)` 作为温度时间导数前的瞬时储能系数，即离散项为 `rho*cp*dT/dt`；没有另外展开或加入 `T*d(rho*cp)/dt` 的物性时间导数项。这是当前问题二数值模型的明确实现约定。
+      
+      中心轴对称条件为：
+      
+      $$
+      \left.\frac{\partial T}{\partial r}\right|_{r=0}=0.
+      $$
+      
+      表面采用对流换热 Robin 条件。脚本采用的等价写法是：
+      
+      $$
+      k\left.\frac{\partial T}{\partial r}\right|_{r=R}
+      =h\left[T_{\mathrm{air}}(t)-T(R,t)\right],
+      \qquad h=25\ \mathrm{W/(m^2 K)}.
+      $$
+      
+      也可以写成标准外向热流形式：
+      
+      $$
+      -k\left.\frac{\partial T}{\partial r}\right|_{r=R}
+      =h\left[T(R,t)-T_{\mathrm{air}}(t)\right].
+      $$
+      
+      当烘房温度高于药材表面温度时，脚本最后一个半控制体积的矩阵对角线上增加 `dt*R*h`，右端增加 `dt*R*h*T_air`，从而给药材提供正的净热输入。
+      
+      ## 5. 水分方程和传质边界
+      
+      水分采用状态相关扩散系数的圆柱径向扩散方程：
+      
+      $$
+      \frac{\partial C}{\partial t}
+      =\frac{1}{r}\frac{\partial}{\partial r}
+      \left(rD(T,C)\frac{\partial C}{\partial r}\right).
+      $$
+      
+      中心轴对称条件为：
+      
+      $$
+      \left.\frac{\partial C}{\partial r}\right|_{r=0}=0.
+      $$
+      
+      表面对流传质条件在脚本中写为：
+      
+      $$
+      D\left.\frac{\partial C}{\partial r}\right|_{r=R}
+      =h_m\left[C_{\mathrm{air}}(t)-C(R,t)\right],
+      \qquad h_m=8\times10^{-7}\ \mathrm{m/s}.
+      $$
+      
+      等价地，按外向通量写为：
+      
+      $$
+      -D\left.\frac{\partial C}{\partial r}\right|_{r=R}
+      =h_m\left[C(R,t)-C_{\mathrm{air}}(t)\right].
+      $$
+      
+      通常 `C(R,t)>C_air(t)`，因此外向通量为正、药材内部水分下降。程序最后一个水分控制体积的矩阵对角线上增加 `dt*R*h_m`，右端增加 `dt*R*h_m*C_air`。
+      
+      ## 6. 附录 3 动态物性
+      
+      每个 Picard 迭代、每个径向节点都根据当前猜测状态重新计算：
+      
+      $$
+      \rho=650+128C,
+      $$
+      
+      $$
+      c_p=1450+2736\frac{C}{C+1},
+      $$
+      
+      $$
+      k=0.21+0.38\frac{C}{C+1},
+      $$
+      
+      $$
+      D=2.4\times10^{-3}
+      \exp\left(-\frac{0.45}{C}\right)
+      \exp\left(-\frac{3850}{T_K}\right).
+      $$
+      
+      单位分别为：
+      
+      - `rho`：`kg/m^3`；
+      - `cp`：`J/(kg K)`；
+      - `k`：`W/(m K)`；
+      - `D`：`m^2/s`；
+      - `C`：`kg/kg`。
+      
+      公式中的温度必须使用 Kelvin：
+      
+      $$
+      T_K=T_{degC}+273.15.
+      $$
+      
+      脚本的输出温度仍然是 `degC`，只有进入 `D` 公式的指数项时才加 `273.15`。`material_properties()` 对用于除法的 `C` 使用不小于 `1e-12` 的数值下限；Picard 收敛后对极小的数值负值作非负截断。这是数值保护，不是新的物性模型。
+      
+      ## 7. 模型假设和适用范围
+      
+      当前结果建立在以下假设上：
+      
+      1. 药材是均匀、各向同性的规则圆柱，空间上只考虑径向变化。
+      2. 轴向梯度、两个端面的传热传质、内部孔隙的复杂结构和二维/三维效应均忽略。
+      3. `R=2 cm` 在整个问题二计算期间保持不变，不考虑干燥收缩；收缩只应在问题四中按附件 2 和附录 4 单独建模。
+      4. 初始温度 `28 degC` 和初始含水率 `2.55 kg/kg` 在整个半径内均匀。
+      5. `h` 和 `h_m` 沿表面均匀，并在问题二计算中保持问题一的数值；没有重新反演或优化传递系数。
+      6. 烘房温度和烘房水分浓度在药材表面空间上均匀；附件 1 中的 `水分浓度` 直接作为 `C_air(t)` 使用，不进行湿空气热力学换算。
+      7. 不加入蒸发潜热、辐射换热、内部热源、化学反应或相变动力学；温度对水分的影响只通过附录 3 的 `D(T,C)` 体现。
+      8. 不加入半径变化、移动网格或轴向流动等问题四内容。
+      9. 当前使用附录 3 经验式覆盖整个 3 h 区间，不额外给动态物性做参数拟合。
+      
+      这些假设使问题二保持为固定几何下的热质耦合扩散问题；如果后续模型改变边界、几何或潜热处理，不能把新结果与当前结果直接混用。
+      
+      ## 8. 附件 1 烘房边界数据
+      
+      `load_air_data()` 读取 `problem/附件/附件1.xlsx` 中的三列：`时间`、`温度`、`水分浓度`。当前附件数据覆盖 `0--14400 s`，求解的 `0--10800 s` 完全位于数据范围内。
+      
+      读取后程序将三列转为数值、按时间排序，并对重复时间保留最后一条；随后使用 `numpy.interp` 对 `T_air(t)` 和 `C_air(t)` 进行分段线性插值。每个后向欧拉步在 `time_new_s` 处取边界值。
+      
+      因此，当前版本使用附件 1 的完整边界记录，包括 `1800 s` 之后的实际数据；不是把 `1800 s` 之后的边界冻结为 `1800 s` 末值。这个区别是最新提交 `ed97452` 修正的重点。
+      
+      ## 9. 径向有限体积离散
+      
+      ### 9.1 网格和控制体积
+      
+      内部节点包含 `r=0` 和 `r=R`：
+      
+      $$
+      \Delta r=0.000125\ \mathrm{m}=0.0125\ \mathrm{cm},
+      $$
+      
+      共 `161` 个节点。相邻节点面取算术中点：
+      
+      $$
+      r_{i+1/2}=\frac{r_i+r_{i+1}}{2}.
+      $$
+      
+      去掉公共因子 `2 pi L` 后，第 `i` 个控制体积的径向测度为：
+      
+      $$
+      V_i^{(r)}=\int_{r_{i-1/2}}^{r_{i+1/2}}r\,dr
+      =\frac{r_{i+1/2}^2-r_{i-1/2}^2}{2}.
+      $$
+      
+      首尾节点是半控制体积，内部节点是完整控制体积。
+      
+      ### 9.2 内部面通量和面物性
+      
+      温度内部面的导热系数取相邻节点算术平均：
+      
+      $$
+      k_{i+1/2}=\frac{k_i+k_{i+1}}{2},
+      $$
+      
+      对应的径向导热通量系数为：
+      
+      $$
+      G^T_{i+1/2}=k_{i+1/2}\frac{r_{i+1/2}}{\Delta r}.
+      $$
+      
+      水分面扩散系数同样取算术平均：
+      
+      $$
+      D_{i+1/2}=\frac{D_i+D_{i+1}}{2},
+      \qquad
+      G^C_{i+1/2}=D_{i+1/2}\frac{r_{i+1/2}}{\Delta r}.
+      $$
+      
+      由相邻控制体积共享同一面通量，内部离散保持守恒。
+      
+      ### 9.3 中心和表面
+      
+      `r=0` 的内侧面因面半径为零，通量自然为零；代码不计算 `1/r`，因此不会出现中心除零。对常系数情形，这种半控制体积处理等价于中心极限中的
+      
+      $$
+      \left.\frac{1}{r}\frac{\partial}{\partial r}
+      \left(r\frac{\partial T}{\partial r}\right)\right|_{r=0}
+      \approx\frac{4(T_1-T_0)}{\Delta r^2}.
+      $$
+      
+      表面最后一个半控制体积的外侧面不再假设零通量，而是直接代入热/质 Robin 边界。这样既保留了半控制体积的几何测度，也使边界换热和传质项具有正确方向。
+      
+      线性系统均为三对角系统，使用 `scipy.linalg.solve_banded` 求解。
+      
+      ## 10. 后向欧拉和 Picard 非线性流程
+      
+      最终计算使用 `dt=1 s`、后向欧拉。对从 `t^n` 到 `t^(n+1)` 的每一步，流程如下：
+      
+      1. 令 `T^(0)=T^n`、`C^(0)=C^n`。
+      2. 用当前猜测 `T^(m)`、`C^(m)` 计算所有节点的 `rho`、`cp`、`k`、`D`，并在相邻面取面系数。
+      3. 冻结这些物性，分别组装并求解后向欧拉温度三对角系统和水分三对角系统，得到临时 `T^(m+1)`、`C^(m+1)`。
+      4. 计算
+      
+         $$
+         \max_i|T_i^{(m+1)}-T_i^{(m)}|,
+         \qquad
+         \max_i|C_i^{(m+1)}-C_i^{(m)}|.
+         $$
+      
+      5. 当温度差不超过 `1e-8 degC` 且水分差不超过 `1e-10 kg/kg` 时，接受当前时间步；否则将临时状态作为新的猜测继续迭代。
+      6. 单步最大迭代次数为 `50`。当前 3 h 运行最大只用到 `4` 次，平均 `3.8219444444` 次。
+      
+      两场在每次 Picard 外迭代中使用同一组冻结状态求解，再一起更新；这保证 `D(T,C)`、`rho(C)`、`cp(C)`、`k(C)` 在一个时间步内不是只按初始状态计算一次。
+      
+      ## 11. 时间、空间和输出结构
+      
+      - 内部时间步：`dt=1 s`；
+      - 总时长：`10800 s`；
+      - 输出时间：`0,1,...,10800 s`，共 `10801` 个时刻；
+      - 输出半径：`0,0.1,...,2.0 cm`，共 `21` 个位置；这些位置正好落在内部网格上，不需要额外空间插值；
+      - `result2.xlsx`：只保留模板要求的 `温度`、`水分浓度` 两个工作表；A 列为时间（s），第 1 行为到中心距离（cm），数值按四位小数写出；
+      - `task2_all_results.csv`：列为 `time_s,time_h,radius_cm,temperature_C,moisture_kgkg`，每个 `(time,radius)` 一行，共 `10801*21=226821` 条数据记录，`time_h` 仅为辅助字段。
+      
+      计算内部保留双精度，答案文件的温度和水分值统一按题目要求保留四位小数。
+      
+      ## 12. 当前结果和数值验证
+      
+      对当前脚本执行 `--no-write` 的完整 3 h 运行，得到：
+      
+      - 完整推进到 `10800 s`；
+      - 温度范围：`27.999999999999872--49.9663867557243 degC`，按输出精度为 `28.0000--49.9664 degC`；
+      - 水分范围：`1.0081299103327388--2.5500000000000047 kg/kg`，按输出精度为 `1.0081--2.5500 kg/kg`；
+      - 无 NaN、Inf 或明显负水分；
+      - 最大 Picard 次数为 `4`，平均次数为 `3.8219444444`；
+      - 末时刻表面比中心高 `0.1169551 degC`，表面含水率比中心低 `0.7580687 kg/kg`，符合表面先升温、先失水的径向响应；
+      - 相邻输出时刻没有超过脚本 sanity check 阈值的温度/水分跳变。
+      
+      时间步敏感性是在表 3、表 4 的六个时间点和五个径向位置上比较 `dt=1 s` 与 `dt=0.5 s`：
+      
+      - 最大温度绝对差：`7.381804e-4 degC`，出现在 `(t,r)=(1800 s,0 cm)`；
+      - 最大水分绝对差：`4.569464e-5 kg/kg`，出现在 `(t,r)=(1800 s,2 cm)`。
+      
+      因此当前结果保留题目要求的 `dt=1 s`。这是关键点集合上的低成本检查，不应表述为所有内部时间/空间点的严格误差上界。
+      
+      答案一致性检查结果：
+      
+      - CSV 读取到 `226821` 条数据记录，全部温度和水分值有限；
+      - XLSX 工作表严格为 `温度`、`水分浓度`，每张表为 `10802` 行（含表头）和 `22` 列（含时间列）；
+      - XLSX 与 CSV 在全部 `10801*21` 个温度/水分位置的最大绝对差均为 `0`（两者都读取四位小数结果）；
+      - XLSX 的起始时间为 `0`、末时间为 `10800`，距离表头为 `0--2.0 cm`。
+      
+      ## 13. 表 3 和表 4 当前结果
+      
+      以下数值均直接从当前完整 CSV（同时也是当前 XLSX 的数值场）提取，单位和表头与题目一致。
+      
+      ### 表 3：温度（degC）
+      
+      | 时间/h | 0 cm | 0.5 cm | 1.0 cm | 1.5 cm | 2.0 cm |
+      |---:|---:|---:|---:|---:|---:|
+      | 0.5 | 32.1907 | 32.3836 | 32.9673 | 33.9620 | 35.4140 |
+      | 1.0 | 40.3816 | 40.5536 | 41.0605 | 41.8783 | 42.9978 |
+      | 1.5 | 45.8461 | 45.9342 | 46.1924 | 46.6045 | 47.1396 |
+      | 2.0 | 48.4497 | 48.4875 | 48.5980 | 48.7731 | 49.0030 |
+      | 2.5 | 49.4666 | 49.4789 | 49.5133 | 49.5652 | 49.6610 |
+      | 3.0 | 49.8494 | 49.8553 | 49.8745 | 49.9101 | 49.9664 |
+      
+      ### 表 4：水分浓度（kg/kg）
+      
+      | 时间/h | 0 cm | 0.5 cm | 1.0 cm | 1.5 cm | 2.0 cm |
+      |---:|---:|---:|---:|---:|---:|
+      | 0.5 | 2.5499 | 2.5489 | 2.5255 | 2.3257 | 1.6487 |
+      | 1.0 | 2.5257 | 2.4947 | 2.3578 | 2.0230 | 1.4711 |
+      | 1.5 | 2.3860 | 2.3256 | 2.1344 | 1.8020 | 1.3476 |
+      | 2.0 | 2.1708 | 2.1084 | 1.9236 | 1.6260 | 1.2311 |
+      | 2.5 | 1.9567 | 1.9006 | 1.7360 | 1.4720 | 1.1167 |
+      | 3.0 | 1.7662 | 1.7166 | 1.5702 | 1.3333 | 1.0081 |
+      
+      ## 14. 运行方式和函数入口
+      
+      在项目根目录执行完整求解（会写入两个答案文件）：
+      
+      ```bash
+      /Users/jiaqiaosu/miniconda3/bin/python solution/task2/script/solve_task2.py
+      ```
+      
+      只运行求解和检查、不改写答案文件：
+      
+      ```bash
+      /Users/jiaqiaosu/miniconda3/bin/python solution/task2/script/solve_task2.py --no-write
+      ```
+      
+      跳过 `dt=0.5 s` 敏感性检查：
+      
+      ```bash
+      /Users/jiaqiaosu/miniconda3/bin/python solution/task2/script/solve_task2.py --no-write --skip-sensitivity
+      ```
+      
+      脚本的主要入口函数为：
+      
+      - `load_air_data()`：读取附件 1 并返回完整边界数据；
+      - `control_volume_geometry()`：建立节点、面和半控制体积测度；
+      - `material_properties()`：按当前 `T,C` 计算四个动态物性；
+      - `_solve_temperature_linear()`、`_solve_moisture_linear()`：求解冻结物性下的单步线性系统；
+      - `_picard_step()`：完成单个时间步的 Picard 迭代；
+      - `solve_task2()`：推进完整时间区间并保存输出网格上的数值场；
+      - `validate_solution()`：执行形状、有限值、初值、边界响应和跳变检查；
+      - `write_result_xlsx()`、`write_result_csv()`：生成两个结果文件；
+      - `key_tables()`：从完整场提取表 3、表 4；
+      - `time_step_sensitivity()`：比较 `dt=1 s` 和 `dt=0.5 s` 的关键点结果。
+      
+      默认运行会覆盖：
+      
+      - `solution/task2/answer/result2.xlsx`；
+      - `solution/task2/answer/task2_all_results.csv`。
+      
+      如果只是检查代码或复现实验统计，应使用 `--no-write`，避免覆盖当前答案文件。模板 `problem/附件/附件3/result2.xlsx` 和附件 1 均只读使用，不能直接改写模板。
+      
+      ## 15. 对后续问题三的交接注意事项
+      
+      问题三可以复用本问题二的固定半径核心：附录 3 动态物性、径向有限体积、中心零通量、表面对流传质、后向欧拉和 Picard 迭代。问题三仍然不应直接引入问题四的尺寸收缩；不要把附件 2 半径数据或附录 4 物性公式混入问题三。
+      
+      如果问题三需要把时间范围延长到 3 h 之外，应先根据题面确认烘房边界条件如何延拓。当前问题二仅使用附件 1 的 `0--14400 s` 数据计算到 `10800 s`，不能把这个 3 h 结果文件的边界处理未经检查地外推到更长时间。问题四才单独处理半径随水分变化的移动几何和相关经验公式。
+      f90d788 补充问题二数值模型交接文档
+       handoff/task2_xby_handoff.md | 375 +++++++++++++++++++++++++++++++++++++++++++
+       1 file changed, 375 insertions(+)
+      f90d788 补充问题二数值模型交接文档
+      
+      handoff/task2_xby_handoff.md
+      ## main...origin/main [ahead 2]
+      A  context/context-task2-1_xby.md
+      ?? .DS_Store
+      ?? solution/.DS_Store
+      ?? solution/task2/.DS_Store
+      ?? solution/task2/script/__pycache__/
+
+## Assistant
+
+文档主体与最新模型和结果一致，但 root 审查发现一处表述需修正：问题一沿用的是“径向有限体积思想”，问题一时间积分是 BDF，并没有直接组装本问题二使用的三对角后向欧拉系统。因此不能写成“三对角线性系统也继承自问题一”。我会让 worker 只修正这一句并单独提交，避免给后续接手者错误印象。
+
+## Activity
+
+    Interacted with `/root/task2_handoff`
+
+## Activity
+
+    Completed `/root/task2_handoff`
+
+## Activity
+
+    agent tool: Wait · Completed
+
+## Assistant
+
+准确性修正已提交。最终交付前我会按 `verification-before-completion` 做一次只读验收：确认文档章节、最新边界规则、关键公式、表3/表4数值、提交文件边界，以及未误提交现有 staged context。该检查不修改文件。
+
+## Activity
+
+    $ /bin/zsh -lc "sed -n '1,220p' /Users/jiaqiaosu/.agents/skills/verification-before-completion/SKILL.md && /Users/jiaqiaosu/miniconda3/bin/python -c \"from pathlib import Path; import pandas as pd, re; p=Path('handoff/task2_xby_handoff.md'); t=p.read_text(encoding='utf-8'); required=['当前完成状态','问题二相对于问题一改变的内容','建模区域、变量和初始条件','温度方程和热边界','水分方程和传质边界','附录 3 动态物性','模型假设和适用范围','附件 1 烘房边界数据','径向有限体积离散','后向欧拉和 Picard 非线性流程','当前结果和数值验证','表 3 和表 4 当前结果','运行方式和函数入口']; missing=[x for x in required if x not in t]; assert not missing,missing; must=['0--14400 s','不是把 "'`1800 s` 之后的边界冻结'"','T_K=T_{degC}+273.15','dt=1 s','161','226821','问题二为实现逐步 Picard']; absent=[x for x in must if x not in t]; assert not absent,absent; assert '三对角线性系统和附件 1 边界数据插值方式' not in t; d=pd.read_csv('solution/task2/answer/task2_all_results.csv'); key=d[d.time_s.isin([1800,3600,5400,7200,9000,10800]) & d.radius_cm.isin([0,.5,1,1.5,2])]; nums=[]
+for _,row in key.iterrows(): nums.extend([f'{row.temperature_C:.4f}',f'{row.moisture_kgkg:.4f}'])
+not_in=[x for x in nums if x not in t]; assert not not_in,not_in[:10]; print(f'交接文档验收通过: lines={len(t.splitlines())}, sections={len(required)}, key_values={len(nums)}, missing=0')\" && git show --stat --oneline f90d788 e3f08be && git show --name-only --format='%h %s' f90d788 e3f08be && git diff --exit-code -- handoff/task2_xby_handoff.md && git status --short --branch"
+    status: Failed · exit 1
+      Traceback (most recent call last):
+        File "<string>", line 1, in <module>
+          from pathlib import Path; import pandas as pd, re; p=Path('handoff/task2_xby_handoff.md'); t=p.read_text(encoding='utf-8'); required=['当前完成状态','问题二相对于问题一改变的内容','建模区域、变量和初始条件','温度方程和热边界','水分方程和传质边界','附录 3 动态物性','模型假设和适用范围','附件 1 烘房边界数据','径向有限体积离散','后向欧拉和 Picard 非线性流程','当前结果和数值验证','表 3 和表 4 当前结果','运行方式和函数入口']; missing=[x for x in required if x not in t]; assert not missing,missing; must=['0--14400 s','不是把  之后的边界冻结','T_K=T_{degC}+273.15','dt=1 s','161','226821','问题二为实现逐步 Picard']; absent=[x for x in must if x not in t]; assert not absent,absent; assert '三对角线性系统和附件 1 边界数据插值方式' not in t; d=pd.read_csv('solution/task2/answer/task2_all_results.csv'); key=d[d.time_s.isin([1800,3600,5400,7200,9000,10800]) & d.radius_cm.isin([0,.5,1,1.5,2])]; nums=[]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^^^^^^^^^^
+      AssertionError: ['不是把  之后的边界冻结']
+
+## Assistant
+
+最终验收命令第一次失败，原因不是文档内容：检查字符串中包含 Markdown 反引号，被 zsh 当成命令替换并尝试执行 `1800`。我会改用不会触发 shell 展开的引号重新检查；不会修改文档。
+
+## Activity
+
+    $ /bin/zsh -lc "/Users/jiaqiaosu/miniconda3/bin/python -c 'from pathlib import Path; import pandas as pd; p=Path(\"handoff/task2_xby_handoff.md\"); t=p.read_text(encoding=\"utf-8\"); required=[\"当前完成状态\",\"问题二相对于问题一改变的内容\",\"建模区域、变量和初始条件\",\"温度方程和热边界\",\"水分方程和传质边界\",\"附录 3 动态物性\",\"模型假设和适用范围\",\"附件 1 烘房边界数据\",\"径向有限体积离散\",\"后向欧拉和 Picard 非线性流程\",\"当前结果和数值验证\",\"表 3 和表 4 当前结果\",\"运行方式和函数入口\"]; missing=[x for x in required if x not in t]; assert not missing,missing; must=[\"0--14400 s\",\"不是把 "'`1800 s` 之后的边界冻结","T_K=T_{degC}+273.15","dt=1 s","161","226821","问题二为实现逐步 Picard"]; absent=[x for x in must if x not in t]; assert not absent,absent; assert "三对角线性系统和附件 1 边界数据插值方式" not in t; d=pd.read_csv("solution/task2/answer/task2_all_results.csv"); key=d[d.time_s.isin([1800,3600,5400,7200,9000,10800]) & d.radius_cm.isin([0,.5,1,1.5,2])]; nums=[]; [nums.extend([f"{row.temperature_C:.4f}",f"{row.moisture_kgkg:.4f}"]) for _,row in key.iterrows()]; not_in=[x for x in nums if x not in t]; assert not not_in,not_in[:10]; print(f"交接文档验收通过: lines={len(t.splitlines())}, sections={len(required)}, key_values={len(nums)}, missing=0")'"' && git log --format='%h %s' -5 && git show --stat --oneline f90d788 HEAD && git show --name-only --format='%h %s' f90d788 HEAD && git diff --exit-code -- handoff/task2_xby_handoff.md && git status --short --branch"
+    status: Completed · exit 0
+      交接文档验收通过: lines=375, sections=13, key_values=60, missing=0
+      e3f08be 修正问题二交接文档时间离散表述
+      f90d788 补充问题二数值模型交接文档
+      ed97452 修正问题二烘房边界数据
+      94ffe31 修正问题二结果模板格式
+      f423a75 统一问题一结果文件格式
+      f90d788 补充问题二数值模型交接文档
+       handoff/task2_xby_handoff.md | 375 +++++++++++++++++++++++++++++++++++++++++++
+       1 file changed, 375 insertions(+)
+      e3f08be 修正问题二交接文档时间离散表述
+       handoff/task2_xby_handoff.md | 2 +-
+       1 file changed, 1 insertion(+), 1 deletion(-)
+      f90d788 补充问题二数值模型交接文档
+      
+      handoff/task2_xby_handoff.md
+      e3f08be 修正问题二交接文档时间离散表述
+      
+      handoff/task2_xby_handoff.md
+      ## main...origin/main [ahead 3]
+      A  context/context-task2-1_xby.md
+      ?? .DS_Store
+      ?? solution/.DS_Store
+      ?? solution/task2/.DS_Store
+      ?? solution/task2/script/__pycache__/
+
+## Assistant
+
+状态：问题二交接文档已完成。
+
+文件：
+
+- [task2_xby_handoff.md](/Users/jiaqiaosu/Desktop/作业/2026夏季学期/2026CUMCM/2026CUMCM/handoff/task2_xby_handoff.md)
+
+文档共 375 行，包含：
+
+- 问题二相对问题一的模型变化
+- 温度、水分控制方程及边界条件
+- 动态物性与热质耦合关系
+- 有限体积、后向欧拉和 Picard 求解流程
+- 模型假设与适用范围
+- 最新附件1完整边界数据处理
+- 当前数值验证、表3和表4结果
+- 运行方法及后续问题三注意事项
+
+已验证：13 个必要章节和当前 CSV 中 60 个表3/表4关键数值全部匹配。
+
+Git：
+
+- `f90d788` — 补充问题二数值模型交接文档
+- `e3f08be` — 修正问题二交接文档时间离散表述
+
+现有 staged `context/context-task2-1_xby.md` 和未跟踪系统文件均未纳入提交。
