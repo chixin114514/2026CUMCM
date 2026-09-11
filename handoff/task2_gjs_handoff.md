@@ -2,41 +2,41 @@
 
 ## 1. 建模思路
 
-第二问沿用第一问的基本框架：把药材近似为半径 \(R=2\ \mathrm{cm}\)、长度 \(L=25\ \mathrm{cm}\) 的均匀圆柱体，只研究从中心到表面的径向传热和水分迁移。
+第二问沿用第一问的基本框架：把药材近似为半径 $R=2\ \mathrm{cm}$、长度 $L=25\ \mathrm{cm}$ 的均匀圆柱体，只研究从中心到表面的径向传热和水分迁移。
 
 第二问与第一问的关键区别在于附录3：
 
-- 密度 \(\rho\)、比热容 \(c_p\) 和导热系数 \(k\) 都随水分浓度 \(C\) 改变；
-- 水分扩散系数 \(D\) 同时取决于温度 \(T\) 和水分浓度 \(C\)；
-- 因此 \(C\) 会影响温度场，温度场又会反过来影响水分场，两个方程必须迭代求解。
+- 密度 $\rho$、比热容 $c_p$ 和导热系数 $k$ 都随水分浓度 $C$ 改变；
+- 水分扩散系数 $D$ 同时取决于温度 $T$ 和水分浓度 $C$；
+- 因此 $C$ 会影响温度场，温度场又会反过来影响水分场，两个方程必须迭代求解。
 
-附件1给出了 \(0\sim14400\ \mathrm s\) 的烘房数据，而第二问只计算前三小时，即 \(0\sim10800\ \mathrm s\)，所以计算范围完全处于附件数据内部，不需要外推。
+附件1给出了 $0\sim14400\ \mathrm s$ 的烘房数据，而第二问只计算前三小时，即 $0\sim10800\ \mathrm s$，所以计算范围完全处于附件数据内部，不需要外推。
 
-附件1中的烘房温度由 \(28^\circ\mathrm C\) 逐渐升高，并在约 \(2.5\sim3\ \mathrm h\) 后稳定在 \(50^\circ\mathrm C\) 左右，数据本身已经描述了预热向恒温干燥的过渡。附录3又要求两个阶段统一使用同一组经验公式，所以不需要人为切换控制方程。
+附件1中的烘房温度由 $28^\circ\mathrm C$ 逐渐升高，并在约 $2.5\sim3\ \mathrm h$ 后稳定在 $50^\circ\mathrm C$ 左右，数据本身已经描述了预热向恒温干燥的过渡。附录3又要求两个阶段统一使用同一组经验公式，所以不需要人为切换控制方程。
 
 ## 2. 模型假设
 
 1. 药材为均匀、各向同性的圆柱体；
-2. 第二问不考虑药材收缩，半径始终取 \(R=0.02\ \mathrm m\)，收缩在问题4中处理；
+2. 第二问不考虑药材收缩，半径始终取 $R=0.02\ \mathrm m$，收缩在问题4中处理；
 3. 初始温度和水分浓度在药材内部均匀分布；
-4. 因为 \(L/R=12.5\)，且题目要求的是“到药材中心的距离”，建立轴对称径向一维模型；
+4. 因为 $L/R=12.5$，且题目要求的是“到药材中心的距离”，建立轴对称径向一维模型；
 5. 药材内部没有体热源，水分迁移用有效扩散模型描述；
 6. 附件1中的烘房水分浓度作为药材表面的有效平衡边界浓度；
-7. 附录3没有重新给出表面对流系数，因此沿用 \(h=25\ \mathrm{W/(m^2\cdot K)}\) 和 \(h_m=8\times10^{-7}\ \mathrm{m/s}\)。
+7. 附录3没有重新给出表面对流系数，因此沿用 $h=25\ \mathrm{W/(m^2\cdot K)}$ 和 $h_m=8\times10^{-7}\ \mathrm{m/s}$。
 
 ## 3. 附件1边界数据的处理
 
-对附件1中的烘房温度 \(T_\infty(t)\) 和水分浓度 \(C_\infty(t)\) 分别作分段线性插值：
+对附件1中的烘房温度 $T_\infty(t)$ 和水分浓度 $C_\infty(t)$ 分别作分段线性插值：
 
-\[
+$$
 y(t)=y_j+
 \frac{y_{j+1}-y_j}{t_{j+1}-t_j}(t-t_j),
 \qquad t_j\le t\le t_{j+1}.
-\]
+$$
 
 题目指定时刻的边界数据如下。
 
-| 时间/h | 时间/s | \(T_\infty/^\circ\mathrm C\) | \(C_\infty/(\mathrm{kg/kg})\) |
+| 时间/h | 时间/s | $T_\infty/^\circ\mathrm C$ | $C_\infty/(\mathrm{kg/kg})$ |
 |---:|---:|---:|---:|
 | 0.5 | 1800 | 41.5130 | 0.0331 |
 | 1.0 | 3600 | 47.4850 | 0.0427 |
@@ -49,60 +49,98 @@ y(t)=y_j+
 
 ### 4.1 LaTeX源式
 
-    \rho(C)c_p(C)\frac{\partial T}{\partial t}
-    =\frac{1}{r}\frac{\partial}{\partial r}
-    \left[rk(C)\frac{\partial T}{\partial r}\right],
+$$
+\rho(C)c_p(C)\frac{\partial T}{\partial t}
+=\frac{1}{r}\frac{\partial}{\partial r}
+\left[rk(C)\frac{\partial T}{\partial r}\right],
+$$
 
-    \frac{\partial C}{\partial t}
-    =\frac{1}{r}\frac{\partial}{\partial r}
-    \left[rD(T,C)\frac{\partial C}{\partial r}\right].
+$$
+\frac{\partial C}{\partial t}
+=\frac{1}{r}\frac{\partial}{\partial r}
+\left[rD(T,C)\frac{\partial C}{\partial r}\right].
+$$
 
 ### 4.2 编译后的公式
 
-![温度与水分耦合控制方程](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-1.png>)
+$$
+\rho(C)c_p(C)\frac{\partial T}{\partial t}
+=\frac{1}{r}\frac{\partial}{\partial r}
+\left[rk(C)\frac{\partial T}{\partial r}\right],
+\qquad
+\frac{\partial C}{\partial t}
+=\frac{1}{r}\frac{\partial}{\partial r}
+\left[rD(T,C)\frac{\partial C}{\partial r}\right].
+$$
 
 第一行来自能量守恒和 Fourier 导热定律，描述药材内部的非稳态径向导热。第二行来自水分质量守恒和 Fick 扩散定律，描述内部水分从高浓度区域向低浓度区域迁移。
 
-温度方程中的三个热物性参数都由 \(C(r,t)\) 决定；水分方程中的 \(D\) 又由 \(T(r,t)\) 和 \(C(r,t)\) 共同决定。
+温度方程中的三个热物性参数都由 $C(r,t)$ 决定；水分方程中的 $D$ 又由 $T(r,t)$ 和 $C(r,t)$ 共同决定。
 
 ## 5. 附录3经验公式
 
 ### 5.1 LaTeX源式
 
-    \rho(C)=650+128C,
+$$
+\rho(C)=650+128C,
+$$
 
-    c_p(C)=1450+2736\frac{C}{C+1},
+$$
+c_p(C)=1450+2736\frac{C}{C+1},
+$$
 
-    k(C)=0.21+0.38\frac{C}{C+1},
+$$
+k(C)=0.21+0.38\frac{C}{C+1},
+$$
 
-    D(T,C)=2.4\times10^{-3}
-    \exp\left(-\frac{0.45}{C}\right)
-    \exp\left[-\frac{3850}{T+273.15}\right].
+$$
+D(T,C)=2.4\times10^{-3}
+\exp\left(-\frac{0.45}{C}\right)
+\exp\left[-\frac{3850}{T+273.15}\right].
+$$
 
 ### 5.2 编译后的公式
 
-![附录3经验公式](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-2.png>)
+$$
+\rho(C)=650+128C,\qquad
+c_p(C)=1450+2736\frac{C}{C+1},\qquad
+k(C)=0.21+0.38\frac{C}{C+1},
+$$
+
+$$
+D(T,C)=2.4\times10^{-3}
+\exp\left(-\frac{0.45}{C}\right)
+\exp\left(-\frac{3850}{T+273.15}\right).
+$$
 
 | 参数 | 含义 | 单位 |
 |---|---|---|
-| \(\rho(C)\) | 药材密度 | kg/m³ |
-| \(c_p(C)\) | 药材比热容 | J/(kg·K) |
-| \(k(C)\) | 药材导热系数 | W/(m·K) |
-| \(D(T,C)\) | 有效水分扩散系数 | m²/s |
-| \(C\) | 干基含水率 | kg/kg |
-| \(T\) | 药材温度；代入 \(D\) 时使用K | °C或K |
+| $\rho(C)$ | 药材密度 | kg/m³ |
+| $c_p(C)$ | 药材比热容 | J/(kg·K) |
+| $k(C)$ | 药材导热系数 | W/(m·K) |
+| $D(T,C)$ | 有效水分扩散系数 | m²/s |
+| $C$ | 干基含水率 | kg/kg |
+| $T$ | 药材温度；代入 $D$ 时使用K | °C或K |
 
 附录3中扩散系数公式的温度必须使用开尔文。
 
 ### 5.3 温标转换的LaTeX源式
 
-    T_K=T_{^\circ\mathrm C}+273.15,
+$$
+T_K=T_{^\circ\mathrm C}+273.15,
+$$
 
-    D(T,C)=2.4\times10^{-3}e^{-0.45/C}e^{-3850/T_K}.
+$$
+D(T,C)=2.4\times10^{-3}e^{-0.45/C}e^{-3850/T_K}.
+$$
 
 ### 5.4 编译后的公式
 
-![温标转换与扩散系数](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-4.png>)
+$$
+T_K=T_{^\circ\mathrm C}+273.15,
+\qquad
+D(T,C)=2.4\times10^{-3}e^{-0.45/C}e^{-3850/T_K}.
+$$
 
 如果把摄氏温度直接代入指数项，扩散系数会产生多个数量级的错误。
 
@@ -110,64 +148,89 @@ y(t)=y_j+
 
 ### 6.1 LaTeX源式
 
-    T(r,0)=28,\qquad C(r,0)=2.55,
+$$
+T(r,0)=28,\qquad C(r,0)=2.55,
+$$
 
-    \left.\frac{\partial T}{\partial r}\right|_{r=0}=0,\qquad
-    \left.\frac{\partial C}{\partial r}\right|_{r=0}=0,
+$$
+\left.\frac{\partial T}{\partial r}\right|_{r=0}=0,\qquad
+\left.\frac{\partial C}{\partial r}\right|_{r=0}=0,
+$$
 
-    -k(C_s)\left.\frac{\partial T}{\partial r}\right|_{r=R}
-    =h[T_s-T_\infty(t)],
+$$
+-k(C_s)\left.\frac{\partial T}{\partial r}\right|_{r=R}
+=h[T_s-T_\infty(t)],
+$$
 
-    -D(T_s,C_s)\left.\frac{\partial C}{\partial r}\right|_{r=R}
-    =h_m[C_s-C_\infty(t)].
+$$
+-D(T_s,C_s)\left.\frac{\partial C}{\partial r}\right|_{r=R}
+=h_m[C_s-C_\infty(t)].
+$$
 
 ### 6.2 编译后的公式
 
-![初始条件和边界条件](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-3.png>)
+$$
+T(r,0)=28,\qquad C(r,0)=2.55,
+$$
 
-其中 \(T_s=T(R,t)\)、\(C_s=C(R,t)\)。中心处两个零梯度条件来自圆柱轴对称性；表面温度满足 Newton 对流换热定律；表面水分满足内部扩散通量与对流传质通量连续。
+$$
+\left.\frac{\partial T}{\partial r}\right|_{r=0}=0,\qquad
+\left.\frac{\partial C}{\partial r}\right|_{r=0}=0,
+$$
+
+$$
+-k(C_s)\left.\frac{\partial T}{\partial r}\right|_{r=R}
+=h[T_s-T_\infty(t)],
+$$
+
+$$
+-D(T_s,C_s)\left.\frac{\partial C}{\partial r}\right|_{r=R}
+=h_m[C_s-C_\infty(t)].
+$$
+
+其中 $T_s=T(R,t)$、$C_s=C(R,t)$。中心处两个零梯度条件来自圆柱轴对称性；表面温度满足 Newton 对流换热定律；表面水分满足内部扩散通量与对流传质通量连续。
 
 ## 7. 双向耦合关系
 
-\[
+$$
 C(r,t)
 \longrightarrow \rho(C),c_p(C),k(C)
 \longrightarrow T(r,t)
 \longrightarrow D(T,C)
 \longrightarrow C(r,t).
-\]
+$$
 
 具体含义是：
 
 1. 含水率改变，会改变药材密度、蓄热能力和导热能力；
 2. 温度升高会通过扩散系数加快内部水分迁移；
-3. 水分下降又会通过 \(\exp(-0.45/C)\) 改变扩散系数；
+3. 水分下降又会通过 $\exp(-0.45/C)$ 改变扩散系数；
 4. 因此应在每个时间步内同步迭代温度场和水分场。
 
 ## 8. 数值计算过程
 
 ### 8.1 空间和时间离散
 
-在 \(0\le r\le0.02\ \mathrm m\) 上采用守恒型有限体积法，最终网格和时间步取
+在 $0\le r\le0.02\ \mathrm m$ 上采用守恒型有限体积法，最终网格和时间步取
 
-\[
+$$
 \Delta r=5\times10^{-5}\ \mathrm m=0.005\ \mathrm{cm},
 \qquad
 \Delta t=0.5\ \mathrm s.
-\]
+$$
 
-每个环形控制体都满足“储存量变化＝内侧流入通量－外侧流出通量”。相邻网格界面的 \(k\) 和 \(D\) 采用调和平均，以保证界面通量连续。时间方向采用 Crank–Nicolson 格式。
+每个环形控制体都满足“储存量变化＝内侧流入通量－外侧流出通量”。相邻网格界面的 $k$ 和 $D$ 采用调和平均，以保证界面通量连续。时间方向采用 Crank–Nicolson 格式。
 
 ### 8.2 每个时间步的耦合迭代
 
-已知第 \(n\) 个时刻的 \(T^n,C^n\) 后：
+已知第 $n$ 个时刻的 $T^n,C^n$ 后：
 
-1. 以 \(T^n,C^n\) 作为下一时刻的初始猜测；
-2. 根据当前 \(C\) 计算 \(\rho(C)、c_p(C)、k(C)\)；
-3. 代入附件1插值得到的 \(T_\infty(t)\)，求解温度方程；
-4. 将新温度转换成开尔文，根据新 \(T,C\) 计算 \(D(T,C)\)；
-5. 代入附件1插值得到的 \(C_\infty(t)\)，求解水分方程；
-6. 比较本次和上次迭代的 \(T,C\)；
+1. 以 $T^n,C^n$ 作为下一时刻的初始猜测；
+2. 根据当前 $C$ 计算 $\rho(C)、c_p(C)、k(C)$；
+3. 代入附件1插值得到的 $T_\infty(t)$，求解温度方程；
+4. 将新温度转换成开尔文，根据新 $T,C$ 计算 $D(T,C)$；
+5. 代入附件1插值得到的 $C_\infty(t)$，求解水分方程；
+6. 比较本次和上次迭代的 $T,C$；
 7. 若误差未达到要求，返回第2步继续迭代；
 8. 收敛后进入下一时间步。
 
@@ -175,15 +238,15 @@ C(r,t)
 
 ### 8.3 输出抽取
 
-论文表格抽取 \(t=0.5,1.0,1.5,2.0,2.5,3.0\ \mathrm h\) 和
-\(r=0,0.5,1.0,1.5,2.0\ \mathrm{cm}\) 处的结果。制作 result2.xlsx 时，再从完整数值解中按每隔1 s、每隔0.1 cm抽取温度和水分浓度。
+论文表格抽取 $t=0.5,1.0,1.5,2.0,2.5,3.0\ \mathrm h$ 和
+$r=0,0.5,1.0,1.5,2.0\ \mathrm{cm}$ 处的结果。制作 result2.xlsx 时，再从完整数值解中按每隔1 s、每隔0.1 cm抽取温度和水分浓度。
 
 ## 9. 网格和时间步独立性检验
 
 | 检验项目 | 两组设置 | 最大温度差/°C | 最大水分浓度差/(kg/kg) |
 |---|---|---:|---:|
-| 空间网格 | \(\Delta r=0.01\) cm 与 \(0.005\) cm，\(\Delta t=1\) s | \(8.25\times10^{-6}\) | \(7.47\times10^{-6}\) |
-| 时间步 | \(\Delta t=1\) s 与 \(0.5\) s，\(\Delta r=0.005\) cm | \(4.46\times10^{-7}\) | \(7.84\times10^{-9}\) |
+| 空间网格 | $\Delta r=0.01$ cm 与 $0.005$ cm，$\Delta t=1$ s | $8.25\times10^{-6}$ | $7.47\times10^{-6}$ |
+| 时间步 | $\Delta t=1$ s 与 $0.5$ s，$\Delta r=0.005$ cm | $4.46\times10^{-7}$ | $7.84\times10^{-9}$ |
 
 误差远小于题目要求的四位小数精度，因此以下结果采用加密解。
 
@@ -213,19 +276,19 @@ C(r,t)
 
 ## 11. 结果分析
 
-0.5 h时，药材表面温度为 \(35.4130^\circ\mathrm C\)，中心温度为
-\(32.1892^\circ\mathrm C\)，表里温差约 \(3.22^\circ\mathrm C\)，说明预热初期内部温度梯度明显。
+0.5 h时，药材表面温度为 $35.4130^\circ\mathrm C$，中心温度为
+$32.1892^\circ\mathrm C$，表里温差约 $3.22^\circ\mathrm C$，说明预热初期内部温度梯度明显。
 
 随着烘房逐渐恒温，药材内部温差不断减小。3 h时中心温度为
-\(49.8495^\circ\mathrm C\)，表面温度为 \(49.9664^\circ\mathrm C\)，已经接近烘房温度
-\(50.1950^\circ\mathrm C\)，药材在热学意义上接近完成预热平衡。
+$49.8495^\circ\mathrm C$，表面温度为 $49.9664^\circ\mathrm C$，已经接近烘房温度
+$50.1950^\circ\mathrm C$，药材在热学意义上接近完成预热平衡。
 
-水分扩散明显慢于热扩散。0.5 h时表面含水率已降到 \(1.6486\ \mathrm{kg/kg}\)，中心仍为
-\(2.5499\ \mathrm{kg/kg}\)。3 h时中心含水率为 \(1.7662\ \mathrm{kg/kg}\)，表面为
-\(1.0081\ \mathrm{kg/kg}\)，内部仍存在明显水分梯度。
+水分扩散明显慢于热扩散。0.5 h时表面含水率已降到 $1.6486\ \mathrm{kg/kg}$，中心仍为
+$2.5499\ \mathrm{kg/kg}$。3 h时中心含水率为 $1.7662\ \mathrm{kg/kg}$，表面为
+$1.0081\ \mathrm{kg/kg}$，内部仍存在明显水分梯度。
 
 第二问0.5 h的数值不应与第一问1800 s完全相同。第一问使用附录2中的常物性和
-\(D(C)\)，第二问则从 \(t=0\) 开始统一使用附录3中的变物性公式；二者的热扩散和水分扩散能力不同，结果存在差别是正常的。
+$D(C)$，第二问则从 $t=0$ 开始统一使用附录3中的变物性公式；二者的热扩散和水分扩散能力不同，结果存在差别是正常的。
 
 ## 12. 合理性检验
 
@@ -240,7 +303,7 @@ C(r,t)
 第二问在第一问径向传热—传质模型的基础上，引入附录3给出的含水率相关热物性参数和温湿相关水分扩散系数，建立了非线性双向耦合模型。附件1提供随时间变化的烘房温度和水分浓度边界，有限体积法保证离散过程中的热量与水分通量守恒，Crank–Nicolson格式和Picard迭代用于求解变系数耦合方程。
 
 计算表明，药材温度在3 h内逐渐接近烘房温度，中心与表面的温差由0.5 h时约
-\(3.22^\circ\mathrm C\) 减小到3 h时约 \(0.12^\circ\mathrm C\)；水分迁移明显滞后，3 h时中心和表面的含水率分别为 \(1.7662\) 和 \(1.0081\ \mathrm{kg/kg}\)。前三小时主要完成温度平衡，但距离整体干燥要求仍有较大差距，这为问题3确定最终烘干时间提供了初始依据。
+$3.22^\circ\mathrm C$ 减小到3 h时约 $0.12^\circ\mathrm C$；水分迁移明显滞后，3 h时中心和表面的含水率分别为 $1.7662$ 和 $1.0081\ \mathrm{kg/kg}$。前三小时主要完成温度平衡，但距离整体干燥要求仍有较大差距，这为问题3确定最终烘干时间提供了初始依据。
 
 ## 参考依据
 

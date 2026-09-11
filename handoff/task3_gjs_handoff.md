@@ -4,9 +4,9 @@
 
 问题3不需要重新建立新的温度方程和水分方程，而是在问题2的非线性温度—水分双向耦合模型基础上继续计算，直到药材内部所有位置的水分浓度都低于规定值
 
-\[
+$$
 C_{\mathrm{lim}}=0.15\ \mathrm{kg/kg}.
-\]
+$$
 
 相较于问题2，问题3新增了三项工作：
 
@@ -18,65 +18,112 @@ C_{\mathrm{lim}}=0.15\ \mathrm{kg/kg}.
 
 ### 2.1 LaTeX源式
 
-    \rho(C)c_p(C)\frac{\partial T}{\partial t}
-    =\frac1r\frac{\partial}{\partial r}
-    \left[rk(C)\frac{\partial T}{\partial r}\right],
+$$
+\rho(C)c_p(C)\frac{\partial T}{\partial t}
+=\frac1r\frac{\partial}{\partial r}
+\left[rk(C)\frac{\partial T}{\partial r}\right],
+$$
 
-    \frac{\partial C}{\partial t}
-    =\frac1r\frac{\partial}{\partial r}
-    \left[rD(T,C)\frac{\partial C}{\partial r}\right].
+$$
+\frac{\partial C}{\partial t}
+=\frac1r\frac{\partial}{\partial r}
+\left[rD(T,C)\frac{\partial C}{\partial r}\right].
+$$
 
 ### 2.2 编译后的公式
 
-![问题2的双向耦合控制方程](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-1.png>)
+$$
+\rho(C)c_p(C)\frac{\partial T}{\partial t}
+=\frac{1}{r}\frac{\partial}{\partial r}
+\left[rk(C)\frac{\partial T}{\partial r}\right],
+\qquad
+\frac{\partial C}{\partial t}
+=\frac{1}{r}\frac{\partial}{\partial r}
+\left[rD(T,C)\frac{\partial C}{\partial r}\right].
+$$
 
 附录3的材料参数仍为：
 
 ### 2.3 LaTeX源式
 
-    \rho(C)=650+128C,
+$$
+\rho(C)=650+128C,
+$$
 
-    c_p(C)=1450+2736\frac{C}{C+1},
+$$
+c_p(C)=1450+2736\frac{C}{C+1},
+$$
 
-    k(C)=0.21+0.38\frac{C}{C+1},
+$$
+k(C)=0.21+0.38\frac{C}{C+1},
+$$
 
-    D(T,C)=2.4\times10^{-3}
-    \exp\left(-\frac{0.45}{C}\right)
-    \exp\left(-\frac{3850}{T+273.15}\right).
+$$
+D(T,C)=2.4\times10^{-3}
+\exp\left(-\frac{0.45}{C}\right)
+\exp\left(-\frac{3850}{T+273.15}\right).
+$$
 
 ### 2.4 编译后的公式
 
-![附录3经验公式](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-2.png>)
+$$
+\rho(C)=650+128C,\qquad
+c_p(C)=1450+2736\frac{C}{C+1},\qquad
+k(C)=0.21+0.38\frac{C}{C+1},
+$$
+
+$$
+D(T,C)=2.4\times10^{-3}
+\exp\left(-\frac{0.45}{C}\right)
+\exp\left(-\frac{3850}{T+273.15}\right).
+$$
 
 扩散系数公式中的温度使用开尔文，即
 
-\[
+$$
 T_K=T_{^\circ\mathrm C}+273.15.
-\]
+$$
 
 初始条件、中心对称条件以及表面对流换热、传质条件也与问题2相同：
 
-![初始条件和边界条件](</Users/a1523647308/overleaf modify/A题第二问_assets/formula-3.png>)
+$$
+T(r,0)=28,\qquad C(r,0)=2.55,
+$$
+
+$$
+\left.\frac{\partial T}{\partial r}\right|_{r=0}=0,\qquad
+\left.\frac{\partial C}{\partial r}\right|_{r=0}=0,
+$$
+
+$$
+-k(C_s)\left.\frac{\partial T}{\partial r}\right|_{r=R}
+=h[T_s-T_\infty(t)],
+$$
+
+$$
+-D(T_s,C_s)\left.\frac{\partial C}{\partial r}\right|_{r=R}
+=h_m[C_s-C_\infty(t)].
+$$
 
 其中继续采用
 
-\[
+$$
 R=0.02\ \mathrm m,\qquad
 h=25\ \mathrm{W/(m^2\cdot K)},\qquad
 h_m=8\times10^{-7}\ \mathrm{m/s}.
-\]
+$$
 
 ## 3. 烘房边界条件的长期延拓
 
 附件1只记录到
 
-\[
+$$
 14400\ \mathrm s=4\ \mathrm h,
-\]
+$$
 
 而烘干过程持续两至三天，因此必须确定4 h以后的烘房环境。
 
-附件1在 \(9000\sim14400\ \mathrm s\) 内已经进入稳定阶段。对该时间段统计得到：
+附件1在 $9000\sim14400\ \mathrm s$ 内已经进入稳定阶段。对该时间段统计得到：
 
 | 变量 | 平均值 | 标准差 | 最小值 | 最大值 |
 |---|---:|---:|---:|---:|
@@ -87,21 +134,39 @@ h_m=8\times10^{-7}\ \mathrm{m/s}.
 
 ### 3.1 LaTeX源式
 
-    T_\infty(t)=
-    \begin{cases}
-    \widetilde T_\infty(t),&0\le t\le14400\ {\rm s},\\
-    50.0049^\circ{\rm C},&t>14400\ {\rm s},
-    \end{cases}
+$$
+T_\infty(t)=
+\begin{cases}
+\widetilde T_\infty(t),&0\le t\le14400\ {\rm s},\\
+50.0049^\circ{\rm C},&t>14400\ {\rm s},
+\end{cases}
+$$
 
-    C_\infty(t)=
-    \begin{cases}
-    \widetilde C_\infty(t),&0\le t\le14400\ {\rm s},\\
-    0.049994\ {\rm kg/kg},&t>14400\ {\rm s}.
-    \end{cases}
+$$
+C_\infty(t)=
+\begin{cases}
+\widetilde C_\infty(t),&0\le t\le14400\ {\rm s},\\
+0.049994\ {\rm kg/kg},&t>14400\ {\rm s}.
+\end{cases}
+$$
 
 ### 3.2 编译后的公式
 
-![烘房边界条件延拓](</Users/a1523647308/overleaf modify/A题第三问_assets/formula-1.png>)
+$$
+T_\infty(t)=
+\begin{cases}
+\widetilde T_\infty(t),&0\le t\le14400\ {\rm s},\\
+50.0049^\circ{\rm C},&t>14400\ {\rm s},
+\end{cases}
+$$
+
+$$
+C_\infty(t)=
+\begin{cases}
+\widetilde C_\infty(t),&0\le t\le14400\ {\rm s},\\
+0.049994\ {\rm kg/kg},&t>14400\ {\rm s}.
+\end{cases}
+$$
 
 采用稳定阶段平均值可以削弱测量噪声的影响，比直接使用最后一个观测值更稳健。
 
@@ -111,31 +176,49 @@ h_m=8\times10^{-7}\ \mathrm{m/s}.
 
 ### 4.1 LaTeX源式
 
-    t_{\rm dry}=
-    \inf\left\{t>0:
-    \max_{0\le r\le R}C(r,t)\le0.15\right\}.
+$$
+t_{\rm dry}=
+\inf\left\{t>0:
+\max_{0\le r\le R}C(r,t)\le0.15\right\}.
+$$
 
 由于干燥过程中水分由内部向表面迁移，始终有
 
-    \frac{\partial C}{\partial r}\le0,
+$$
+\frac{\partial C}{\partial r}\le0,
+$$
 
 从而
 
-    \max_{0\le r\le R}C(r,t)=C(0,t).
+$$
+\max_{0\le r\le R}C(r,t)=C(0,t).
+$$
 
 所以实际停止条件可化为
 
-    C(0,t_{\rm dry})=0.15.
+$$
+C(0,t_{\rm dry})=0.15.
+$$
 
 ### 4.2 编译后的公式
 
-![烘干结束条件](</Users/a1523647308/overleaf modify/A题第三问_assets/formula-2.png>)
+$$
+t_{\rm dry}=\inf\left\{t>0:\max_{0\le r\le R}C(r,t)\le0.15\right\}.
+$$
+
+$$
+\frac{\partial C}{\partial r}\le0,
+\qquad
+\max_{0\le r\le R}C(r,t)=C(0,t),
+\qquad
+C(0,t_{\rm dry})=0.15.
+$$
 
 计算时仍然检查全部径向网格点。整个计算过程中没有出现水分空间顺序反转，数值结果始终满足
 
-\[
+$$
 C(0,t)\ge C(r,t)\ge C(R,t),
-\]
+$$
 
 因此中心确实是最后达到干燥标准的位置。
 
@@ -145,18 +228,18 @@ C(0,t)\ge C(r,t)\ge C(R,t),
 
 空间方向继续采用守恒型径向有限体积法，时间方向采用Crank–Nicolson格式。每个时间步使用Picard迭代同步更新
 
-\[
+$$
 \rho(C),\quad c_p(C),\quad k(C),\quad D(T,C).
-\]
+$$
 
 每个时间步的求解顺序如下：
 
-1. 根据当前水分浓度更新 \(\rho,c_p,k\)；
+1. 根据当前水分浓度更新 $\rho,c_p,k$；
 2. 求解温度方程；
-3. 把温度转换为开尔文并更新 \(D(T,C)\)；
+3. 把温度转换为开尔文并更新 $D(T,C)$；
 4. 求解水分方程；
 5. 重复上述过程，直到温度和水分浓度同时收敛；
-6. 检查全部网格点是否满足 \(C\le0.15\)；
+6. 检查全部网格点是否满足 $C\le0.15$；
 7. 未满足则进入下一时间步，满足则定位结束时刻。
 
 最细网格计算中，每个时间步最多经过8次Picard迭代达到收敛。
@@ -165,21 +248,21 @@ C(0,t)\ge C(r,t)\ge C(R,t),
 
 前4 h烘房环境变化较快，取
 
-\[
+$$
 \Delta t=2\ \mathrm s.
-\]
+$$
 
 4 h后烘房进入稳定阶段，温湿度和水分场变化明显变慢，取
 
-\[
+$$
 \Delta t=10\ \mathrm s.
-\]
+$$
 
 为了验证时间步误差，另用前4 h为1 s、4 h后为5 s进行复算，得到的结束时刻仅相差
 
-\[
+$$
 0.0073\ \mathrm s,
-\]
+$$
 
 说明时间离散误差可以忽略。
 
@@ -187,57 +270,63 @@ C(0,t)\ge C(r,t)\ge C(R,t),
 
 若相邻两个时间层满足
 
-\[
+$$
 C(0,t_n)>0.15,\qquad C(0,t_{n+1})<0.15,
-\]
+$$
 
 则在线性时间插值下定位结束时刻。
 
 #### LaTeX源式
 
-    t_{\rm dry}\approx t_n+
-    \frac{C(0,t_n)-0.15}
-    {C(0,t_n)-C(0,t_{n+1})}
-    (t_{n+1}-t_n).
+$$
+t_{\rm dry}\approx t_n+
+\frac{C(0,t_n)-0.15}
+{C(0,t_n)-C(0,t_{n+1})}
+(t_{n+1}-t_n).
+$$
 
 #### 编译后的公式
 
-![结束时刻插值公式](</Users/a1523647308/overleaf modify/A题第三问_assets/formula-3.png>)
+$$
+t_{\rm dry}\approx t_n+
+\frac{C(0,t_n)-0.15}{C(0,t_n)-C(0,t_{n+1})}
+(t_{n+1}-t_n).
+$$
 
 ## 6. 空间网格收敛检验
 
-干燥后期含水率下降使 \(D(T,C)\) 显著减小，药材表面附近形成较陡的水分梯度。因此，问题3所需空间网格应比问题2更细。
+干燥后期含水率下降使 $D(T,C)$ 显著减小，药材表面附近形成较陡的水分梯度。因此，问题3所需空间网格应比问题2更细。
 
-| 径向区间数 \(N\) | \(\Delta r\)/cm | 计算得到的结束时间/h | 相对上一网格变化/h |
+| 径向区间数 $N$ | $\Delta r$/cm | 计算得到的结束时间/h | 相对上一网格变化/h |
 |---:|---:|---:|---:|
 | 200 | 0.01000 | 58.9449 | — |
 | 400 | 0.00500 | 57.6779 | 1.2671 |
 | 800 | 0.00250 | 57.5031 | 0.1748 |
 | 1600 | 0.00125 | 57.4719 | 0.0312 |
 
-可以看到，网格持续加密后结束时刻逐渐稳定。最终结果采用 \(N=1600\) 的最细网格。最后两级网格的差为0.0312 h，约1.87 min，可视为当前离散下的保守数值不确定度。
+可以看到，网格持续加密后结束时刻逐渐稳定。最终结果采用 $N=1600$ 的最细网格。最后两级网格的差为0.0312 h，约1.87 min，可视为当前离散下的保守数值不确定度。
 
 ## 7. 烘干结束时间
 
 最细网格计算得到
 
-\[
+$$
 \boxed{
 t_{\mathrm{dry}}=57.4719\ \mathrm h
 }
-\]
+$$
 
 即约为
 
-\[
+$$
 2\ \mathrm d\ 9\ \mathrm h\ 28\ \mathrm{min}.
-\]
+$$
 
 实用工艺上可向上取整为
 
-\[
+$$
 \boxed{57.5\ \mathrm h}
-\]
+$$
 
 以保证药材中心不会高于规定水分浓度。
 
@@ -260,9 +349,9 @@ t_{\mathrm{dry}}=57.4719\ \mathrm h
 
 烘干结束时药材温度已经基本均匀，各指定位置的温度均约为
 
-\[
+$$
 50.0049^\circ\mathrm C.
-\]
+$$
 
 ## 9. 结果分析
 
@@ -278,11 +367,11 @@ t_{\mathrm{dry}}=57.4719\ \mathrm h
 
 这是附录3扩散系数中
 
-\[
+$$
 \exp\left(-\frac{0.45}{C}\right)
-\]
+$$
 
-造成的。当 \(C\) 下降时，该指数项迅速减小，使有效扩散系数下降，形成明显的降速干燥阶段。
+造成的。当 $C$ 下降时，该指数项迅速减小，使有效扩散系数下降，形成明显的降速干燥阶段。
 
 ### 9.3 表面水分浓度接近环境值
 
@@ -300,11 +389,11 @@ t_{\mathrm{dry}}=57.4719\ \mathrm h
 
 据此估计，附件稳定段的小幅波动对应的结束时间范围约为
 
-\[
+$$
 \boxed{
 57.11\ \mathrm h\le t_{\mathrm{dry}}\le57.85\ \mathrm h
 }.
-\]
+$$
 
 这说明模型给出的57.47 h对正常烘房波动具有较好的稳定性。实际工艺若需要更保守的设定，可以采用58 h。
 
