@@ -1,22 +1,18 @@
-"""A题问题四：药材收缩条件下的移动边界热湿耦合求解器。
+"""A题问题四：材料坐标下的收缩圆柱热湿耦合求解器。
 
-空间坐标采用固定的
+药材半径由附件2给出，材料坐标为 ``xi=r/R(t)``。在固定 ``xi`` 网格上，
+温度和干基含水率采用守恒型径向有限体积离散；时间方向为冻结中点物性
+Crank--Nicolson 型格式，每个时间步使用同步 Picard 迭代。
 
-    xi = r / R(t), 0 <= xi <= 1,
-
-并在固定 xi 网格上用径向控制体积法离散。时间方向采用后向欧拉；每个
-内部时间步内用 Picard 迭代更新附录 4 的状态相关物性。半径 R(t) 来自
-附件 2 的分段线性插值，移动坐标项 b*xi*T_xi（b=-Rdot/R）用一阶后向
-迎风差分，并与扩散项一起隐式求解。
-
-求解器同时提供 result4.xlsx、论文表6和完整长表CSV的生成与独立回读
-验收；--no-write 可只运行数值求解和计算验证而不创建答案文件。
+材料导数在材料坐标中已经等于固定 xi 导数，因此不再加入旧脚本中的
+Rdot 迎风项；半径变化通过时间中点半径、空间尺度和移动表面边界进入方程。
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import re
 import time as wall_time
 from copy import copy
@@ -30,7 +26,6 @@ from openpyxl.styles import Font
 from scipy.linalg import solve_banded
 
 
-# 题目和问题二/三已确定的环境、初始条件及边界传递参数。
 RADIUS_INITIAL_M = 0.02
 LENGTH_M = 0.25
 INITIAL_TEMPERATURE_C = 28.0
@@ -38,16 +33,21 @@ INITIAL_MOISTURE_KGKG = 2.55
 HEAT_TRANSFER_W_M2_K = 25.0
 MASS_TRANSFER_M_S = 8.0e-7
 
-# 问题四数值默认值：最终结果采用加密网格；粗解仅作为对照。
-N_DEFAULT = 320  # xi 区间数，dxi=1/320
-TIME_STEP_S_DEFAULT = 0.5
+N_DEFAULT = 800
+TIME_STEP_EARLY_S = 1.0
+TIME_STEP_LONG_DEFAULT_S = 5.0
+TIME_STEP_S_DEFAULT = TIME_STEP_LONG_DEFAULT_S
 OUTPUT_DT_S = 60.0
+STABLE_START_S = 9000.0
+AIR_DATA_END_S = 14400.0
 DRYING_THRESHOLD_KGKG = 0.15
-EVENT_TOL_S = 1.0e-3
-
+EVENT_TOL_S = 0.1
+DEFAULT_MAX_TIME_S = 3.0 * 24.0 * 3600.0
+FIXED_MAX_TIME_S = 7.0 * 24.0 * 3600.0
 PICARD_TOL_T_C = 1.0e-8
 PICARD_TOL_C_KGKG = 1.0e-10
 PICARD_MAX_ITER = 50
+STATE_TOL = 1.0e-8
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_AIR_DATA_PATH = REPO_ROOT / "problem" / "附件" / "附件1.xlsx"
@@ -57,40 +57,24 @@ DEFAULT_ANSWER_DIR = Path(__file__).resolve().parents[1] / "answer"
 DEFAULT_XLSX_PATH = DEFAULT_ANSWER_DIR / "result4.xlsx"
 DEFAULT_PAPER_PATH = DEFAULT_ANSWER_DIR / "task4_paper_table.xlsx"
 DEFAULT_CSV_PATH = DEFAULT_ANSWER_DIR / "task4_all_answers.csv"
-# 附件 2 的最后一个数据时刻；求解不会超出该时刻，也不会外推 R(t)。
-DEFAULT_MAX_TIME_S = 259200.0
 
 OUTPUT_RADIUS_CM = np.arange(0.0, 2.0000001, 0.1)
-PAPER_RADIUS_CM = np.array([0.0, 0.5, 1.0], dtype=float)
 CSV_COLUMNS = [
-    "record_type",
-    "time_s",
-    "time_h",
-    "radius_cm",
-    "r_cm",
-    "is_surface",
-    "temperature_C",
-    "moisture_kgkg",
+    "record_type", "time_s", "time_h", "radius_cm", "r_cm",
+    "is_surface", "temperature_C", "moisture_kgkg",
 ]
 
 
 def _required_columns(frame: pd.DataFrame, required: tuple[str, ...]) -> dict[str, Any]:
-    """按去除首尾空格后的中文列名返回原始列映射。"""
-
     mapping = {str(column).strip(): column for column in frame.columns}
     missing = [name for name in required if name not in mapping]
     if missing:
-        raise ValueError(
-            f"附件缺少必需列 {missing!r}；实际列为 {list(frame.columns)!r}"
-        )
+        raise ValueError(f"附件缺少必需列 {missing!r}；实际列为 {list(frame.columns)!r}")
     return mapping
 
 
-def load_air_data(
-    path: str | Path = DEFAULT_AIR_DATA_PATH,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """读取附件 1；求解区间外的边界值由 np.interp 保持末值。"""
-
+def load_air_data(path: str | Path = DEFAULT_AIR_DATA_PATH) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """读取附件1并确认覆盖稳定段结束14400 s。"""
     frame = pd.read_excel(Path(path))
     columns = _required_columns(frame, ("时间", "温度", "水分浓度"))
     selected = frame[[columns["时间"], columns["温度"], columns["水分浓度"]]].copy()
@@ -104,16 +88,28 @@ def load_air_data(
     values = np.column_stack((time_s, temperature_C, moisture_kgkg))
     if time_s.size < 2 or np.any(np.diff(time_s) <= 0.0):
         raise ValueError("附件1时间必须包含至少两个严格递增时间点")
-    if time_s[0] > 1.0e-10 or not np.all(np.isfinite(values)):
-        raise ValueError("附件1时间必须从0开始且数据必须有限")
+    if time_s[0] > 1.0e-10 or time_s[-1] < AIR_DATA_END_S - 1.0e-10:
+        raise ValueError("附件1未覆盖到14400 s")
+    if not np.all(np.isfinite(values)):
+        raise ValueError("附件1数据包含NaN或Inf")
     return time_s, temperature_C, moisture_kgkg
 
 
-def load_radius_data(
-    path: str | Path = DEFAULT_RADIUS_DATA_PATH,
-) -> tuple[np.ndarray, np.ndarray]:
-    """读取附件 2 的时间/半径，并将半径从 cm 转为 m。"""
+def stable_air_means(time_s: np.ndarray, temperature_C: np.ndarray, moisture_kgkg: np.ndarray) -> tuple[float, float, int]:
+    stable = (time_s >= STABLE_START_S - 1.0e-10) & (time_s <= AIR_DATA_END_S + 1.0e-10)
+    if not np.any(stable):
+        raise ValueError("附件1没有9000--14400 s稳定段数据")
+    return float(np.mean(temperature_C[stable])), float(np.mean(moisture_kgkg[stable])), int(np.count_nonzero(stable))
 
+
+def air_at(time_value_s: float, time_s: np.ndarray, temperature_C: np.ndarray, moisture_kgkg: np.ndarray, stable_temperature_C: float, stable_moisture_kgkg: float) -> tuple[float, float]:
+    if time_value_s <= AIR_DATA_END_S + 1.0e-10:
+        clipped = min(max(float(time_value_s), float(time_s[0])), AIR_DATA_END_S)
+        return float(np.interp(clipped, time_s, temperature_C)), float(np.interp(clipped, time_s, moisture_kgkg))
+    return float(stable_temperature_C), float(stable_moisture_kgkg)
+
+
+def load_radius_data(path: str | Path = DEFAULT_RADIUS_DATA_PATH) -> tuple[np.ndarray, np.ndarray]:
     frame = pd.read_excel(Path(path))
     columns = _required_columns(frame, ("时间", "半径"))
     selected = frame[[columns["时间"], columns["半径"]]].copy()
@@ -125,44 +121,25 @@ def load_radius_data(
     radius_cm = selected["半径"].to_numpy(dtype=float)
     radius_m = radius_cm / 100.0
     values = np.column_stack((time_s, radius_cm, radius_m))
-    if time_s.size < 2 or np.any(np.diff(time_s) <= 0.0):
-        raise ValueError("附件2时间必须包含至少两个严格递增时间点")
-    if time_s[0] > 1.0e-10 or not np.all(np.isfinite(values)):
-        raise ValueError("附件2时间必须从0开始且数据必须有限")
-    if np.any(radius_m <= 0.0):
-        raise ValueError("附件2半径必须为正")
-    if not np.isclose(radius_m[0], RADIUS_INITIAL_M, rtol=0.0, atol=1.0e-12):
-        raise ValueError(
-            f"附件2初始半径为 {radius_cm[0]:g} cm，不是题设的 2 cm"
-        )
+    if time_s.size < 2 or np.any(np.diff(time_s) <= 0.0) or time_s[0] > 1.0e-10 or not np.all(np.isfinite(values)):
+        raise ValueError("附件2时间必须从0开始且严格递增、数据有限")
+    if np.any(radius_m <= 0.0) or not np.isclose(radius_m[0], RADIUS_INITIAL_M, atol=1.0e-12, rtol=0.0):
+        raise ValueError("附件2半径必须为正且初始值为2 cm")
     if np.any(np.diff(radius_m) > 1.0e-12):
-        raise ValueError("附件2半径必须单调不增，不能为移动边界使用非物理膨胀数据")
+        raise ValueError("附件2半径必须单调不增")
     return time_s, radius_m
 
 
 def radius_at(time_s: float, radius_time_s: np.ndarray, radius_m: np.ndarray) -> float:
-    """在附件2覆盖范围内分段线性插值 R(t)，不允许无说明外推。"""
-
     if time_s < radius_time_s[0] - 1.0e-10 or time_s > radius_time_s[-1] + 1.0e-10:
-        raise ValueError(
-            f"求解时刻 {time_s:g}s 超出附件2的 [{radius_time_s[0]:g}, "
-            f"{radius_time_s[-1]:g}]s 覆盖范围，禁止外推半径"
-        )
-    clipped_time = min(max(float(time_s), float(radius_time_s[0])), float(radius_time_s[-1]))
-    return float(np.interp(clipped_time, radius_time_s, radius_m))
-
-
-def _air_at(time_s: float, air_time_s: np.ndarray, values: np.ndarray) -> float:
-    """附件1内分段线性，14400 s 后保持最后观测值。"""
-
-    return float(np.interp(float(time_s), air_time_s, values))
+        raise ValueError(f"求解时刻{time_s:g}s超出附件2覆盖范围，禁止外推")
+    clipped = min(max(float(time_s), float(radius_time_s[0])), float(radius_time_s[-1]))
+    return float(np.interp(clipped, radius_time_s, radius_m))
 
 
 def fixed_xi_geometry(n_intervals: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
-    """返回 xi 节点、xi 面、固定 xi 控制体测度和 dxi。"""
-
     if n_intervals < 2:
-        raise ValueError("xi 区间数至少为2")
+        raise ValueError("xi区间数至少为2")
     dxi = 1.0 / float(n_intervals)
     xi = np.linspace(0.0, 1.0, n_intervals + 1)
     faces = 0.5 * (xi[:-1] + xi[1:])
@@ -170,1004 +147,567 @@ def fixed_xi_geometry(n_intervals: int) -> tuple[np.ndarray, np.ndarray, np.ndar
     measure[0] = 0.5 * faces[0] ** 2
     measure[1:-1] = 0.5 * (faces[1:] ** 2 - faces[:-1] ** 2)
     measure[-1] = 0.5 * (1.0 - faces[-1] ** 2)
-    if not np.isclose(np.sum(measure), 0.5, rtol=0.0, atol=1.0e-14):
-        raise ValueError("固定xi控制体测度未覆盖 [0,1] 的径向积分测度")
+    if not np.isclose(np.sum(measure), 0.5, atol=1.0e-14, rtol=0.0):
+        raise ValueError("固定xi控制体测度错误")
     return xi, faces, measure, dxi
 
 
-def material_properties(
-    temperature_C: np.ndarray,
-    moisture_kgkg: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """附录4物性；指数公式中的温度显式转换为 Kelvin。"""
-
+def material_properties(temperature_C: np.ndarray, moisture_kgkg: np.ndarray, appendix: int = 4) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """附录3/4物性；D中的温度始终转换为Kelvin。"""
     temperature_C = np.asarray(temperature_C, dtype=float)
     moisture_kgkg = np.asarray(moisture_kgkg, dtype=float)
-    if temperature_C.shape != moisture_kgkg.shape:
-        raise ValueError("温度和水分数组形状不一致")
-    concentration = np.maximum(moisture_kgkg, 1.0e-12)
+    if temperature_C.shape != moisture_kgkg.shape or not np.all(np.isfinite(temperature_C)) or not np.all(np.isfinite(moisture_kgkg)):
+        raise ValueError("物性输入形状或有限性错误")
+    if appendix not in (3, 4) or np.min(moisture_kgkg) < -1.0e-10:
+        raise ValueError("物性附录或水分范围错误")
+    c = np.maximum(moisture_kgkg, 1.0e-12)
     temperature_K = temperature_C + 273.15
-    if np.any(~np.isfinite(temperature_K)) or np.any(temperature_K <= 0.0):
-        raise ValueError("附录4物性计算遇到非正或非有限 Kelvin 温度")
-
-    rho = 760.0 + 90.0 * concentration
-    cp = 1850.0 + 2150.0 * concentration / (concentration + 1.0)
-    conductivity = 0.12 + 0.20 * concentration / (concentration + 1.0)
-    diffusivity = 4.2e-4 * np.exp(-0.30 / concentration) * np.exp(
-        -3850.0 / temperature_K
-    )
+    if np.any(temperature_K <= 0.0) or not np.all(np.isfinite(temperature_K)):
+        raise ValueError("物性计算遇到非正或非有限Kelvin温度")
+    if appendix == 3:
+        rho = 650.0 + 128.0 * c
+        cp = 1450.0 + 2736.0 * c / (c + 1.0)
+        conductivity = 0.21 + 0.38 * c / (c + 1.0)
+        diffusivity = 2.4e-3 * np.exp(-0.45 / c) * np.exp(-3850.0 / temperature_K)
+    else:
+        rho = 760.0 + 90.0 * c
+        cp = 1850.0 + 2150.0 * c / (c + 1.0)
+        conductivity = 0.12 + 0.20 * c / (c + 1.0)
+        diffusivity = 4.2e-4 * np.exp(-0.30 / c) * np.exp(-3850.0 / temperature_K)
     return rho, cp, conductivity, diffusivity
 
 
-def _solve_tridiagonal(
-    lower: np.ndarray,
-    diagonal: np.ndarray,
-    upper: np.ndarray,
-    rhs: np.ndarray,
-) -> np.ndarray:
-    """解三对角系统；输入 lower/upper 长度为 n-1。"""
-
-    n = diagonal.size
-    banded = np.zeros((3, n), dtype=float)
-    banded[0, 1:] = upper
-    banded[1, :] = diagonal
-    banded[2, :-1] = lower
-    solution = solve_banded((1, 1), banded, rhs, check_finite=False)
-    if not np.all(np.isfinite(solution)):
-        raise RuntimeError("三对角线性系统求解得到 NaN 或 Inf")
-    return solution
-
-
-def _assemble_temperature_system(
-    old_temperature_C: np.ndarray,
-    guess_temperature_C: np.ndarray,
-    guess_moisture_kgkg: np.ndarray,
-    xi: np.ndarray,
-    faces: np.ndarray,
-    measure: np.ndarray,
-    dxi: float,
-    radius_m: float,
-    radius_rate_m_s: float,
-    dt_s: float,
-    air_temperature_C: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """组装固定xi坐标下的温度后向欧拉矩阵。"""
-
-    rho, cp, conductivity, _ = material_properties(
-        guess_temperature_C, guess_moisture_kgkg
-    )
-    storage = rho * cp * measure
-    # 继承 task2/task3 实际求解器的界面物性算术平均；问题四只改变
-    # 题目指定的物性公式和移动边界，不额外改变固定边界模型的界面离散。
-    face_conductivity = 0.5 * (conductivity[:-1] + conductivity[1:])
-    # 固定xi控制体扩散导通量：1/R^2 * xi_face*k_face/dxi。
-    conductance = face_conductivity * faces / (radius_m**2 * dxi)
-    b = -radius_rate_m_s / radius_m
-    if b < -1.0e-12:
-        raise ValueError("R(t)出现膨胀，不能继续使用 b>=0 的后向迎风差分")
-    b = max(0.0, b)
-    # PDE 的移动项为 b*xi*T_xi，b>=0 时使用 (T_j-T_{j-1})/dxi。
-    advection = storage * b * xi / dxi
-
-    diagonal = storage.copy()
-    lower = np.zeros(storage.size - 1, dtype=float)
-    upper = np.zeros(storage.size - 1, dtype=float)
-    rhs = storage * old_temperature_C
-    diagonal += dt_s * advection
-    lower -= dt_s * advection[1:]
-
-    # 中心自然零通量；中心项没有左邻接、没有移动项（xi=0）。
-    diagonal[0] += dt_s * conductance[0]
-    upper[0] -= dt_s * conductance[0]
-    # 内部控制体。
-    if storage.size > 2:
-        left = conductance[:-1]
-        right = conductance[1:]
-        diagonal[1:-1] += dt_s * (left + right)
-        # row j=1..n-2 的下/上三对角项分别对应 g_{j-1}/g_j。
-        lower[:-1] -= dt_s * left
-        upper[1:] -= dt_s * right
-    # 移动表面 Robin：-(k/R)T_xi=h(Ts-Tair)，换成 h/R 的边界导通量。
-    boundary_conductance = HEAT_TRANSFER_W_M2_K / radius_m
-    diagonal[-1] += dt_s * (conductance[-1] + boundary_conductance)
-    lower[-1] -= dt_s * conductance[-1]
-    rhs[-1] += dt_s * boundary_conductance * air_temperature_C
-    return lower, diagonal, upper, rhs
-
-
-def _assemble_moisture_system(
-    old_moisture_kgkg: np.ndarray,
-    guess_temperature_C: np.ndarray,
-    guess_moisture_kgkg: np.ndarray,
-    xi: np.ndarray,
-    faces: np.ndarray,
-    measure: np.ndarray,
-    dxi: float,
-    radius_m: float,
-    radius_rate_m_s: float,
-    dt_s: float,
-    air_moisture_kgkg: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """组装固定xi坐标下的水分后向欧拉矩阵。"""
-
-    _, _, _, diffusivity = material_properties(
-        guess_temperature_C, guess_moisture_kgkg
-    )
-    storage = measure.copy()
-    # 同 task2/task3，界面扩散系数使用算术平均。
-    face_diffusivity = 0.5 * (diffusivity[:-1] + diffusivity[1:])
-    conductance = face_diffusivity * faces / (radius_m**2 * dxi)
-    b = -radius_rate_m_s / radius_m
-    if b < -1.0e-12:
-        raise ValueError("R(t)出现膨胀，不能继续使用 b>=0 的后向迎风差分")
-    b = max(0.0, b)
-    advection = storage * b * xi / dxi
-
-    diagonal = storage.copy()
-    lower = np.zeros(storage.size - 1, dtype=float)
-    upper = np.zeros(storage.size - 1, dtype=float)
-    rhs = storage * old_moisture_kgkg
-    diagonal += dt_s * advection
-    lower -= dt_s * advection[1:]
-
-    diagonal[0] += dt_s * conductance[0]
-    upper[0] -= dt_s * conductance[0]
-    if storage.size > 2:
-        left = conductance[:-1]
-        right = conductance[1:]
-        diagonal[1:-1] += dt_s * (left + right)
-        lower[:-1] -= dt_s * left
-        upper[1:] -= dt_s * right
-    boundary_conductance = MASS_TRANSFER_M_S / radius_m
-    diagonal[-1] += dt_s * (conductance[-1] + boundary_conductance)
-    lower[-1] -= dt_s * conductance[-1]
-    rhs[-1] += dt_s * boundary_conductance * air_moisture_kgkg
-    return lower, diagonal, upper, rhs
-
-
-def _picard_step(
-    old_temperature_C: np.ndarray,
-    old_moisture_kgkg: np.ndarray,
-    xi: np.ndarray,
-    faces: np.ndarray,
-    measure: np.ndarray,
-    dxi: float,
-    radius_old_m: float,
-    radius_new_m: float,
-    dt_s: float,
-    air_temperature_C: float,
-    air_moisture_kgkg: float,
-) -> tuple[np.ndarray, np.ndarray, int, float, float]:
-    """一个移动边界时间步内的 Picard 热湿耦合迭代。"""
-
-    if dt_s <= 0.0:
-        raise ValueError("Picard 时间步必须为正")
-    radius_rate_m_s = (radius_new_m - radius_old_m) / dt_s
-    guess_temperature_C = old_temperature_C.copy()
-    guess_moisture_kgkg = old_moisture_kgkg.copy()
-    last_delta_temperature = np.inf
-    last_delta_moisture = np.inf
-
-    for iteration in range(1, PICARD_MAX_ITER + 1):
-        lower_T, diagonal_T, upper_T, rhs_T = _assemble_temperature_system(
-            old_temperature_C,
-            guess_temperature_C,
-            guess_moisture_kgkg,
-            xi,
-            faces,
-            measure,
-            dxi,
-            radius_new_m,
-            radius_rate_m_s,
-            dt_s,
-            air_temperature_C,
-        )
-        new_temperature_C = _solve_tridiagonal(
-            lower_T, diagonal_T, upper_T, rhs_T
-        )
-        lower_C, diagonal_C, upper_C, rhs_C = _assemble_moisture_system(
-            old_moisture_kgkg,
-            guess_temperature_C,
-            guess_moisture_kgkg,
-            xi,
-            faces,
-            measure,
-            dxi,
-            radius_new_m,
-            radius_rate_m_s,
-            dt_s,
-            air_moisture_kgkg,
-        )
-        new_moisture_kgkg = _solve_tridiagonal(
-            lower_C, diagonal_C, upper_C, rhs_C
-        )
-        last_delta_temperature = float(
-            np.max(np.abs(new_temperature_C - guess_temperature_C))
-        )
-        last_delta_moisture = float(
-            np.max(np.abs(new_moisture_kgkg - guess_moisture_kgkg))
-        )
-        if (
-            last_delta_temperature <= PICARD_TOL_T_C
-            and last_delta_moisture <= PICARD_TOL_C_KGKG
-        ):
-            if np.min(new_moisture_kgkg) < -1.0e-10:
-                raise RuntimeError("Picard 步得到明显负水分浓度")
-            return (
-                new_temperature_C,
-                np.maximum(new_moisture_kgkg, 0.0),
-                iteration,
-                last_delta_temperature,
-                last_delta_moisture,
-            )
-        guess_temperature_C = new_temperature_C
-        guess_moisture_kgkg = new_moisture_kgkg
-
-    raise RuntimeError(
-        "问题四 Picard 迭代未收敛: "
-        f"dt={dt_s:g}s, iter={PICARD_MAX_ITER}, "
-        f"max|dT|={last_delta_temperature:.3e}, "
-        f"max|dC|={last_delta_moisture:.3e}"
-    )
-
-
-def _max_info(
-    moisture_kgkg: np.ndarray,
-    xi: np.ndarray,
-    radius_m: float,
-) -> tuple[float, int, float, float]:
-    index = int(np.argmax(moisture_kgkg))
-    maximum = float(moisture_kgkg[index])
-    xi_position = float(xi[index])
-    radius_position_m = xi_position * radius_m
-    return maximum, index, xi_position, radius_position_m
-
-
-def _event_bisection(
-    lower_time_s: float,
-    lower_temperature_C: np.ndarray,
-    lower_moisture_kgkg: np.ndarray,
-    lower_max_kgkg: float,
-    upper_time_s: float,
-    upper_temperature_C: np.ndarray,
-    upper_moisture_kgkg: np.ndarray,
-    upper_max_kgkg: float,
-    xi: np.ndarray,
-    faces: np.ndarray,
-    measure: np.ndarray,
-    dxi: float,
-    radius_time_s: np.ndarray,
-    radius_m: np.ndarray,
-    air_time_s: np.ndarray,
-    air_temperature_C: np.ndarray,
-    air_moisture_kgkg: np.ndarray,
-) -> dict[str, Any]:
-    """首次跨阈值后，从固定 base 状态二分终止时刻。
-
-    每个候选时刻都计算统一函数
-
-        F(t) = max_xi C(t; base_state -> t) - 0.15,
-
-    其中 ``base_state`` 是首次跨阈值时间步前的状态。lower/upper 只更新
-    候选时刻及其由 base_state 直接积分得到的状态，不能把更新后的 lower
-    状态作为下一次候选的起点。
-    """
-
-    if not (lower_max_kgkg >= DRYING_THRESHOLD_KGKG):
-        raise ValueError("事件二分下端不在阈值上方")
-    if not (upper_max_kgkg < DRYING_THRESHOLD_KGKG):
-        raise ValueError("事件二分上端未严格低于阈值")
-    # 固定首次跨阈值前的 base 状态；所有候选都从它重新推进。
-    base_time = float(lower_time_s)
-    base_temperature = lower_temperature_C.copy()
-    base_moisture = lower_moisture_kgkg.copy()
-    base_radius = radius_at(base_time, radius_time_s, radius_m)
-
-    lower_time = base_time
-    upper_time = float(upper_time_s)
-    lower_temperature = base_temperature.copy()
-    lower_moisture = base_moisture.copy()
-    lower_max = float(lower_max_kgkg)
-    upper_temperature = upper_temperature_C.copy()
-    upper_moisture = upper_moisture_kgkg.copy()
-    upper_max = float(upper_max_kgkg)
-
-    while upper_time - lower_time > EVENT_TOL_S:
-        midpoint = 0.5 * (lower_time + upper_time)
-        midpoint_radius = radius_at(midpoint, radius_time_s, radius_m)
-        midpoint_temperature, midpoint_moisture, _, _, _ = _picard_step(
-            base_temperature,
-            base_moisture,
-            xi,
-            faces,
-            measure,
-            dxi,
-            base_radius,
-            midpoint_radius,
-            midpoint - base_time,
-            _air_at(midpoint, air_time_s, air_temperature_C),
-            _air_at(midpoint, air_time_s, air_moisture_kgkg),
-        )
-        midpoint_max, _, _, _ = _max_info(
-            midpoint_moisture, xi, midpoint_radius
-        )
-        if midpoint_max < DRYING_THRESHOLD_KGKG:
-            upper_time = midpoint
-            upper_temperature = midpoint_temperature
-            upper_moisture = midpoint_moisture
-            upper_max = midpoint_max
-        else:
-            lower_time = midpoint
-            lower_temperature = midpoint_temperature
-            lower_moisture = midpoint_moisture
-            lower_max = midpoint_max
-
-    upper_radius = radius_at(upper_time, radius_time_s, radius_m)
-    maximum, index, xi_position, radius_position_m = _max_info(
-        upper_moisture, xi, upper_radius
-    )
-    lower_radius = radius_at(lower_time, radius_time_s, radius_m)
-    lower_max_check, lower_index, lower_xi, lower_position_m = _max_info(
-        lower_moisture, xi, lower_radius
-    )
-    if not np.isclose(maximum, upper_max, rtol=0.0, atol=1.0e-12):
-        raise RuntimeError("事件二分上端最大值记录不一致")
-    if not np.isclose(lower_max_check, lower_max, rtol=0.0, atol=1.0e-12):
-        raise RuntimeError("事件二分下端最大值记录不一致")
-    return {
-        "termination_time_s": float(upper_time),
-        "termination_temperature_internal_C": upper_temperature,
-        "termination_moisture_internal_kgkg": upper_moisture,
-        "termination_max_kgkg": float(maximum),
-        "termination_max_index": int(index),
-        "termination_max_xi": float(xi_position),
-        "termination_max_radius_m": float(radius_position_m),
-        "termination_radius_m": float(upper_radius),
-        "termination_lower_time_s": float(lower_time),
-        "termination_lower_temperature_internal_C": lower_temperature,
-        "termination_lower_moisture_internal_kgkg": lower_moisture,
-        "termination_lower_max_kgkg": float(lower_max_check),
-        "termination_lower_max_index": int(lower_index),
-        "termination_lower_max_xi": float(lower_xi),
-        "termination_lower_max_radius_m": float(lower_position_m),
-        "termination_lower_radius_m": float(lower_radius),
-        "termination_bracket_width_s": float(upper_time - lower_time),
-    }
-
-
-def solve_task4(
-    air_data_path: str | Path = DEFAULT_AIR_DATA_PATH,
-    radius_data_path: str | Path = DEFAULT_RADIUS_DATA_PATH,
-    max_time_s: float = DEFAULT_MAX_TIME_S,
-    time_step_s: float = TIME_STEP_S_DEFAULT,
-    output_dt_s: float = OUTPUT_DT_S,
-    n_intervals: int = N_DEFAULT,
-    progress: bool = False,
-) -> dict[str, Any]:
-    """运行问题四基线求解，返回每60 s完整xi状态和精确终止状态。"""
-
-    if max_time_s <= 0.0 or time_step_s <= 0.0 or output_dt_s <= 0.0:
-        raise ValueError("最大时间、内部时间步和输出间隔必须为正")
-    output_ratio = output_dt_s / time_step_s
-    output_stride = int(round(output_ratio))
-    if not np.isclose(output_ratio, output_stride, rtol=0.0, atol=1.0e-10):
-        raise ValueError("输出间隔必须是内部时间步的整数倍")
-    max_steps_float = max_time_s / time_step_s
-    max_steps = int(round(max_steps_float))
-    if not np.isclose(max_steps_float, max_steps, rtol=0.0, atol=1.0e-8):
-        raise ValueError("最大时间必须是内部时间步的整数倍")
-
-    air_time_s, air_temperature, air_moisture = load_air_data(air_data_path)
-    radius_time_s, radius_values_m = load_radius_data(radius_data_path)
-    if max_time_s > radius_time_s[-1] + 1.0e-10:
-        raise ValueError(
-            f"请求求解至 {max_time_s:g}s，但附件2只覆盖到 {radius_time_s[-1]:g}s，"
-            "禁止无说明外推"
-        )
-    xi, faces, measure, dxi = fixed_xi_geometry(n_intervals)
-    initial_temperature = np.full(xi.size, INITIAL_TEMPERATURE_C, dtype=float)
-    initial_moisture = np.full(xi.size, INITIAL_MOISTURE_KGKG, dtype=float)
-    current_temperature = initial_temperature.copy()
-    current_moisture = initial_moisture.copy()
-    current_time = 0.0
-    current_radius = radius_at(current_time, radius_time_s, radius_values_m)
-    current_max, _, _, _ = _max_info(current_moisture, xi, current_radius)
-
-    sampled_times: list[float] = [0.0]
-    sampled_radius_m: list[float] = [current_radius]
-    sampled_temperature: list[np.ndarray] = [current_temperature.copy()]
-    sampled_moisture: list[np.ndarray] = [current_moisture.copy()]
-    sampled_max: list[float] = [current_max]
-    iteration_counts: list[int] = []
-    picard_delta_temperature: list[float] = []
-    picard_delta_moisture: list[float] = []
-    min_temperature = float(np.min(current_temperature))
-    max_temperature = float(np.max(current_temperature))
-    min_moisture = float(np.min(current_moisture))
-    max_moisture = float(np.max(current_moisture))
-    progress_next_time = 0.0
-    termination: dict[str, Any] | None = None
-
-    for step in range(1, max_steps + 1):
-        time_new = min(float(step * time_step_s), float(max_time_s))
-        dt_current = time_new - current_time
-        if dt_current <= 0.0:
-            break
-        radius_new = radius_at(time_new, radius_time_s, radius_values_m)
-        temperature_new, moisture_new, iterations, delta_T, delta_C = _picard_step(
-            current_temperature,
-            current_moisture,
-            xi,
-            faces,
-            measure,
-            dxi,
-            current_radius,
-            radius_new,
-            dt_current,
-            _air_at(time_new, air_time_s, air_temperature),
-            _air_at(time_new, air_time_s, air_moisture),
-        )
-        iteration_counts.append(int(iterations))
-        picard_delta_temperature.append(float(delta_T))
-        picard_delta_moisture.append(float(delta_C))
-        step_max, _, _, _ = _max_info(moisture_new, xi, radius_new)
-        min_temperature = min(min_temperature, float(np.min(temperature_new)))
-        max_temperature = max(max_temperature, float(np.max(temperature_new)))
-        min_moisture = min(min_moisture, float(np.min(moisture_new)))
-        max_moisture = max(max_moisture, float(np.max(moisture_new)))
-
-        # 保留每60 s时刻的完整 xi 场，供后续绝对r和真实表面插值。
-        if step % output_stride == 0:
-            sampled_times.append(float(time_new))
-            sampled_radius_m.append(float(radius_new))
-            sampled_temperature.append(temperature_new.copy())
-            sampled_moisture.append(moisture_new.copy())
-            sampled_max.append(float(step_max))
-
-        if progress and (
-            step == 1 or time_new >= progress_next_time or time_new >= max_time_s
-        ):
-            print(
-                f"  已推进 {time_new / 3600.0:.2f} h，R={radius_new * 100:.4f} cm，"
-                f"max C={step_max:.8f}，Picard={iterations}"
-            )
-            while progress_next_time <= time_new + 1.0e-10:
-                progress_next_time += 6.0 * 3600.0
-
-        if step_max < DRYING_THRESHOLD_KGKG:
-            termination = _event_bisection(
-                current_time,
-                current_temperature,
-                current_moisture,
-                current_max,
-                time_new,
-                temperature_new,
-                moisture_new,
-                step_max,
-                xi,
-                faces,
-                measure,
-                dxi,
-                radius_time_s,
-                radius_values_m,
-                air_time_s,
-                air_temperature,
-                air_moisture,
-            )
-            break
-
-        current_time = time_new
-        current_radius = radius_new
-        current_temperature = temperature_new
-        current_moisture = moisture_new
-        current_max = step_max
-
-    if termination is None:
-        raise RuntimeError(
-            f"在 {max_time_s / 3600.0:g} h 附件2覆盖范围内未达到全场严格阈值 "
-            f"max C < {DRYING_THRESHOLD_KGKG:g}"
-        )
-
-    result: dict[str, Any] = {
-        "xi": xi,
-        "dxi": float(dxi),
-        "time_step_s": float(time_step_s),
-        "output_dt_s": float(output_dt_s),
-        "n_intervals": int(n_intervals),
-        "radius_data_time_s": radius_time_s.copy(),
-        "radius_data_m": radius_values_m.copy(),
-        "air_data_time_s": air_time_s.copy(),
-        "air_temperature_C": air_temperature.copy(),
-        "air_moisture_kgkg": air_moisture.copy(),
-        "sampled_times_s": np.asarray(sampled_times, dtype=float),
-        "sampled_radius_m": np.asarray(sampled_radius_m, dtype=float),
-        "sampled_temperature_internal_C": np.asarray(sampled_temperature, dtype=float),
-        "sampled_moisture_internal_kgkg": np.asarray(sampled_moisture, dtype=float),
-        "sampled_max_kgkg": np.asarray(sampled_max, dtype=float),
-        "iteration_counts": np.asarray(iteration_counts, dtype=int),
-        "picard_delta_temperature": np.asarray(picard_delta_temperature, dtype=float),
-        "picard_delta_moisture": np.asarray(picard_delta_moisture, dtype=float),
-        "min_temperature_C": float(min_temperature),
-        "max_temperature_C": float(max_temperature),
-        "min_internal_moisture_kgkg": float(min_moisture),
-        "max_internal_moisture_kgkg": float(max_moisture),
-    }
-    result.update(termination)
+def _harmonic_mean(left: np.ndarray, right: np.ndarray) -> np.ndarray:
+    left = np.asarray(left, dtype=float)
+    right = np.asarray(right, dtype=float)
+    denominator = left + right
+    if left.shape != right.shape or np.any(left <= 0.0) or np.any(right <= 0.0) or not np.all(np.isfinite(denominator)):
+        raise ValueError("界面物性必须为同形状正有限数组")
+    result = 2.0 * left * right / denominator
+    if not np.all(np.isfinite(result)):
+        raise ValueError("调和平均得到NaN或Inf")
     return result
 
 
-def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
-    """检查输入半径、离散边界、物性单位、采样和终止阈值。"""
+def _solve_tridiagonal(lower: np.ndarray, diagonal: np.ndarray, upper: np.ndarray, rhs: np.ndarray) -> np.ndarray:
+    n = diagonal.size
+    if lower.size != n - 1 or upper.size != n - 1 or rhs.size != n:
+        raise ValueError("三对角系统长度错误")
+    banded = np.zeros((3, n), dtype=float)
+    banded[0, 1:] = upper
+    banded[1] = diagonal
+    banded[2, :-1] = lower
+    result = solve_banded((1, 1), banded, rhs, check_finite=False)
+    if not np.all(np.isfinite(result)):
+        raise RuntimeError("三对角系统求解得到NaN或Inf")
+    return result
 
-    xi = np.asarray(solution["xi"], dtype=float)
-    radius_data_time_s = np.asarray(solution["radius_data_time_s"], dtype=float)
-    radius_data_m = np.asarray(solution["radius_data_m"], dtype=float)
-    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
-    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
-    sampled_temperature = np.asarray(
-        solution["sampled_temperature_internal_C"], dtype=float
-    )
-    sampled_moisture = np.asarray(
-        solution["sampled_moisture_internal_kgkg"], dtype=float
-    )
-    termination_temperature = np.asarray(
-        solution["termination_temperature_internal_C"], dtype=float
-    )
-    termination_moisture = np.asarray(
-        solution["termination_moisture_internal_kgkg"], dtype=float
-    )
-    lower_temperature = np.asarray(
-        solution["termination_lower_temperature_internal_C"], dtype=float
-    )
-    lower_moisture = np.asarray(
-        solution["termination_lower_moisture_internal_kgkg"], dtype=float
-    )
-    all_arrays = (
-        xi,
-        radius_data_time_s,
-        radius_data_m,
-        sampled_times,
-        sampled_radius,
-        sampled_temperature,
-        sampled_moisture,
-        termination_temperature,
-        termination_moisture,
-        lower_temperature,
-        lower_moisture,
-    )
-    if not all(np.all(np.isfinite(array)) for array in all_arrays):
-        raise ValueError("问题四结果包含 NaN 或 Inf")
-    if xi.ndim != 1 or xi.size < 3 or not np.isclose(xi[0], 0.0) or not np.isclose(xi[-1], 1.0):
-        raise ValueError("固定xi网格端点错误")
-    if np.any(np.diff(xi) <= 0.0):
-        raise ValueError("固定xi网格不是严格递增")
-    if not np.isclose(radius_data_m[0], RADIUS_INITIAL_M, atol=1.0e-12):
-        raise ValueError("附件2初始半径读取错误")
-    if np.any(np.diff(radius_data_m) > 1.0e-12):
-        raise ValueError("附件2半径不是单调不增")
-    if not np.isclose(sampled_times[0], 0.0, atol=1.0e-12):
-        raise ValueError("60 s采样未从0 s开始")
-    if sampled_times.size > 1 and not np.allclose(
-        np.diff(sampled_times), OUTPUT_DT_S, rtol=0.0, atol=1.0e-8
-    ):
-        raise ValueError("60 s采样时间间隔错误")
-    if sampled_temperature.shape != (sampled_times.size, xi.size):
-        raise ValueError("每60 s温度完整xi状态形状错误")
-    if sampled_moisture.shape != sampled_temperature.shape:
-        raise ValueError("每60 s温度/水分完整xi状态形状不一致")
-    if sampled_radius.shape != sampled_times.shape:
-        raise ValueError("每60 s半径状态形状错误")
-    expected_radius = np.array(
-        [radius_at(t, radius_data_time_s, radius_data_m) for t in sampled_times]
-    )
-    if not np.allclose(sampled_radius, expected_radius, rtol=0.0, atol=1.0e-12):
-        raise ValueError("每60 s半径没有使用附件2分段线性 R(t)")
-    if np.min(sampled_moisture) < -1.0e-10 or np.min(termination_moisture) < -1.0e-10:
-        raise ValueError("水分场出现明显负值")
-    if termination_temperature.shape != xi.shape or termination_moisture.shape != xi.shape:
-        raise ValueError("终止状态不是完整xi网格")
-    if lower_temperature.shape != xi.shape or lower_moisture.shape != xi.shape:
-        raise ValueError("终止下端状态不是完整xi网格")
 
-    # 附件2的每个已知数据点都必须被原样读取；半径单位检查同时覆盖 cm->m。
-    interpolated_known = np.array(
-        [radius_at(t, radius_data_time_s, radius_data_m) for t in radius_data_time_s]
-    )
-    known_radius_error = float(np.max(np.abs(interpolated_known - radius_data_m)))
-    if known_radius_error > 1.0e-14:
-        raise ValueError("附件2已知时间点半径插值不一致")
+def _solve_cn_field(old_field: np.ndarray, storage: np.ndarray, conductance: np.ndarray, dt_s: float, boundary_conductance: float, air_value: float) -> np.ndarray:
+    """(S+dt*K/2)new=(S-dt*K/2)old+dt*b_mid。"""
+    old_field = np.asarray(old_field, dtype=float)
+    storage = np.asarray(storage, dtype=float)
+    conductance = np.asarray(conductance, dtype=float)
+    if storage.shape != old_field.shape or conductance.size != old_field.size - 1:
+        raise ValueError("CN场/存储/导通数组形状错误")
+    if dt_s <= 0.0 or boundary_conductance < 0.0 or np.any(storage <= 0.0) or np.any(conductance <= 0.0):
+        raise ValueError("CN参数无效")
+    diagonal_K = np.empty_like(storage)
+    diagonal_K[0] = conductance[0]
+    diagonal_K[1:-1] = conductance[:-1] + conductance[1:]
+    diagonal_K[-1] = conductance[-1] + boundary_conductance
+    half = 0.5 * dt_s
+    diagonal = storage + half * diagonal_K
+    lower = -half * conductance
+    upper = -half * conductance
+    rhs = (storage - half * diagonal_K) * old_field
+    rhs[:-1] += half * conductance * old_field[1:]
+    rhs[1:] += half * conductance * old_field[:-1]
+    rhs[-1] += dt_s * boundary_conductance * float(air_value)
+    return _solve_tridiagonal(lower, diagonal, upper, rhs)
 
-    # 用一个独立计算的 Kelvin 表达式检查物性温度单位没有误用摄氏度。
-    reference_T = np.array([50.0])
-    reference_C = np.array([0.10])
-    _, _, _, computed_D = material_properties(reference_T, reference_C)
-    expected_D = 4.2e-4 * np.exp(-0.30 / 0.10) * np.exp(-3850.0 / (50.0 + 273.15))
-    if not np.isclose(computed_D[0], expected_D, rtol=1.0e-13, atol=0.0):
-        raise ValueError("D 的 Kelvin 温度验证失败")
 
-    lower_max = float(solution["termination_lower_max_kgkg"])
-    upper_max = float(solution["termination_max_kgkg"])
-    lower_time = float(solution["termination_lower_time_s"])
-    upper_time = float(solution["termination_time_s"])
-    if not lower_max >= DRYING_THRESHOLD_KGKG:
-        raise ValueError("终止括号下端已低于阈值")
-    if not upper_max < DRYING_THRESHOLD_KGKG:
-        raise ValueError("终止状态没有严格低于阈值")
-    if not (lower_time < upper_time and upper_time - lower_time <= EVENT_TOL_S + 1.0e-10):
-        raise ValueError("终止时刻括号不满足二分精度")
-    if not np.isclose(lower_max, np.max(lower_moisture), atol=1.0e-12, rtol=0.0):
-        raise ValueError("终止下端 max C 不是全xi场最大值")
-    if not np.isclose(upper_max, np.max(termination_moisture), atol=1.0e-12, rtol=0.0):
-        raise ValueError("终止上端 max C 不是全xi场最大值")
-    upper_index = int(np.argmax(termination_moisture))
-    if upper_index != int(solution["termination_max_index"]):
-        raise ValueError("终止 max C 位置记录不一致")
-    expected_upper_position = xi[upper_index] * float(solution["termination_radius_m"])
-    if not np.isclose(
-        expected_upper_position,
-        float(solution["termination_max_radius_m"]),
-        atol=1.0e-14,
-        rtol=0.0,
-    ):
-        raise ValueError("终止 max C 的物理半径位置记录不一致")
+def _picard_step(old_temperature_C: np.ndarray, old_moisture_kgkg: np.ndarray, xi: np.ndarray, faces: np.ndarray, measure: np.ndarray, dxi: float, radius_mid_m: float, dt_s: float, air_temperature_C: float, air_moisture_kgkg: float, appendix: int = 4, context_time_s: float | None = None) -> tuple[np.ndarray, np.ndarray, int, float, float]:
+    """同一组中点物性同步求解温度和水分，固定材料坐标无Rdot迎风项。"""
+    if dt_s <= 0.0 or radius_mid_m <= 0.0:
+        raise ValueError("Picard时间步和中点半径必须为正")
+    if old_temperature_C.shape != xi.shape or old_moisture_kgkg.shape != xi.shape or measure.shape != xi.shape or faces.shape != (xi.size - 1,):
+        raise ValueError("Picard网格形状错误")
+    guess_T = old_temperature_C.copy()
+    guess_C = old_moisture_kgkg.copy()
+    dT = np.inf
+    dC = np.inf
+    for iteration in range(1, PICARD_MAX_ITER + 1):
+        midpoint_T = 0.5 * (old_temperature_C + guess_T)
+        midpoint_C = 0.5 * (old_moisture_kgkg + guess_C)
+        rho, cp, conductivity, diffusivity = material_properties(midpoint_T, midpoint_C, appendix)
+        face_k = _harmonic_mean(conductivity[:-1], conductivity[1:])
+        face_D = _harmonic_mean(diffusivity[:-1], diffusivity[1:])
+        scale = radius_mid_m * radius_mid_m * dxi
+        new_T = _solve_cn_field(old_temperature_C, rho * cp * measure, faces * face_k / scale, dt_s, HEAT_TRANSFER_W_M2_K / radius_mid_m, air_temperature_C)
+        new_C = _solve_cn_field(old_moisture_kgkg, measure, faces * face_D / scale, dt_s, MASS_TRANSFER_M_S / radius_mid_m, air_moisture_kgkg)
+        if not np.all(np.isfinite(new_T)) or not np.all(np.isfinite(new_C)):
+            raise RuntimeError("Picard步得到NaN或Inf")
+        if np.min(new_C) < -1.0e-10:
+            raise RuntimeError("Picard步得到明显负水分浓度")
+        new_C = np.maximum(new_C, 0.0)
+        dT = float(np.max(np.abs(new_T - guess_T)))
+        dC = float(np.max(np.abs(new_C - guess_C)))
+        if dT <= PICARD_TOL_T_C and dC <= PICARD_TOL_C_KGKG:
+            return new_T, new_C, iteration, dT, dC
+        guess_T, guess_C = new_T, new_C
+    location = "" if context_time_s is None else f", t={context_time_s:g}s"
+    raise RuntimeError(f"CN Picard迭代未收敛{location}, dt={dt_s:g}s, R_mid={radius_mid_m:g}m, iter={PICARD_MAX_ITER}, max|dT|={dT:.3e}, max|dC|={dC:.3e}")
 
-    # 中心离散语义：xi=0，advection=b*xi/dxi=0，左侧扩散通量为空。
-    if not np.isclose(xi[0], 0.0, atol=1.0e-14):
-        raise ValueError("中心xi不是0")
-    center_boundary_ok = True
 
+def _radius_for_time(time_s: float, radius_time_s: np.ndarray | None, radius_values_m: np.ndarray | None, fixed_radius_m: float | None) -> float:
+    if fixed_radius_m is not None:
+        return float(fixed_radius_m)
+    if radius_time_s is None or radius_values_m is None:
+        raise ValueError("动态半径求解缺少附件2数据")
+    return radius_at(time_s, radius_time_s, radius_values_m)
+
+
+def _advance_step(old_time_s: float, dt_s: float, old_temperature_C: np.ndarray, old_moisture_kgkg: np.ndarray, xi: np.ndarray, faces: np.ndarray, measure: np.ndarray, dxi: float, radius_time_s: np.ndarray | None, radius_values_m: np.ndarray | None, fixed_radius_m: float | None, air_time_s: np.ndarray, air_temperature_C: np.ndarray, air_moisture_kgkg: np.ndarray, stable_temperature_C: float, stable_moisture_kgkg: float, appendix: int = 4) -> tuple[np.ndarray, np.ndarray, int, float, float, float, tuple[float, float]]:
+    midpoint_time = float(old_time_s + 0.5 * dt_s)
+    radius_mid = _radius_for_time(midpoint_time, radius_time_s, radius_values_m, fixed_radius_m)
+    midpoint_air = air_at(midpoint_time, air_time_s, air_temperature_C, air_moisture_kgkg, stable_temperature_C, stable_moisture_kgkg)
+    result = _picard_step(old_temperature_C, old_moisture_kgkg, xi, faces, measure, dxi, radius_mid, dt_s, midpoint_air[0], midpoint_air[1], appendix, midpoint_time)
+    return (*result, radius_mid, midpoint_air)
+
+
+def _max_info(moisture_kgkg: np.ndarray, xi: np.ndarray, radius_m: float) -> tuple[float, int, float, float]:
+    index = int(np.argmax(moisture_kgkg))
+    return float(moisture_kgkg[index]), index, float(xi[index]), float(xi[index] * radius_m)
+
+
+def _event_bisection(lower_time_s: float, lower_temperature_C: np.ndarray, lower_moisture_kgkg: np.ndarray, lower_max_kgkg: float, upper_time_s: float, upper_temperature_C: np.ndarray, upper_moisture_kgkg: np.ndarray, upper_max_kgkg: float, xi: np.ndarray, faces: np.ndarray, measure: np.ndarray, dxi: float, radius_time_s: np.ndarray | None, radius_values_m: np.ndarray | None, air_time_s: np.ndarray, air_temperature_C: np.ndarray, air_moisture_kgkg: np.ndarray, stable_temperature_C: float, stable_moisture_kgkg: float, fixed_radius_m: float | None = None, appendix: int = 4, event_tol_s: float = EVENT_TOL_S, temperature_bounds: tuple[float, float] | None = None) -> dict[str, Any]:
+    """候选时刻均从同一个跨阈值前base状态重新推进。"""
+    if lower_max_kgkg < DRYING_THRESHOLD_KGKG or upper_max_kgkg >= DRYING_THRESHOLD_KGKG or upper_time_s <= lower_time_s or event_tol_s <= 0.0:
+        raise ValueError("事件二分上下端或精度错误")
+    base_time = float(lower_time_s)
+    base_T = lower_temperature_C.copy()
+    base_C = lower_moisture_kgkg.copy()
+    lower_time, lower_T, lower_C, lower_max = base_time, base_T.copy(), base_C.copy(), float(lower_max_kgkg)
+    upper_time, upper_T, upper_C, upper_max = float(upper_time_s), upper_temperature_C.copy(), upper_moisture_kgkg.copy(), float(upper_max_kgkg)
+    event_iterations = 0
+    event_picard_iterations: list[int] = []
+    while upper_time - lower_time > event_tol_s:
+        midpoint = 0.5 * (lower_time + upper_time)
+        values = _advance_step(base_time, midpoint - base_time, base_T, base_C, xi, faces, measure, dxi, radius_time_s, radius_values_m, fixed_radius_m, air_time_s, air_temperature_C, air_moisture_kgkg, stable_temperature_C, stable_moisture_kgkg, appendix)
+        midpoint_T, midpoint_C = values[0], values[1]
+        midpoint_picard_iterations = int(values[2])
+        if temperature_bounds is not None:
+            _check_state(midpoint_T, midpoint_C, temperature_bounds, f"事件候选t={midpoint:g}s")
+        event_picard_iterations.append(midpoint_picard_iterations)
+        midpoint_radius = _radius_for_time(midpoint, radius_time_s, radius_values_m, fixed_radius_m)
+        midpoint_max, _, _, _ = _max_info(midpoint_C, xi, midpoint_radius)
+        if midpoint_max < DRYING_THRESHOLD_KGKG:
+            upper_time, upper_T, upper_C, upper_max = midpoint, midpoint_T, midpoint_C, midpoint_max
+        else:
+            lower_time, lower_T, lower_C, lower_max = midpoint, midpoint_T, midpoint_C, midpoint_max
+        event_iterations += 1
+    upper_radius = _radius_for_time(upper_time, radius_time_s, radius_values_m, fixed_radius_m)
+    lower_radius = _radius_for_time(lower_time, radius_time_s, radius_values_m, fixed_radius_m)
+    upper_max, upper_index, upper_xi, upper_position = _max_info(upper_C, xi, upper_radius)
+    lower_max, lower_index, lower_xi, lower_position = _max_info(lower_C, xi, lower_radius)
     return {
         "termination_time_s": upper_time,
-        "termination_time_h": upper_time / 3600.0,
-        "termination_radius_cm": float(solution["termination_radius_m"]) * 100.0,
+        "termination_temperature_internal_C": upper_T,
+        "termination_moisture_internal_kgkg": upper_C,
         "termination_max_kgkg": upper_max,
-        "termination_max_xi": float(solution["termination_max_xi"]),
-        "termination_max_radius_cm": float(solution["termination_max_radius_m"]) * 100.0,
+        "termination_max_index": upper_index,
+        "termination_max_xi": upper_xi,
+        "termination_max_radius_m": upper_position,
+        "termination_radius_m": upper_radius,
         "termination_lower_time_s": lower_time,
+        "termination_lower_temperature_internal_C": lower_T,
+        "termination_lower_moisture_internal_kgkg": lower_C,
         "termination_lower_max_kgkg": lower_max,
+        "termination_lower_max_index": lower_index,
+        "termination_lower_max_xi": lower_xi,
+        "termination_lower_max_radius_m": lower_position,
+        "termination_lower_radius_m": lower_radius,
         "termination_bracket_width_s": upper_time - lower_time,
-        "radius_known_point_max_error_m": known_radius_error,
-        "radius_known_point_count": int(radius_data_time_s.size),
-        "temperature_min_C": float(solution["min_temperature_C"]),
-        "temperature_max_C": float(solution["max_temperature_C"]),
-        "moisture_min_kgkg": float(solution["min_internal_moisture_kgkg"]),
-        "moisture_max_kgkg": float(solution["max_internal_moisture_kgkg"]),
-        "max_picard_iterations": int(np.max(solution["iteration_counts"])),
-        "mean_picard_iterations": float(np.mean(solution["iteration_counts"])),
-        "sample_count": int(sampled_times.size),
-        "internal_node_count": int(xi.size),
-        "center_boundary_zero_flux_and_zero_advection": center_boundary_ok,
-        "kelvin_reference_D_m2_s": float(computed_D[0]),
+        "termination_event_iterations": event_iterations,
+        "termination_event_picard_max": int(max(event_picard_iterations, default=0)),
+        "termination_event_picard_total": int(sum(event_picard_iterations)),
+        "termination_event_candidate_count": int(len(event_picard_iterations)),
+    }
+
+
+def _state_bounds(air_temperature_C: np.ndarray, stable_temperature_C: float) -> tuple[float, float]:
+    return float(min(INITIAL_TEMPERATURE_C, np.min(air_temperature_C), stable_temperature_C)), float(max(INITIAL_TEMPERATURE_C, np.max(air_temperature_C), stable_temperature_C))
+
+
+def _check_state(temperature_C: np.ndarray, moisture_kgkg: np.ndarray, temperature_bounds: tuple[float, float], context: str) -> None:
+    if not np.all(np.isfinite(temperature_C)) or not np.all(np.isfinite(moisture_kgkg)):
+        raise RuntimeError(f"{context}包含NaN或Inf")
+    if np.min(moisture_kgkg) < -1.0e-10 or np.max(moisture_kgkg) > INITIAL_MOISTURE_KGKG + STATE_TOL:
+        raise RuntimeError(f"{context}水分超出[0,C0]范围")
+    lower, upper = temperature_bounds
+    if np.min(temperature_C) < lower - STATE_TOL or np.max(temperature_C) > upper + STATE_TOL:
+        raise RuntimeError(f"{context}温度超出[{lower:g},{upper:g}]C范围")
+
+
+def solve_task4(air_data_path: str | Path = DEFAULT_AIR_DATA_PATH, radius_data_path: str | Path = DEFAULT_RADIUS_DATA_PATH, max_time_s: float | None = None, time_step_s: float | None = None, output_dt_s: float = OUTPUT_DT_S, n_intervals: int = N_DEFAULT, progress: bool = False, *, time_step_early_s: float | None = None, time_step_long_s: float | None = None, event_tol_s: float = EVENT_TOL_S, appendix: int = 4, fixed_radius_m: float | None = None) -> dict[str, Any]:
+    """从0开始求解，动态半径只在附件2覆盖范围内使用。"""
+    if time_step_s is not None:
+        if time_step_early_s is not None or time_step_long_s is not None:
+            raise ValueError("time_step不能与early/long同时使用")
+        time_step_early_s = time_step_long_s = float(time_step_s)
+    time_step_early_s = TIME_STEP_EARLY_S if time_step_early_s is None else float(time_step_early_s)
+    time_step_long_s = TIME_STEP_LONG_DEFAULT_S if time_step_long_s is None else float(time_step_long_s)
+    max_time_s = (FIXED_MAX_TIME_S if fixed_radius_m is not None else DEFAULT_MAX_TIME_S) if max_time_s is None else float(max_time_s)
+    if max_time_s <= 0.0 or output_dt_s <= 0.0 or time_step_early_s <= 0.0 or time_step_long_s <= 0.0 or event_tol_s <= 0.0:
+        raise ValueError("时间、时间步和事件精度必须为正")
+    if fixed_radius_m is not None and fixed_radius_m <= 0.0:
+        raise ValueError("固定半径必须为正")
+    for step_value in (time_step_early_s, time_step_long_s):
+        ratio = output_dt_s / step_value
+        if not np.isclose(ratio, round(ratio), atol=1.0e-10, rtol=0.0):
+            raise ValueError("60 s输出间隔必须是两段内部时间步的整数倍")
+    air_time_s, air_temperature, air_moisture = load_air_data(air_data_path)
+    stable_T, stable_C, stable_count = stable_air_means(air_time_s, air_temperature, air_moisture)
+    if fixed_radius_m is None:
+        radius_time_s, radius_values_m = load_radius_data(radius_data_path)
+        if max_time_s > radius_time_s[-1] + 1.0e-10:
+            raise ValueError("动态半径求解超过附件2覆盖范围")
+    else:
+        radius_time_s = np.array([], dtype=float)
+        radius_values_m = np.array([], dtype=float)
+    xi, faces, measure, dxi = fixed_xi_geometry(n_intervals)
+    temperature = np.full(xi.size, INITIAL_TEMPERATURE_C, dtype=float)
+    moisture = np.full(xi.size, INITIAL_MOISTURE_KGKG, dtype=float)
+    bounds = _state_bounds(air_temperature, stable_T)
+    current_time = 0.0
+    current_radius = _radius_for_time(0.0, None if fixed_radius_m is not None else radius_time_s, None if fixed_radius_m is not None else radius_values_m, fixed_radius_m)
+    current_max, _, _, _ = _max_info(moisture, xi, current_radius)
+    sampled_times: list[float] = [0.0]
+    sampled_radius: list[float] = [current_radius]
+    sampled_T: list[np.ndarray] = [temperature.copy()]
+    sampled_C: list[np.ndarray] = [moisture.copy()]
+    sampled_max: list[float] = [current_max]
+    step_times: list[float] = []
+    step_max: list[float] = []
+    step_xi: list[float] = []
+    step_position: list[float] = []
+    step_radius: list[float] = []
+    radius_increments: list[float] = []
+    iterations: list[int] = []
+    delta_T: list[float] = []
+    delta_C: list[float] = []
+    min_T, max_T = float(np.min(temperature)), float(np.max(temperature))
+    min_C, max_C = float(np.min(moisture)), float(np.max(moisture))
+    early_steps = long_steps = 0
+    progress_next = 0.0
+    termination: dict[str, Any] | None = None
+    guard = 0
+    guard_limit = int(np.ceil(max_time_s / min(time_step_early_s, time_step_long_s))) + 1000
+
+    def next_boundary(now: float, values: list[float]) -> float:
+        valid = [value for value in values if value > now + 1.0e-9]
+        return min(valid) if valid else float("inf")
+
+    while current_time < max_time_s - 1.0e-9:
+        guard += 1
+        if guard > guard_limit:
+            raise RuntimeError("超过时间步保护上限仍未达到烘干阈值")
+        phase_dt = time_step_early_s if current_time < AIR_DATA_END_S - 1.0e-9 else time_step_long_s
+        candidates = [current_time + phase_dt, max_time_s, (np.floor(current_time / output_dt_s + 1.0e-10) + 1.0) * output_dt_s, next_boundary(current_time, [AIR_DATA_END_S])]
+        if fixed_radius_m is None:
+            candidates.append(next_boundary(current_time, list(radius_time_s[1:])))
+        time_new = min(value for value in candidates if value > current_time + 1.0e-9)
+        time_new = min(time_new, max_time_s)
+        dt_current = time_new - current_time
+        values = _advance_step(current_time, dt_current, temperature, moisture, xi, faces, measure, dxi, None if fixed_radius_m is not None else radius_time_s, None if fixed_radius_m is not None else radius_values_m, fixed_radius_m, air_time_s, air_temperature, air_moisture, stable_T, stable_C, appendix)
+        new_T, new_C, n_iter, dT, dC = values[:5]
+        new_radius = _radius_for_time(time_new, None if fixed_radius_m is not None else radius_time_s, None if fixed_radius_m is not None else radius_values_m, fixed_radius_m)
+        _check_state(new_T, new_C, bounds, f"t={time_new:g}s步")
+        new_max, new_index, new_xi, new_position = _max_info(new_C, xi, new_radius)
+
+        # 先把本次完整CN步纳入范围、Picard和半径诊断；即使它跨过阈值，
+        # 也不能因为随后进入事件二分而遗漏这个全步状态。
+        step_times.append(time_new)
+        step_max.append(new_max)
+        step_xi.append(new_xi)
+        step_position.append(new_position)
+        step_radius.append(new_radius)
+        radius_increments.append(new_radius - current_radius)
+        iterations.append(int(n_iter))
+        delta_T.append(float(dT))
+        delta_C.append(float(dC))
+        min_T, max_T = min(min_T, float(np.min(new_T))), max(max_T, float(np.max(new_T)))
+        min_C, max_C = min(min_C, float(np.min(new_C))), max(max_C, float(np.max(new_C)))
+        if current_time < AIR_DATA_END_S - 1.0e-9:
+            early_steps += 1
+        else:
+            long_steps += 1
+
+        if current_max >= DRYING_THRESHOLD_KGKG and new_max < DRYING_THRESHOLD_KGKG:
+            termination = _event_bisection(current_time, temperature, moisture, current_max, time_new, new_T, new_C, new_max, xi, faces, measure, dxi, None if fixed_radius_m is not None else radius_time_s, None if fixed_radius_m is not None else radius_values_m, air_time_s, air_temperature, air_moisture, stable_T, stable_C, fixed_radius_m, appendix, event_tol_s, bounds)
+            _check_state(termination["termination_temperature_internal_C"], termination["termination_moisture_internal_kgkg"], bounds, "事件二分上端")
+            _check_state(termination["termination_lower_temperature_internal_C"], termination["termination_lower_moisture_internal_kgkg"], bounds, "事件二分下端")
+            event_temperatures = (
+                termination["termination_temperature_internal_C"],
+                termination["termination_lower_temperature_internal_C"],
+            )
+            event_moistures = (
+                termination["termination_moisture_internal_kgkg"],
+                termination["termination_lower_moisture_internal_kgkg"],
+            )
+            termination["event_min_temperature_C"] = float(min(np.min(state) for state in event_temperatures))
+            termination["event_max_temperature_C"] = float(max(np.max(state) for state in event_temperatures))
+            termination["event_min_moisture_kgkg"] = float(min(np.min(state) for state in event_moistures))
+            termination["event_max_moisture_kgkg"] = float(max(np.max(state) for state in event_moistures))
+            min_T = min(min_T, termination["event_min_temperature_C"])
+            max_T = max(max_T, termination["event_max_temperature_C"])
+            min_C = min(min_C, termination["event_min_moisture_kgkg"])
+            max_C = max(max_C, termination["event_max_moisture_kgkg"])
+            break
+        if np.isclose(time_new / output_dt_s, round(time_new / output_dt_s), atol=1.0e-9, rtol=0.0):
+            sampled_times.append(time_new)
+            sampled_radius.append(new_radius)
+            sampled_T.append(new_T.copy())
+            sampled_C.append(new_C.copy())
+            sampled_max.append(new_max)
+        if progress and time_new >= progress_next - 1.0e-9:
+            print(f"  已推进{time_new / 3600.0:.2f} h，R={new_radius * 100.0:.4f} cm，max C={new_max:.10f}，Picard={n_iter}")
+            while progress_next <= time_new + 1.0e-9:
+                progress_next += 6.0 * 3600.0
+        current_time, current_radius = time_new, new_radius
+        temperature, moisture, current_max = new_T, new_C, new_max
+    if termination is None:
+        raise RuntimeError(f"在{max_time_s / 3600.0:g} h内未达到全场严格阈值max C < {DRYING_THRESHOLD_KGKG:g}")
+    return {
+        "xi": xi, "dxi": dxi, "n_intervals": int(n_intervals),
+        "time_step_s": time_step_long_s, "time_step_early_s": time_step_early_s,
+        "time_step_long_s": time_step_long_s, "output_dt_s": output_dt_s,
+        "event_tol_s": event_tol_s, "appendix": appendix,
+        "fixed_radius_m": fixed_radius_m, "max_time_s": max_time_s,
+        "temperature_bounds_C": bounds,
+        "stable_temperature_C": stable_T, "stable_moisture_kgkg": stable_C, "stable_count": stable_count,
+        "radius_data_time_s": radius_time_s.copy(), "radius_data_m": radius_values_m.copy(),
+        "air_data_time_s": air_time_s.copy(), "air_temperature_C": air_temperature.copy(), "air_moisture_kgkg": air_moisture.copy(),
+        "sampled_times_s": np.asarray(sampled_times), "sampled_radius_m": np.asarray(sampled_radius),
+        "sampled_temperature_internal_C": np.asarray(sampled_T), "sampled_moisture_internal_kgkg": np.asarray(sampled_C), "sampled_max_kgkg": np.asarray(sampled_max),
+        "step_times_s": np.asarray(step_times), "step_max_kgkg": np.asarray(step_max), "step_max_xi": np.asarray(step_xi), "step_max_radius_m": np.asarray(step_position), "step_radius_m": np.asarray(step_radius), "radius_increments_m": np.asarray(radius_increments),
+        "iteration_counts": np.asarray(iterations, dtype=int), "picard_delta_temperature": np.asarray(delta_T), "picard_delta_moisture": np.asarray(delta_C),
+        "early_steps": early_steps, "long_steps": long_steps,
+        "min_temperature_C": min_T, "max_temperature_C": max_T, "min_internal_moisture_kgkg": min_C, "max_internal_moisture_kgkg": max_C,
+        **termination,
+    }
+
+
+def validate_solution(solution: dict[str, Any]) -> dict[str, Any]:
+    xi = np.asarray(solution["xi"], dtype=float)
+    times = np.asarray(solution["sampled_times_s"], dtype=float)
+    radii = np.asarray(solution["sampled_radius_m"], dtype=float)
+    sampled_T = np.asarray(solution["sampled_temperature_internal_C"], dtype=float)
+    sampled_C = np.asarray(solution["sampled_moisture_internal_kgkg"], dtype=float)
+    lower_T = np.asarray(solution["termination_lower_temperature_internal_C"], dtype=float)
+    lower_C = np.asarray(solution["termination_lower_moisture_internal_kgkg"], dtype=float)
+    upper_T = np.asarray(solution["termination_temperature_internal_C"], dtype=float)
+    upper_C = np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float)
+    if not all(np.all(np.isfinite(a)) for a in (xi, times, radii, sampled_T, sampled_C, lower_T, lower_C, upper_T, upper_C)):
+        raise ValueError("结果包含NaN或Inf")
+    if xi[0] != 0.0 or xi[-1] != 1.0 or np.any(np.diff(xi) <= 0.0):
+        raise ValueError("固定xi网格错误")
+    if times.size < 1 or not np.isclose(times[0], 0.0, atol=1.0e-12):
+        raise ValueError("采样未从0开始")
+    if times.size > 1 and not np.allclose(np.diff(times), OUTPUT_DT_S, atol=1.0e-8, rtol=0.0):
+        raise ValueError("采样不是60 s间隔")
+    if sampled_T.shape != (times.size, xi.size) or sampled_C.shape != sampled_T.shape or radii.shape != times.shape:
+        raise ValueError("采样状态形状错误")
+    fixed_radius = solution.get("fixed_radius_m")
+    radius_time = np.asarray(solution["radius_data_time_s"], dtype=float)
+    radius_values = np.asarray(solution["radius_data_m"], dtype=float)
+    if fixed_radius is None:
+        if radius_time.size < 2 or not np.isclose(radius_values[0], RADIUS_INITIAL_M, atol=1.0e-12, rtol=0.0) or np.any(np.diff(radius_values) > 1.0e-12):
+            raise ValueError("附件2半径数据错误")
+        expected_radii = np.array([radius_at(t, radius_time, radius_values) for t in times])
+        known_error = float(np.max(np.abs(np.array([radius_at(t, radius_time, radius_values) for t in radius_time]) - radius_values)))
+    else:
+        expected_radii = np.full(times.shape, float(fixed_radius))
+        known_error = 0.0
+    if not np.allclose(radii, expected_radii, atol=1.0e-12, rtol=0.0):
+        raise ValueError("R(t)采样错误")
+    bounds = tuple(solution["temperature_bounds_C"])
+    _check_state(lower_T, lower_C, bounds, "终止下端")
+    _check_state(upper_T, upper_C, bounds, "终止上端")
+    if np.min(sampled_C) < -1.0e-10 or np.max(sampled_C) > INITIAL_MOISTURE_KGKG + STATE_TOL:
+        raise ValueError("采样水分范围错误")
+    lower_time, upper_time = float(solution["termination_lower_time_s"]), float(solution["termination_time_s"])
+    lower_max, upper_max = float(solution["termination_lower_max_kgkg"]), float(solution["termination_max_kgkg"])
+    if lower_max < DRYING_THRESHOLD_KGKG or upper_max >= DRYING_THRESHOLD_KGKG or not (lower_time < upper_time <= lower_time + float(solution["event_tol_s"]) + 1.0e-10):
+        raise ValueError("终止阈值括号错误")
+    if not np.isclose(lower_max, np.max(lower_C), atol=1.0e-12, rtol=0.0) or not np.isclose(upper_max, np.max(upper_C), atol=1.0e-12, rtol=0.0):
+        raise ValueError("终止max C不是全场最大值")
+    upper_index = int(np.argmax(upper_C))
+    if upper_index != int(solution["termination_max_index"]):
+        raise ValueError("终止最大值索引错误")
+    if not np.isclose(float(solution["termination_max_radius_m"]), xi[upper_index] * float(solution["termination_radius_m"]), atol=1.0e-14, rtol=0.0):
+        raise ValueError("终止最大值物理位置错误")
+    if known_error > 1.0e-14:
+        raise ValueError("附件2已知点回读错误")
+    D_ref = material_properties(np.array([50.0]), np.array([0.10]), 4)[3][0]
+    if not np.isclose(D_ref, 4.2e-4 * np.exp(-0.30 / 0.10) * np.exp(-3850.0 / 323.15), rtol=1.0e-13, atol=0.0):
+        raise ValueError("Kelvin温度验证失败")
+    iterations = np.asarray(solution["iteration_counts"], dtype=int)
+    event_picard_max = int(solution.get("termination_event_picard_max", 0))
+    event_candidate_count = int(solution.get("termination_event_candidate_count", 0))
+    if iterations.size == 0 or np.max(iterations) > PICARD_MAX_ITER or event_picard_max > PICARD_MAX_ITER:
+        raise ValueError("Picard记录错误")
+    for key in ("step_times_s", "step_max_kgkg", "step_max_xi", "step_max_radius_m", "step_radius_m", "radius_increments_m", "picard_delta_temperature", "picard_delta_moisture"):
+        if np.asarray(solution[key]).size != iterations.size:
+            raise ValueError(f"诊断字段{key}长度错误")
+    return {
+        "termination_time_s": upper_time, "termination_time_h": upper_time / 3600.0,
+        "termination_radius_cm": float(solution["termination_radius_m"]) * 100.0,
+        "termination_max_kgkg": upper_max, "termination_max_xi": float(solution["termination_max_xi"]),
+        "termination_max_radius_cm": float(solution["termination_max_radius_m"]) * 100.0,
+        "termination_lower_time_s": lower_time, "termination_lower_max_kgkg": lower_max,
+        "termination_bracket_width_s": upper_time - lower_time,
+        "radius_known_point_max_error_m": known_error, "radius_known_point_count": int(radius_values.size),
+        "temperature_min_C": float(solution["min_temperature_C"]), "temperature_max_C": float(solution["max_temperature_C"]),
+        "moisture_min_kgkg": float(solution["min_internal_moisture_kgkg"]), "moisture_max_kgkg": float(solution["max_internal_moisture_kgkg"]),
+        "event_min_temperature_C": float(solution["event_min_temperature_C"]), "event_max_temperature_C": float(solution["event_max_temperature_C"]),
+        "event_min_moisture_kgkg": float(solution["event_min_moisture_kgkg"]), "event_max_moisture_kgkg": float(solution["event_max_moisture_kgkg"]),
+        "max_picard_iterations": int(max(np.max(iterations), event_picard_max)),
+        "mean_picard_iterations": float(np.mean(iterations)),
+        "event_picard_max": event_picard_max, "event_picard_total": int(solution.get("termination_event_picard_total", 0)),
+        "event_candidate_count": event_candidate_count,
+        "picard_iteration_count_total": int(iterations.size + event_candidate_count),
+        "sample_count": int(times.size), "internal_node_count": int(xi.size), "center_boundary_zero_flux": True,
+        "stable_temperature_C": float(solution["stable_temperature_C"]), "stable_moisture_kgkg": float(solution["stable_moisture_kgkg"]), "stable_count": int(solution["stable_count"]),
+        "early_steps": int(solution["early_steps"]), "long_steps": int(solution["long_steps"]), "event_iterations": int(solution.get("termination_event_iterations", 0)), "kelvin_reference_D_m2_s": float(D_ref),
     }
 
 
 def _regular_sample_indices(solution: dict[str, Any]) -> np.ndarray:
-    """返回 result4/CSV 使用的 60 s 状态索引（严格从60 s开始）。"""
-
     times = np.asarray(solution["sampled_times_s"], dtype=float)
-    termination_time = float(solution["termination_time_s"])
-    last_time = np.floor(termination_time / OUTPUT_DT_S + 1.0e-12) * OUTPUT_DT_S
-    indices = np.flatnonzero(
-        (times >= OUTPUT_DT_S - 1.0e-8) & (times <= last_time + 1.0e-8)
-    )
-    selected = times[indices]
-    if selected.size and not np.allclose(
-        selected, np.arange(OUTPUT_DT_S, last_time + 0.1, OUTPUT_DT_S), atol=1.0e-8
-    ):
-        raise ValueError("求解器60 s状态与结果文件采样网格不一致")
+    last_time = np.floor(float(solution["termination_time_s"]) / OUTPUT_DT_S + 1.0e-12) * OUTPUT_DT_S
+    indices = np.flatnonzero((times >= OUTPUT_DT_S - 1.0e-8) & (times <= last_time + 1.0e-8))
+    if indices.size and not np.allclose(times[indices], np.arange(OUTPUT_DT_S, last_time + 0.1, OUTPUT_DT_S), atol=1.0e-8):
+        raise ValueError("缺少连续60 s采样")
     return indices
 
 
 def _paper_regular_hours(solution: dict[str, Any]) -> list[int]:
-    """返回表6中的6 h、12 h、...常规行。"""
-
-    termination_hours = float(solution["termination_time_s"]) / 3600.0
-    last_regular_hour = int(np.floor(termination_hours / 6.0 + 1.0e-12) * 6)
-    return list(range(6, last_regular_hour + 1, 6))
+    last = int(np.floor(float(solution["termination_time_s"]) / 3600.0 / 6.0 + 1.0e-12) * 6)
+    return list(range(6, last + 1, 6))
 
 
 def _sample_index_at_time(solution: dict[str, Any], time_s: float) -> int:
-    times = np.asarray(solution["sampled_times_s"], dtype=float)
-    matches = np.flatnonzero(np.isclose(times, time_s, rtol=0.0, atol=1.0e-8))
+    matches = np.flatnonzero(np.isclose(np.asarray(solution["sampled_times_s"]), time_s, atol=1.0e-8, rtol=0.0))
     if matches.size != 1:
-        raise ValueError(f"缺少精确的 {time_s:g}s 完整xi状态")
+        raise ValueError(f"缺少{time_s:g}s完整状态")
     return int(matches[0])
 
 
-def _fixed_state_values(
-    xi: np.ndarray,
-    temperature_C: np.ndarray,
-    moisture_kgkg: np.ndarray,
-    radius_m: float,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """按绝对半径采样；返回温度、水分和有效位置掩码。"""
-
-    fixed_temperature = np.full(OUTPUT_RADIUS_CM.size, np.nan, dtype=float)
-    fixed_moisture = np.full(OUTPUT_RADIUS_CM.size, np.nan, dtype=float)
+def _fixed_state_values(xi: np.ndarray, temperature_C: np.ndarray, moisture_kgkg: np.ndarray, radius_m: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    fixed_T = np.full(OUTPUT_RADIUS_CM.size, np.nan)
+    fixed_C = np.full(OUTPUT_RADIUS_CM.size, np.nan)
     valid = OUTPUT_RADIUS_CM / 100.0 <= radius_m + 1.0e-12
     for index, radius_cm in enumerate(OUTPUT_RADIUS_CM):
-        if not valid[index]:
-            continue
-        xi_target = min(1.0, (radius_cm / 100.0) / radius_m)
-        fixed_temperature[index] = float(np.interp(xi_target, xi, temperature_C))
-        fixed_moisture[index] = float(np.interp(xi_target, xi, moisture_kgkg))
-    return fixed_temperature, fixed_moisture, valid
+        if valid[index]:
+            target = min(1.0, radius_cm / 100.0 / radius_m)
+            fixed_T[index] = np.interp(target, xi, temperature_C)
+            fixed_C[index] = np.interp(target, xi, moisture_kgkg)
+    return fixed_T, fixed_C, valid
 
 
-def _surface_values(
-    temperature_C: np.ndarray, moisture_kgkg: np.ndarray
-) -> tuple[float, float]:
-    """药材表面直接取固定xi网格的 xi=1 节点。"""
-
+def _surface_values(temperature_C: np.ndarray, moisture_kgkg: np.ndarray) -> tuple[float, float]:
     return float(temperature_C[-1]), float(moisture_kgkg[-1])
 
 
-def write_result_xlsx(
-    solution: dict[str, Any],
-    output_path: str | Path = DEFAULT_XLSX_PATH,
-    template_path: str | Path = DEFAULT_TEMPLATE_PATH,
-) -> None:
-    """复制 result4 模板并写入60 s固定绝对位置和真实移动表面。"""
-
+def write_result_xlsx(solution: dict[str, Any], output_path: str | Path = DEFAULT_XLSX_PATH, template_path: str | Path = DEFAULT_TEMPLATE_PATH) -> None:
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     workbook = load_workbook(Path(template_path))
     if workbook.sheetnames != ["Sheet1"]:
-        raise ValueError(f"result4模板工作表不符合要求: {workbook.sheetnames}")
-    worksheet = workbook["Sheet1"]
-    header_style = copy(worksheet.cell(row=1, column=2)._style)
-    time_style = copy(worksheet.cell(row=2, column=1)._style)
-    value_style = copy(worksheet.cell(row=2, column=2)._style)
-    if worksheet.max_row > 1:
-        worksheet.delete_rows(2, worksheet.max_row - 1)
-
-    # A1 保留官方模板语义；B:V 是固定绝对位置，W 是真实移动表面。
-    worksheet.cell(row=1, column=1).value = "时间\\到药材中心的距离"
-    for column_index, radius_cm in enumerate(OUTPUT_RADIUS_CM, start=2):
-        cell = worksheet.cell(row=1, column=column_index, value=float(radius_cm))
-        cell._style = copy(header_style)
-        cell.number_format = "0.0"
-    surface_header = worksheet.cell(row=1, column=OUTPUT_RADIUS_CM.size + 2, value="药材表面")
-    surface_header._style = copy(header_style)
-
-    xi = np.asarray(solution["xi"], dtype=float)
-    sampled_indices = _regular_sample_indices(solution)
-    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
-    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
-    sampled_temperature = np.asarray(
-        solution["sampled_temperature_internal_C"], dtype=float
-    )
-    sampled_moisture = np.asarray(
-        solution["sampled_moisture_internal_kgkg"], dtype=float
-    )
-    for row_index, state_index in enumerate(sampled_indices, start=2):
-        time_cell = worksheet.cell(row=row_index, column=1, value=int(round(sampled_times[state_index])))
-        time_cell._style = copy(time_style)
-        time_cell.number_format = "0"
-        _, fixed_moisture, valid = _fixed_state_values(
-            xi,
-            sampled_temperature[state_index],
-            sampled_moisture[state_index],
-            float(sampled_radius[state_index]),
-        )
-        for column_index, (value, is_valid) in enumerate(
-            zip(fixed_moisture, valid), start=2
-        ):
-            cell = worksheet.cell(row=row_index, column=column_index)
-            cell._style = copy(value_style)
-            if is_valid:
-                cell.value = float(f"{value:.4f}")
-                cell.number_format = "0.0000"
-            else:
-                cell.value = None
-        surface_value = float(f"{sampled_moisture[state_index, -1]:.4f}")
-        surface_cell = worksheet.cell(
-            row=row_index, column=OUTPUT_RADIUS_CM.size + 2, value=surface_value
-        )
-        surface_cell._style = copy(value_style)
-        surface_cell.number_format = "0.0000"
+        raise ValueError("result4模板工作表错误")
+    sheet = workbook["Sheet1"]
+    header_style = copy(sheet.cell(1, 2)._style)
+    time_style = copy(sheet.cell(2, 1)._style)
+    value_style = copy(sheet.cell(2, 2)._style)
+    if sheet.max_row > 1:
+        sheet.delete_rows(2, sheet.max_row - 1)
+    sheet.cell(1, 1).value = "时间\\到药材中心的距离"
+    for column, radius in enumerate(OUTPUT_RADIUS_CM, start=2):
+        cell = sheet.cell(1, column, float(radius)); cell._style = copy(header_style); cell.number_format = "0.0"
+    cell = sheet.cell(1, OUTPUT_RADIUS_CM.size + 2, "药材表面"); cell._style = copy(header_style)
+    xi = solution["xi"]
+    indices = _regular_sample_indices(solution)
+    times = solution["sampled_times_s"]
+    radii = solution["sampled_radius_m"]
+    states_T = solution["sampled_temperature_internal_C"]
+    states_C = solution["sampled_moisture_internal_kgkg"]
+    for row, state_index in enumerate(indices, start=2):
+        cell = sheet.cell(row, 1, int(round(times[state_index]))); cell._style = copy(time_style); cell.number_format = "0"
+        _, fixed_C, valid = _fixed_state_values(xi, states_T[state_index], states_C[state_index], float(radii[state_index]))
+        for column, (value, is_valid) in enumerate(zip(fixed_C, valid), start=2):
+            cell = sheet.cell(row, column); cell._style = copy(value_style); cell.value = float(f"{value:.4f}") if is_valid else None; cell.number_format = "0.0000"
+        cell = sheet.cell(row, OUTPUT_RADIUS_CM.size + 2, float(f"{states_C[state_index, -1]:.4f}")); cell._style = copy(value_style); cell.number_format = "0.0000"
     workbook.save(output_path)
 
 
-def _csv_state_rows(
-    record_prefix: str,
-    time_s: float,
-    radius_m: float,
-    temperature_C: np.ndarray,
-    moisture_kgkg: np.ndarray,
-    xi: np.ndarray,
-    sample_time: bool,
-) -> list[dict[str, str]]:
-    """将一个完整xi状态展开为固定位置记录和单独表面记录。"""
-
-    fixed_temperature, fixed_moisture, valid = _fixed_state_values(
-        xi, temperature_C, moisture_kgkg, radius_m
-    )
-    if sample_time:
-        time_token = str(int(round(time_s)))
-        fixed_type = "sample_fixed"
-        surface_type = "sample_surface"
-    else:
-        time_token = f"{time_s:.6f}"
-        fixed_type = "drying_end_fixed"
-        surface_type = "drying_end_surface"
-    hour_token = f"{time_s / 3600.0:.8f}"
+def _csv_state_rows(time_s: float, radius_m: float, temperature_C: np.ndarray, moisture_kgkg: np.ndarray, xi: np.ndarray, sample_time: bool) -> list[dict[str, str]]:
+    fixed_T, fixed_C, valid = _fixed_state_values(xi, temperature_C, moisture_kgkg, radius_m)
+    token = str(int(round(time_s))) if sample_time else f"{time_s:.6f}"
+    fixed_type = "sample_fixed" if sample_time else "drying_end_fixed"
+    surface_type = "sample_surface" if sample_time else "drying_end_surface"
     radius_token = f"{radius_m * 100.0:.4f}"
     rows: list[dict[str, str]] = []
     for index, radius_cm in enumerate(OUTPUT_RADIUS_CM):
-        if not valid[index]:
-            continue
-        rows.append(
-            {
-                "record_type": fixed_type,
-                "time_s": time_token,
-                "time_h": hour_token,
-                "radius_cm": radius_token,
-                "r_cm": f"{radius_cm:.4f}",
-                "is_surface": "0",
-                "temperature_C": f"{fixed_temperature[index]:.4f}",
-                "moisture_kgkg": f"{fixed_moisture[index]:.4f}",
-            }
-        )
-    surface_temperature, surface_moisture = _surface_values(
-        temperature_C, moisture_kgkg
-    )
-    rows.append(
-        {
-            "record_type": surface_type,
-            "time_s": time_token,
-            "time_h": hour_token,
-            "radius_cm": radius_token,
-            "r_cm": radius_token,
-            "is_surface": "1",
-            "temperature_C": f"{surface_temperature:.4f}",
-            "moisture_kgkg": f"{surface_moisture:.4f}",
-        }
-    )
+        if valid[index]:
+            rows.append({"record_type": fixed_type, "time_s": token, "time_h": f"{time_s / 3600.0:.8f}", "radius_cm": radius_token, "r_cm": f"{radius_cm:.4f}", "is_surface": "0", "temperature_C": f"{fixed_T[index]:.4f}", "moisture_kgkg": f"{fixed_C[index]:.4f}"})
+    surface_T, surface_C = _surface_values(temperature_C, moisture_kgkg)
+    rows.append({"record_type": surface_type, "time_s": token, "time_h": f"{time_s / 3600.0:.8f}", "radius_cm": radius_token, "r_cm": radius_token, "is_surface": "1", "temperature_C": f"{surface_T:.4f}", "moisture_kgkg": f"{surface_C:.4f}"})
     return rows
 
 
-def write_result_csv(
-    solution: dict[str, Any], output_path: str | Path = DEFAULT_CSV_PATH
-) -> None:
-    """写入包含固定位置、真实表面和终止状态的完整长表CSV。"""
-
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    xi = np.asarray(solution["xi"], dtype=float)
-    sampled_indices = _regular_sample_indices(solution)
-    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
-    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
-    sampled_temperature = np.asarray(
-        solution["sampled_temperature_internal_C"], dtype=float
-    )
-    sampled_moisture = np.asarray(
-        solution["sampled_moisture_internal_kgkg"], dtype=float
-    )
+def write_result_csv(solution: dict[str, Any], output_path: str | Path = DEFAULT_CSV_PATH) -> None:
+    output_path = Path(output_path); output_path.parent.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, str]] = []
-    for state_index in sampled_indices:
-        rows.extend(
-            _csv_state_rows(
-                "sample",
-                float(sampled_times[state_index]),
-                float(sampled_radius[state_index]),
-                sampled_temperature[state_index],
-                sampled_moisture[state_index],
-                xi,
-                sample_time=True,
-            )
-        )
-    rows.extend(
-        _csv_state_rows(
-            "drying_end",
-            float(solution["termination_time_s"]),
-            float(solution["termination_radius_m"]),
-            np.asarray(solution["termination_temperature_internal_C"], dtype=float),
-            np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float),
-            xi,
-            sample_time=False,
-        )
-    )
+    indices = _regular_sample_indices(solution)
+    for index in indices:
+        rows.extend(_csv_state_rows(solution["sampled_times_s"][index], solution["sampled_radius_m"][index], solution["sampled_temperature_internal_C"][index], solution["sampled_moisture_internal_kgkg"][index], solution["xi"], True))
+    rows.extend(_csv_state_rows(solution["termination_time_s"], solution["termination_radius_m"], solution["termination_temperature_internal_C"], solution["termination_moisture_internal_kgkg"], solution["xi"], False))
     with output_path.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=CSV_COLUMNS)
-        writer.writeheader()
-        writer.writerows(rows)
+        writer = csv.DictWriter(stream, fieldnames=CSV_COLUMNS); writer.writeheader(); writer.writerows(rows)
 
 
 def _paper_rows(solution: dict[str, Any]) -> list[list[Any]]:
-    """生成表6的常规6 h行和精确终止行。"""
-
-    xi = np.asarray(solution["xi"], dtype=float)
-    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
-    sampled_temperature = np.asarray(
-        solution["sampled_temperature_internal_C"], dtype=float
-    )
-    sampled_moisture = np.asarray(
-        solution["sampled_moisture_internal_kgkg"], dtype=float
-    )
     rows: list[list[Any]] = []
+    xi = solution["xi"]
     for hour in _paper_regular_hours(solution):
-        state_index = _sample_index_at_time(solution, hour * 3600.0)
-        _, fixed_moisture, valid = _fixed_state_values(
-            xi,
-            sampled_temperature[state_index],
-            sampled_moisture[state_index],
-            float(sampled_radius[state_index]),
-        )
-        _, surface_moisture = _surface_values(
-            sampled_temperature[state_index], sampled_moisture[state_index]
-        )
-        rows.append(
-            [
-                float(hour),
-                float(fixed_moisture[0]) if valid[0] else None,
-                float(fixed_moisture[5]) if valid[5] else None,
-                float(fixed_moisture[10]) if valid[10] else None,
-                float(surface_moisture),
-            ]
-        )
-    termination_moisture = np.asarray(
-        solution["termination_moisture_internal_kgkg"], dtype=float
-    )
-    termination_temperature = np.asarray(
-        solution["termination_temperature_internal_C"], dtype=float
-    )
-    _, fixed_moisture, valid = _fixed_state_values(
-        xi,
-        termination_temperature,
-        termination_moisture,
-        float(solution["termination_radius_m"]),
-    )
-    _, surface_moisture = _surface_values(termination_temperature, termination_moisture)
-    termination_hours = float(solution["termination_time_s"]) / 3600.0
-    rows.append(
-        [
-            f"烘干结束时间（{termination_hours:.4f} h）",
-            float(fixed_moisture[0]) if valid[0] else None,
-            float(fixed_moisture[5]) if valid[5] else None,
-            float(fixed_moisture[10]) if valid[10] else None,
-            float(surface_moisture),
-        ]
-    )
+        index = _sample_index_at_time(solution, hour * 3600.0)
+        _, fixed_C, valid = _fixed_state_values(xi, solution["sampled_temperature_internal_C"][index], solution["sampled_moisture_internal_kgkg"][index], solution["sampled_radius_m"][index])
+        rows.append([float(hour), fixed_C[0] if valid[0] else None, fixed_C[5] if valid[5] else None, fixed_C[10] if valid[10] else None, solution["sampled_moisture_internal_kgkg"][index, -1]])
+    _, fixed_C, valid = _fixed_state_values(xi, solution["termination_temperature_internal_C"], solution["termination_moisture_internal_kgkg"], solution["termination_radius_m"])
+    rows.append([f"烘干结束时间（{solution['termination_time_s'] / 3600.0:.4f} h）", fixed_C[0] if valid[0] else None, fixed_C[5] if valid[5] else None, fixed_C[10] if valid[10] else None, solution["termination_moisture_internal_kgkg"][-1]])
     return rows
 
 
-def write_paper_table(
-    solution: dict[str, Any], output_path: str | Path = DEFAULT_PAPER_PATH
-) -> None:
-    """生成论文表6工作表，不把绝对位置之外的数值外推到表格中。"""
-
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    workbook = Workbook()
-    worksheet = workbook.active
-    worksheet.title = "表6"
-    headers = ["时间/h", "0 cm", "0.5 cm", "1.0 cm", "药材表面"]
-    for column_index, header in enumerate(headers, start=1):
-        cell = worksheet.cell(row=1, column=column_index, value=header)
-        cell.font = Font(bold=True)
-    for row_index, row_values in enumerate(_paper_rows(solution), start=2):
-        for column_index, value in enumerate(row_values, start=1):
-            cell = worksheet.cell(row=row_index, column=column_index, value=value)
-            if column_index == 1 and isinstance(value, (int, float)):
-                cell.number_format = "0.0"
-            elif column_index > 1 and value is not None:
-                cell.value = float(f"{float(value):.4f}")
-                cell.number_format = "0.0000"
-    summary_row = 2 + len(_paper_rows(solution)) + 1
-    worksheet.cell(row=summary_row, column=1, value="最终烘干时长/h")
-    duration_cell = worksheet.cell(
-        row=summary_row,
-        column=2,
-        value=float(f"{float(solution['termination_time_s']) / 3600.0:.4f}"),
-    )
-    duration_cell.number_format = "0.0000"
+def write_paper_table(solution: dict[str, Any], output_path: str | Path = DEFAULT_PAPER_PATH) -> None:
+    output_path = Path(output_path); output_path.parent.mkdir(parents=True, exist_ok=True)
+    workbook = Workbook(); sheet = workbook.active; sheet.title = "表6"
+    for column, header in enumerate(["时间/h", "0 cm", "0.5 cm", "1.0 cm", "药材表面"], start=1):
+        sheet.cell(1, column, header).font = Font(bold=True)
+    rows = _paper_rows(solution)
+    for row_index, values in enumerate(rows, start=2):
+        for column, value in enumerate(values, start=1):
+            cell = sheet.cell(row_index, column, value)
+            if column == 1 and isinstance(value, (int, float)): cell.number_format = "0.0"
+            elif column > 1 and value is not None: cell.value = float(f"{float(value):.4f}"); cell.number_format = "0.0000"
+    summary = 2 + len(rows) + 1
+    sheet.cell(summary, 1, "最终烘干时长/h")
+    cell = sheet.cell(summary, 2, float(f"{solution['termination_time_s'] / 3600.0:.4f}")); cell.number_format = "0.0000"
     workbook.save(output_path)
 
 
-def _fixed_valid_count(
-    radius_m: float,
-) -> int:
+def _fixed_valid_count(radius_m: float) -> int:
     return int(np.count_nonzero(OUTPUT_RADIUS_CM / 100.0 <= radius_m + 1.0e-12))
 
 
@@ -1175,418 +715,237 @@ def _format_pattern_ok(value: str, decimals: int) -> bool:
     return re.fullmatch(rf"\d+\.\d{{{decimals}}}", value) is not None
 
 
-def validate_written_outputs(
-    solution: dict[str, Any],
-    xlsx_path: str | Path = DEFAULT_XLSX_PATH,
-    paper_path: str | Path = DEFAULT_PAPER_PATH,
-    csv_path: str | Path = DEFAULT_CSV_PATH,
-) -> dict[str, Any]:
-    """独立回读三个文件并检查结构、掩码、格式及全量数值一致性。"""
-
+def validate_written_outputs(solution: dict[str, Any], xlsx_path: str | Path = DEFAULT_XLSX_PATH, paper_path: str | Path = DEFAULT_PAPER_PATH, csv_path: str | Path = DEFAULT_CSV_PATH) -> dict[str, Any]:
+    """独立回读三个文件；特别检查移动表面之外的固定位置为空。"""
     summary = validate_solution(solution)
-    xi = np.asarray(solution["xi"], dtype=float)
-    sampled_indices = _regular_sample_indices(solution)
-    sampled_times = np.asarray(solution["sampled_times_s"], dtype=float)
-    sampled_radius = np.asarray(solution["sampled_radius_m"], dtype=float)
-    sampled_temperature = np.asarray(
-        solution["sampled_temperature_internal_C"], dtype=float
-    )
-    sampled_moisture = np.asarray(
-        solution["sampled_moisture_internal_kgkg"], dtype=float
-    )
-
-    workbook = load_workbook(Path(xlsx_path), read_only=True, data_only=True)
-    if workbook.sheetnames != ["Sheet1"]:
-        raise ValueError(f"result4答案工作表错误: {workbook.sheetnames}")
-    worksheet = workbook["Sheet1"]
-    xlsx_rows = list(
-        worksheet.iter_rows(
-            min_row=1,
-            max_row=worksheet.max_row,
-            min_col=1,
-            max_col=worksheet.max_column,
-            values_only=True,
-        )
-    )
-    expected_xlsx_rows = sampled_indices.size + 1
-    expected_xlsx_columns = OUTPUT_RADIUS_CM.size + 2
-    if worksheet.max_row != expected_xlsx_rows or worksheet.max_column != expected_xlsx_columns:
-        raise ValueError(
-            f"result4尺寸错误: {(worksheet.max_row, worksheet.max_column)}，"
-            f"期望 {(expected_xlsx_rows, expected_xlsx_columns)}"
-        )
-    header = xlsx_rows[0]
-    expected_header = ["时间\\到药材中心的距离"] + [
-        float(radius) for radius in OUTPUT_RADIUS_CM
-    ] + ["药材表面"]
-    header_positions_ok = (
-        len(header) == len(expected_header)
-        and header[0] == expected_header[0]
-        and header[-1] == expected_header[-1]
-        and np.allclose(
-            np.asarray(header[1:-1], dtype=float), OUTPUT_RADIUS_CM, rtol=0.0, atol=1.0e-12
-        )
-    )
-    if not header_positions_ok:
-        raise ValueError(f"result4表头错误: {header!r}")
-    fixed_blank_count = 0
-    max_xlsx_expected_difference = 0.0
-    xlsx_fixed_map: dict[tuple[int, str], float] = {}
-    xlsx_surface_map: dict[int, float] = {}
-    for row_offset, state_index in enumerate(sampled_indices, start=1):
-        row = xlsx_rows[row_offset]
-        expected_time = int(round(sampled_times[state_index]))
-        if row[0] != expected_time:
-            raise ValueError("result4时间行不是严格60 s整数网格")
-        fixed_temperature, expected_moisture, valid = _fixed_state_values(
-            xi,
-            sampled_temperature[state_index],
-            sampled_moisture[state_index],
-            float(sampled_radius[state_index]),
-        )
-        del fixed_temperature
-        for position_index, is_valid in enumerate(valid):
-            value = row[position_index + 1]
+    indices = _regular_sample_indices(solution); xi = solution["xi"]
+    workbook = load_workbook(Path(xlsx_path), read_only=True, data_only=True); sheet = workbook["Sheet1"]; rows = list(sheet.iter_rows(values_only=True))
+    if workbook.sheetnames != ["Sheet1"] or (sheet.max_row, sheet.max_column) != (indices.size + 1, OUTPUT_RADIUS_CM.size + 2): raise ValueError("result4结构错误")
+    if rows[0][0] != "时间\\到药材中心的距离" or rows[0][-1] != "药材表面" or not np.allclose(np.asarray(rows[0][1:-1], dtype=float), OUTPUT_RADIUS_CM): raise ValueError("result4表头错误")
+    xlsx_fixed: dict[tuple[int, str], float] = {}; xlsx_surface: dict[int, float] = {}; blank_count = 0
+    for row_offset, state_index in enumerate(indices, start=1):
+        time_value = int(round(solution["sampled_times_s"][state_index]))
+        _, fixed_C, valid = _fixed_state_values(xi, solution["sampled_temperature_internal_C"][state_index], solution["sampled_moisture_internal_kgkg"][state_index], solution["sampled_radius_m"][state_index])
+        if rows[row_offset][0] != time_value: raise ValueError("result4时间错误")
+        for index, is_valid in enumerate(valid):
+            value = rows[row_offset][index + 1]
             if not is_valid:
-                fixed_blank_count += 1
-                if value is not None:
-                    raise ValueError("result4在移动表面之外存在外推值")
-                continue
-            if value is None or not np.isfinite(float(value)) or float(value) < 0.0:
-                raise ValueError("result4固定位置包含空值、非有限值或负水分")
-            expected_value = float(f"{expected_moisture[position_index]:.4f}")
-            max_xlsx_expected_difference = max(
-                max_xlsx_expected_difference, abs(float(value) - expected_value)
-            )
-            xlsx_fixed_map[(expected_time, f"{OUTPUT_RADIUS_CM[position_index]:.4f}")] = float(value)
-        surface_value = row[-1]
-        if surface_value is None or not np.isfinite(float(surface_value)) or float(surface_value) < 0.0:
-            raise ValueError("result4表面列包含无效水分")
-        expected_surface = float(f"{sampled_moisture[state_index, -1]:.4f}")
-        max_xlsx_expected_difference = max(
-            max_xlsx_expected_difference, abs(float(surface_value) - expected_surface)
-        )
-        xlsx_surface_map[expected_time] = float(surface_value)
-    if max_xlsx_expected_difference > 0.0:
-        raise ValueError("result4回读值与求解器四位小数结果不一致")
-
+                blank_count += 1
+                if value is not None: raise ValueError("result4域外位置存在外推值")
+            else:
+                expected = float(f"{fixed_C[index]:.4f}")
+                if value is None or float(value) != expected: raise ValueError("result4固定值不一致")
+                xlsx_fixed[(time_value, f"{OUTPUT_RADIUS_CM[index]:.4f}")] = float(value)
+        expected_surface = float(f"{solution['sampled_moisture_internal_kgkg'][state_index, -1]:.4f}")
+        if float(rows[row_offset][-1]) != expected_surface: raise ValueError("result4表面值不一致")
+        xlsx_surface[time_value] = float(rows[row_offset][-1])
     with Path(csv_path).open("r", newline="", encoding="utf-8") as stream:
-        reader = csv.DictReader(stream)
-        if reader.fieldnames != CSV_COLUMNS:
-            raise ValueError(f"CSV字段错误: {reader.fieldnames!r}")
-        csv_rows = list(reader)
-    termination_radius = float(solution["termination_radius_m"])
-    expected_csv_rows = int(
-        sum(_fixed_valid_count(float(sampled_radius[index])) + 1 for index in sampled_indices)
-        + _fixed_valid_count(termination_radius)
-        + 1
-    )
-    if len(csv_rows) != expected_csv_rows:
-        raise ValueError(f"CSV行数为 {len(csv_rows)}，期望 {expected_csv_rows}")
-    record_counts = {
-        record_type: sum(row["record_type"] == record_type for row in csv_rows)
-        for record_type in (
-            "sample_fixed",
-            "sample_surface",
-            "drying_end_fixed",
-            "drying_end_surface",
-        )
-    }
+        csv_rows = list(csv.DictReader(stream))
+    if not csv_rows or list(csv_rows[0]) != CSV_COLUMNS:
+        raise ValueError("CSV字段错误")
+    expected_count = sum(_fixed_valid_count(solution["sampled_radius_m"][index]) + 1 for index in indices) + _fixed_valid_count(solution["termination_radius_m"]) + 1
+    if len(csv_rows) != expected_count:
+        raise ValueError("CSV行数错误")
     expected_record_counts = {
-        "sample_fixed": int(sum(_fixed_valid_count(float(sampled_radius[index])) for index in sampled_indices)),
-        "sample_surface": int(sampled_indices.size),
-        "drying_end_fixed": _fixed_valid_count(termination_radius),
+        "sample_fixed": int(sum(_fixed_valid_count(solution["sampled_radius_m"][index]) for index in indices)),
+        "sample_surface": int(indices.size),
+        "drying_end_fixed": _fixed_valid_count(solution["termination_radius_m"]),
         "drying_end_surface": 1,
     }
+    record_counts = {record_type: sum(row["record_type"] == record_type for row in csv_rows) for record_type in expected_record_counts}
     if record_counts != expected_record_counts:
-        raise ValueError(f"CSV record_type结构错误: {record_counts!r}")
-    csv_seen: set[tuple[str, str, str]] = set()
-    max_csv_xlsx_difference = 0.0
+        raise ValueError(f"CSV记录类型数量错误: {record_counts}")
+    allowed_record_types = set(expected_record_counts)
+    sample_last_time = int(np.floor(float(solution["termination_time_s"]) / OUTPUT_DT_S + 1.0e-12) * OUTPUT_DT_S)
+    termination_time = float(solution["termination_time_s"])
+    termination_radius_cm = float(solution["termination_radius_m"]) * 100.0
+    seen_records: set[tuple[str, str, str]] = set()
+    _, termination_fixed_C, termination_valid = _fixed_state_values(
+        xi,
+        solution["termination_temperature_internal_C"],
+        solution["termination_moisture_internal_kgkg"],
+        solution["termination_radius_m"],
+    )
     for row in csv_rows:
         record_type = row["record_type"]
-        if record_type not in expected_record_counts:
+        if record_type not in allowed_record_types:
             raise ValueError(f"CSV包含未知record_type: {record_type}")
-        if not _format_pattern_ok(row["time_h"], 8):
-            raise ValueError("CSV time_h 不是八位小数")
-        if not np.isclose(
-            float(row["time_h"]), float(row["time_s"]) / 3600.0, rtol=0.0, atol=5.0e-9
-        ):
-            raise ValueError("CSV time_h 与 time_s 不一致")
-        if not _format_pattern_ok(row["radius_cm"], 4) or not _format_pattern_ok(row["r_cm"], 4):
-            raise ValueError("CSV半径字段不是四位小数")
-        if not _format_pattern_ok(row["temperature_C"], 4) or not _format_pattern_ok(row["moisture_kgkg"], 4):
-            raise ValueError("CSV温度/水分不是四位小数字符串")
-        if row["is_surface"] not in {"0", "1"}:
-            raise ValueError("CSV is_surface 不是0/1")
+        expected_surface_flag = "1" if record_type.endswith("_surface") else "0"
+        if row["is_surface"] != expected_surface_flag:
+            raise ValueError("CSV record_type与is_surface不一致")
+        for field, decimals in (("time_h", 8), ("radius_cm", 4), ("r_cm", 4), ("temperature_C", 4), ("moisture_kgkg", 4)):
+            if not _format_pattern_ok(row[field], decimals):
+                raise ValueError(f"CSV字段{field}格式错误")
+        time_s_value = float(row["time_s"])
+        if not np.isclose(float(row["time_h"]), time_s_value / 3600.0, atol=5.0e-9, rtol=0.0):
+            raise ValueError("CSV time_h与time_s不一致")
+        value = float(row["moisture_kgkg"])
+        if value < 0.0 or not np.isfinite(value):
+            raise ValueError("CSV水分无效")
+        record_key = (record_type, row["time_s"], row["r_cm"])
+        if record_key in seen_records:
+            raise ValueError("CSV存在重复记录")
+        seen_records.add(record_key)
         if record_type.startswith("sample_"):
             if re.fullmatch(r"\d+", row["time_s"]) is None:
-                raise ValueError("CSV sample time_s 不是整数秒")
-            sample_time = int(row["time_s"])
-            if sample_time not in xlsx_surface_map and record_type == "sample_surface":
-                raise ValueError("CSV sample表面时刻无法对应result4")
-            sample_matches = np.flatnonzero(
-                np.isclose(sampled_times, sample_time, rtol=0.0, atol=1.0e-8)
-            )
-            if sample_matches.size != 1:
-                raise ValueError("CSV sample时刻无法对应求解器状态")
-            expected_sample_radius_cm = float(sampled_radius[sample_matches[0]]) * 100.0
-            if not np.isclose(
-                float(row["radius_cm"]), expected_sample_radius_cm, rtol=0.0, atol=5.0e-5
-            ):
-                raise ValueError("CSV sample radius_cm 与 R(t) 不一致")
-            if record_type == "sample_fixed":
-                key = (sample_time, row["r_cm"])
-                if key not in xlsx_fixed_map:
-                    raise ValueError("CSV fixed记录无法对应result4固定位置")
-                if row["is_surface"] != "0":
-                    raise ValueError("CSV fixed记录的is_surface必须为0")
-                expected_moisture = xlsx_fixed_map[key]
+                raise ValueError("CSV采样time_s必须为整数秒")
+            time_value = int(row["time_s"])
+            if time_value < int(OUTPUT_DT_S) or time_value > sample_last_time or time_value % int(OUTPUT_DT_S) != 0:
+                raise ValueError("CSV采样time_s不是严格60 s网格")
+            matches = np.flatnonzero(np.isclose(solution["sampled_times_s"], time_value, atol=1.0e-8, rtol=0.0))
+            if matches.size != 1:
+                raise ValueError("CSV采样时间无法对应求解状态")
+            state_index = int(matches[0])
+            expected_sample_radius_cm = float(solution["sampled_radius_m"][state_index]) * 100.0
+            if not np.isclose(float(row["radius_cm"]), expected_sample_radius_cm, atol=5.0e-5, rtol=0.0):
+                raise ValueError("CSV采样radius_cm与R(t)不一致")
+            if record_type == "sample_surface":
+                if not np.isclose(float(row["r_cm"]), expected_sample_radius_cm, atol=5.0e-5, rtol=0.0):
+                    raise ValueError("CSV采样表面r_cm与R(t)不一致")
+                expected = xlsx_surface[time_value]
             else:
-                if not np.isclose(
-                    float(row["r_cm"]), expected_sample_radius_cm, rtol=0.0, atol=5.0e-5
-                ):
-                    raise ValueError("CSV sample表面 r_cm 与 R(t) 不一致")
-                expected_moisture = xlsx_surface_map[sample_time]
+                radius_index = int(round(float(row["r_cm"]) * 10.0))
+                if radius_index < 0 or radius_index >= OUTPUT_RADIUS_CM.size or not np.isclose(float(row["r_cm"]), OUTPUT_RADIUS_CM[radius_index], atol=5.0e-5, rtol=0.0):
+                    raise ValueError("CSV采样固定r_cm格式或范围错误")
+                _, _, valid = _fixed_state_values(
+                    xi,
+                    solution["sampled_temperature_internal_C"][state_index],
+                    solution["sampled_moisture_internal_kgkg"][state_index],
+                    solution["sampled_radius_m"][state_index],
+                )
+                if not valid[radius_index]:
+                    raise ValueError("CSV采样固定位置位于移动表面之外")
+                expected = xlsx_fixed[(time_value, row["r_cm"])]
         else:
             if re.fullmatch(r"\d+\.\d{6}", row["time_s"]) is None:
-                raise ValueError("CSV终止 time_s 不是六位小数")
-            termination_time = float(row["time_s"])
-            if not np.isclose(termination_time, float(solution["termination_time_s"]), atol=5.0e-7, rtol=0.0):
-                raise ValueError("CSV终止时刻与求解器不一致")
-            if not np.isclose(
-                float(row["radius_cm"]), termination_radius * 100.0, rtol=0.0, atol=5.0e-5
-            ):
-                raise ValueError("CSV终止 radius_cm 与真实表面半径不一致")
-            termination_temperature = np.asarray(solution["termination_temperature_internal_C"], dtype=float)
-            termination_moisture_array = np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float)
-            fixed_temperature, fixed_moisture, valid = _fixed_state_values(
-                xi, termination_temperature, termination_moisture_array, termination_radius
-            )
-            del fixed_temperature
-            if record_type == "drying_end_fixed":
-                radius_index = int(round(float(row["r_cm"]) * 10.0))
-                if (
-                    radius_index < 0
-                    or radius_index >= OUTPUT_RADIUS_CM.size
-                    or not valid[radius_index]
-                    or not np.isclose(
-                        float(row["r_cm"]),
-                        float(OUTPUT_RADIUS_CM[radius_index]),
-                        rtol=0.0,
-                        atol=5.0e-5,
-                    )
-                ):
-                    raise ValueError("CSV终止固定位置无效")
-                if row["is_surface"] != "0":
-                    raise ValueError("CSV终止fixed记录的is_surface必须为0")
-                expected_moisture = float(f"{fixed_moisture[radius_index]:.4f}")
+                raise ValueError("CSV终止time_s必须为六位小数")
+            if not np.isclose(time_s_value, termination_time, atol=5.0e-7, rtol=0.0):
+                raise ValueError("CSV终止time_s与solution不一致")
+            if not np.isclose(float(row["radius_cm"]), termination_radius_cm, atol=5.0e-5, rtol=0.0):
+                raise ValueError("CSV终止radius_cm与solution不一致")
+            if record_type == "drying_end_surface":
+                if not np.isclose(float(row["r_cm"]), termination_radius_cm, atol=5.0e-5, rtol=0.0):
+                    raise ValueError("CSV终止表面r_cm与真实表面不一致")
+                expected = float(f"{solution['termination_moisture_internal_kgkg'][-1]:.4f}")
             else:
-                if not np.isclose(
-                    float(row["radius_cm"]), termination_radius * 100.0, rtol=0.0, atol=5.0e-5
-                ) or not np.isclose(
-                    float(row["r_cm"]), termination_radius * 100.0, rtol=0.0, atol=5.0e-5
-                ):
-                    raise ValueError("CSV终止表面半径字段错误")
-                expected_moisture = float(f"{termination_moisture_array[-1]:.4f}")
-        key = (record_type, row["time_s"], row["r_cm"])
-        if key in csv_seen:
-            raise ValueError("CSV存在重复记录")
-        csv_seen.add(key)
-        if (record_type.endswith("surface")) != (row["is_surface"] == "1"):
-            raise ValueError("CSV surface标记与record_type不一致")
-        actual_moisture = float(row["moisture_kgkg"])
-        if not np.isfinite(actual_moisture) or actual_moisture < 0.0:
-            raise ValueError("CSV水分包含非有限值或负值")
-        max_csv_xlsx_difference = max(
-            max_csv_xlsx_difference, abs(actual_moisture - expected_moisture)
-        )
-    if max_csv_xlsx_difference > 0.0:
-        raise ValueError("CSV与result4对应水分值不一致")
-
-    paper_workbook = load_workbook(Path(paper_path), read_only=True, data_only=True)
-    if paper_workbook.sheetnames != ["表6"]:
-        raise ValueError(f"论文表工作表错误: {paper_workbook.sheetnames}")
-    paper_sheet = paper_workbook["表6"]
-    paper_rows = list(
-        paper_sheet.iter_rows(
-            min_row=1,
-            max_row=paper_sheet.max_row,
-            min_col=1,
-            max_col=paper_sheet.max_column,
-            values_only=True,
-        )
-    )
-    paper_hours = _paper_regular_hours(solution)
-    # 表头 + 常规行 + 终止行 + 一个空行 + 最终时长摘要行。
-    expected_paper_rows = len(paper_hours) + 4
-    if paper_sheet.max_row != expected_paper_rows or paper_sheet.max_column != 5:
-        raise ValueError(
-            f"论文表尺寸错误: {(paper_sheet.max_row, paper_sheet.max_column)}，"
-            f"期望 {(expected_paper_rows, 5)}"
-        )
-    if list(paper_rows[0]) != ["时间/h", "0 cm", "0.5 cm", "1.0 cm", "药材表面"]:
-        raise ValueError("论文表表头错误")
-    max_paper_difference = 0.0
-    for row_index, hour in enumerate(paper_hours, start=1):
-        row = paper_rows[row_index]
-        if not np.isclose(float(row[0]), hour, atol=1.0e-12, rtol=0.0):
-            raise ValueError("论文表常规时间行错误")
-        expected_index = _sample_index_at_time(solution, hour * 3600.0)
-        _, fixed_moisture, valid = _fixed_state_values(
-            xi,
-            sampled_temperature[expected_index],
-            sampled_moisture[expected_index],
-            float(sampled_radius[expected_index]),
-        )
-        expected_values = [fixed_moisture[0], fixed_moisture[5], fixed_moisture[10], sampled_moisture[expected_index, -1]]
-        for column_index, expected_value in enumerate(expected_values, start=1):
-            if expected_value is None or (column_index <= 3 and not valid[[0, 5, 10][column_index - 1]]):
-                continue
-            actual_value = row[column_index]
-            if actual_value is None or not np.isfinite(float(actual_value)):
-                raise ValueError("论文表常规水分为空或非有限")
-            max_paper_difference = max(
-                max_paper_difference,
-                abs(float(actual_value) - float(f"{expected_value:.4f}")),
-            )
-    termination_row_index = 1 + len(paper_hours) + 0
-    termination_row = paper_rows[termination_row_index]
-    expected_termination_text = f"烘干结束时间（{float(solution['termination_time_s']) / 3600.0:.4f} h）"
-    if termination_row[0] != expected_termination_text:
-        raise ValueError("论文表终止时间文本错误")
-    termination_temperature = np.asarray(solution["termination_temperature_internal_C"], dtype=float)
-    termination_moisture_array = np.asarray(solution["termination_moisture_internal_kgkg"], dtype=float)
-    _, fixed_moisture, valid = _fixed_state_values(
-        xi, termination_temperature, termination_moisture_array, termination_radius
-    )
-    expected_values = [fixed_moisture[0], fixed_moisture[5], fixed_moisture[10], termination_moisture_array[-1]]
-    for column_index, expected_value in enumerate(expected_values, start=1):
-        if column_index <= 3 and not valid[[0, 5, 10][column_index - 1]]:
+                radius_index = int(round(float(row["r_cm"]) * 10.0))
+                if radius_index < 0 or radius_index >= OUTPUT_RADIUS_CM.size or not np.isclose(float(row["r_cm"]), OUTPUT_RADIUS_CM[radius_index], atol=5.0e-5, rtol=0.0) or not termination_valid[radius_index]:
+                    raise ValueError("CSV终止固定位置域外或r_cm错误")
+                expected = float(f"{termination_fixed_C[radius_index]:.4f}")
+        if value != expected:
+            raise ValueError("CSV与result4值不一致")
+    paper_workbook = load_workbook(Path(paper_path), read_only=True, data_only=True); paper = paper_workbook["表6"]; paper_rows = list(paper.iter_rows(values_only=True)); hours = _paper_regular_hours(solution)
+    if paper_workbook.sheetnames != ["表6"] or (paper.max_row, paper.max_column) != (len(hours) + 4, 5): raise ValueError("论文表结构错误")
+    if list(paper_rows[0]) != ["时间/h", "0 cm", "0.5 cm", "1.0 cm", "药材表面"]: raise ValueError("论文表表头错误")
+    for row_index, hour in enumerate(hours, start=1):
+        index = _sample_index_at_time(solution, hour * 3600.0); _, fixed_C, valid = _fixed_state_values(xi, solution["sampled_temperature_internal_C"][index], solution["sampled_moisture_internal_kgkg"][index], solution["sampled_radius_m"][index])
+        expected_values = [fixed_C[0], fixed_C[5], fixed_C[10], solution["sampled_moisture_internal_kgkg"][index, -1]]
+        for column, expected in enumerate(expected_values, start=1):
+            if column == 4 or valid[[0, 5, 10][column - 1]]:
+                if float(paper_rows[row_index][column]) != float(f"{expected:.4f}"): raise ValueError("论文表常规值不一致")
+    termination_row = paper_rows[len(hours) + 1]
+    if termination_row[0] != f"烘干结束时间（{solution['termination_time_s'] / 3600.0:.4f} h）":
+        raise ValueError("论文表终止时间标签错误")
+    termination_expected = [termination_fixed_C[0], termination_fixed_C[5], termination_fixed_C[10], solution["termination_moisture_internal_kgkg"][-1]]
+    for column, expected in enumerate(termination_expected, start=1):
+        radius_index = (0, 5, 10, None)[column - 1]
+        if radius_index is not None and not termination_valid[radius_index]:
+            if termination_row[column] is not None:
+                raise ValueError("论文表终止固定位置域外不应有数值")
             continue
-        actual_value = termination_row[column_index]
-        if actual_value is None or not np.isfinite(float(actual_value)):
-            raise ValueError("论文表终止水分为空或非有限")
-        max_paper_difference = max(
-            max_paper_difference,
-            abs(float(actual_value) - float(f"{expected_value:.4f}")),
-        )
+        if termination_row[column] is None or float(termination_row[column]) != float(f"{expected:.4f}"):
+            raise ValueError("论文表终止行水分值不一致")
     summary_row = paper_rows[-1]
-    if summary_row[0] != "最终烘干时长/h" or not np.isclose(
-        float(summary_row[1]), float(solution["termination_time_s"]) / 3600.0, atol=5.0e-5
-    ):
-        raise ValueError("论文表最终烘干时长摘要错误")
-    if max_paper_difference > 0.0:
-        raise ValueError("论文表水分值与求解器结果不一致")
-
-    return {
-        **summary,
-        "xlsx_rows": int(worksheet.max_row),
-        "xlsx_columns": int(worksheet.max_column),
-        "csv_rows": int(len(csv_rows)),
-        "paper_rows": int(paper_sheet.max_row),
-        "paper_columns": int(paper_sheet.max_column),
-        "sample_start_s": int(round(sampled_times[sampled_indices[0]])) if sampled_indices.size else None,
-        "sample_end_s": int(round(sampled_times[sampled_indices[-1]])) if sampled_indices.size else None,
-        "sample_count": int(sampled_indices.size),
-        "fixed_blank_count": int(fixed_blank_count),
-        "max_abs_xlsx_expected_difference": float(max_xlsx_expected_difference),
-        "max_abs_csv_xlsx_difference": float(max_csv_xlsx_difference),
-        "max_abs_paper_difference": float(max_paper_difference),
-        "csv_record_counts": record_counts,
-    }
+    expected_duration_h = float(f"{termination_time / 3600.0:.4f}")
+    if summary_row[0] != "最终烘干时长/h":
+        raise ValueError("论文表最终时长标签错误")
+    if summary_row[1] is None or float(summary_row[1]) != expected_duration_h:
+        raise ValueError("论文表最终时长数值不一致")
+    return {**summary, "xlsx_rows": sheet.max_row, "xlsx_columns": sheet.max_column, "csv_rows": len(csv_rows), "paper_rows": paper.max_row, "paper_columns": paper.max_column, "fixed_blank_count": blank_count, "csv_record_counts": record_counts}
 
 
-def run_coarse_comparison(
-    air_data_path: str | Path = DEFAULT_AIR_DATA_PATH,
-    radius_data_path: str | Path = DEFAULT_RADIUS_DATA_PATH,
-    max_time_s: float = DEFAULT_MAX_TIME_S,
-    progress: bool = False,
-) -> dict[str, Any]:
-    """运行 N=160、dt=1 s 的粗网格对照解。"""
+def compare_sensitivity_tables(base: dict[str, Any], other: dict[str, Any]) -> dict[str, Any]:
+    """仅比较共同真实时间/绝对半径的常规场，终止时间单独报告。"""
+    base_times = np.asarray(base["sampled_times_s"]); other_times = np.asarray(other["sampled_times_s"])
+    common = sorted(set(np.round(base_times, 8)).intersection(set(np.round(other_times, 8))))
+    max_difference = 0.0; max_location: tuple[float, float] | None = None; surface_difference = 0.0
+    for time_value in common:
+        i, j = _sample_index_at_time(base, time_value), _sample_index_at_time(other, time_value)
+        r_base, r_other = base["sampled_radius_m"][i], other["sampled_radius_m"][j]
+        for radius_cm in OUTPUT_RADIUS_CM:
+            radius_m = radius_cm / 100.0
+            if radius_m > min(r_base, r_other) + 1.0e-12: continue
+            v_base = np.interp(min(1.0, radius_m / r_base), base["xi"], base["sampled_moisture_internal_kgkg"][i])
+            v_other = np.interp(min(1.0, radius_m / r_other), other["xi"], other["sampled_moisture_internal_kgkg"][j])
+            difference = abs(float(v_base - v_other))
+            if difference > max_difference: max_difference, max_location = difference, (float(time_value), float(radius_cm))
+        surface_difference = max(surface_difference, abs(float(base["sampled_moisture_internal_kgkg"][i, -1] - other["sampled_moisture_internal_kgkg"][j, -1])))
+    return {"common_time_count": len(common), "common_max_abs_difference_kgkg": max_difference, "common_max_difference_time_s": None if max_location is None else max_location[0], "common_max_difference_radius_cm": None if max_location is None else max_location[1], "surface_max_abs_difference_kgkg": surface_difference, "termination_time_base_s": float(base["termination_time_s"]), "termination_time_other_s": float(other["termination_time_s"]), "termination_time_difference_s": float(other["termination_time_s"] - base["termination_time_s"]), "termination_time_difference_h": float(other["termination_time_s"] - base["termination_time_s"]) / 3600.0}
 
-    solution = solve_task4(
-        air_data_path=air_data_path,
-        radius_data_path=radius_data_path,
-        max_time_s=max_time_s,
-        time_step_s=1.0,
-        output_dt_s=OUTPUT_DT_S,
-        n_intervals=160,
-        progress=progress,
-    )
-    return validate_solution(solution)
+
+def run_sensitivity(base_solution: dict[str, Any], progress: bool = False) -> dict[str, Any]:
+    common = {"air_data_path": DEFAULT_AIR_DATA_PATH, "radius_data_path": DEFAULT_RADIUS_DATA_PATH, "max_time_s": base_solution["max_time_s"], "output_dt_s": base_solution["output_dt_s"], "progress": progress, "event_tol_s": base_solution["event_tol_s"], "appendix": base_solution["appendix"], "fixed_radius_m": base_solution.get("fixed_radius_m")}
+    n400 = solve_task4(n_intervals=400, time_step_early_s=base_solution["time_step_early_s"], time_step_long_s=base_solution["time_step_long_s"], **common)
+    half = solve_task4(n_intervals=base_solution["n_intervals"], time_step_early_s=base_solution["time_step_early_s"] / 2.0, time_step_long_s=base_solution["time_step_long_s"] / 2.0, **common)
+    validate_solution(n400); validate_solution(half)
+    return {"space": compare_sensitivity_tables(base_solution, n400), "time": compare_sensitivity_tables(base_solution, half), "n400": n400, "dt_half": half}
+
+
+def run_coarse_comparison(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    kwargs.setdefault("n_intervals", 400)
+    return validate_solution(solve_task4(*args, **kwargs))
+
+
+def run_mechanisms(base_solution: dict[str, Any], progress: bool = False) -> dict[str, Any]:
+    common = {"air_data_path": DEFAULT_AIR_DATA_PATH, "radius_data_path": DEFAULT_RADIUS_DATA_PATH, "n_intervals": base_solution["n_intervals"], "time_step_early_s": base_solution["time_step_early_s"], "time_step_long_s": base_solution["time_step_long_s"], "output_dt_s": base_solution["output_dt_s"], "event_tol_s": base_solution["event_tol_s"], "max_time_s": FIXED_MAX_TIME_S, "progress": progress, "fixed_radius_m": RADIUS_INITIAL_M}
+    A = solve_task4(appendix=3, **common); B = solve_task4(appendix=4, **common)
+    validate_solution(A); validate_solution(B)
+    return {"A": A, "B": B, "C": base_solution}
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="求解A题问题四移动边界模型")
+    parser = argparse.ArgumentParser(description="求解A题问题四材料坐标移动边界模型")
     parser.add_argument("--air-data-path", type=Path, default=DEFAULT_AIR_DATA_PATH)
     parser.add_argument("--radius-data-path", type=Path, default=DEFAULT_RADIUS_DATA_PATH)
-    parser.add_argument("--max-time", type=float, default=DEFAULT_MAX_TIME_S)
-    parser.add_argument("--time-step", type=float, default=TIME_STEP_S_DEFAULT)
+    parser.add_argument("--max-time", type=float, default=None)
+    parser.add_argument("--time-step", type=float, default=None, help="兼容参数：同时设置两段步长")
+    parser.add_argument("--time-step-early", type=float, default=None)
+    parser.add_argument("--time-step-long", type=float, default=None)
+    parser.add_argument("--event-tol", type=float, default=EVENT_TOL_S)
     parser.add_argument("--output-dt", type=float, default=OUTPUT_DT_S)
     parser.add_argument("--n", type=int, default=N_DEFAULT)
-    parser.add_argument("--no-write", action="store_true", help="本阶段不生成答案文件")
-    parser.add_argument(
-        "--skip-sensitivity",
-        action="store_true",
-        help="跳过 N=160、dt=1 s 的粗网格对照计算",
-    )
-    parser.add_argument("--progress", action="store_true", help="按6 h打印推进进度")
+    parser.add_argument("--appendix", type=int, choices=(3, 4), default=4)
+    parser.add_argument("--fixed-radius", type=float, default=None, help="固定半径/m，仅用于等价核对或机制")
+    parser.add_argument("--no-write", action="store_true")
+    parser.add_argument("--skip-sensitivity", action="store_true")
+    parser.add_argument("--mechanism", action="store_true")
+    parser.add_argument("--progress", action="store_true")
     args = parser.parse_args()
-
     started = wall_time.perf_counter()
-    print(
-        "问题四最终加密解开始: "
-        f"N={args.n}, dxi={1.0 / args.n:g}, dt={args.time_step:g}s, "
-        f"output_dt={args.output_dt:g}s, threshold C<{DRYING_THRESHOLD_KGKG:g}"
-    )
-    solution = solve_task4(
-        air_data_path=args.air_data_path,
-        radius_data_path=args.radius_data_path,
-        max_time_s=args.max_time,
-        time_step_s=args.time_step,
-        output_dt_s=args.output_dt,
-        n_intervals=args.n,
-        progress=args.progress,
-    )
+    solution = solve_task4(air_data_path=args.air_data_path, radius_data_path=args.radius_data_path, max_time_s=args.max_time, time_step_s=args.time_step, output_dt_s=args.output_dt, n_intervals=args.n, progress=args.progress, time_step_early_s=args.time_step_early, time_step_long_s=args.time_step_long, event_tol_s=args.event_tol, appendix=args.appendix, fixed_radius_m=args.fixed_radius)
     summary = validate_solution(solution)
-    print(f"最终加密解数值检查: {summary}")
-    print(
-        "终止证据: "
-        f"lower t={summary['termination_lower_time_s']:.6f}s "
-        f"max C={summary['termination_lower_max_kgkg']:.8f}; "
-        f"upper t={summary['termination_time_s']:.6f}s "
-        f"max C={summary['termination_max_kgkg']:.8f}; "
-        f"R={summary['termination_radius_cm']:.6f}cm, "
-        f"max位置 r={summary['termination_max_radius_cm']:.6f}cm "
-        f"(xi={summary['termination_max_xi']:.6f})"
-    )
-    if not args.skip_sensitivity:
-        coarse_started = wall_time.perf_counter()
-        coarse_summary = run_coarse_comparison(
-            air_data_path=args.air_data_path,
-            radius_data_path=args.radius_data_path,
-            max_time_s=args.max_time,
-            progress=args.progress,
-        )
-        print(f"N=160, dt=1s 粗网格对照: {coarse_summary}")
-        print(
-            f"结束时间差（加密-粗解）: "
-            f"{summary['termination_time_h'] - coarse_summary['termination_time_h']:.8f} h"
-        )
-        print(
-            f"粗网格对照耗时: {wall_time.perf_counter() - coarse_started:.2f}s"
-        )
+    print(f"问题四材料坐标CN求解: N={args.n}, 早/晚dt={solution['time_step_early_s']:g}/{solution['time_step_long_s']:g}s, event_tol={args.event_tol:g}s")
+    print(f"稳定段均值: T_air={summary['stable_temperature_C']:.12f} C, C_air={summary['stable_moisture_kgkg']:.12f} kg/kg ({summary['stable_count']}点)")
+    print(f"终止证据: lower t={summary['termination_lower_time_s']:.9f}s max C={summary['termination_lower_max_kgkg']:.12f}; upper t={summary['termination_time_s']:.9f}s max C={summary['termination_max_kgkg']:.12f}; R={summary['termination_radius_cm']:.9f}cm, r_max={summary['termination_max_radius_cm']:.9f}cm")
+    print(f"数值检查: {summary}")
+    if not args.skip_sensitivity and args.fixed_radius is None:
+        sensitivity = run_sensitivity(solution)
+        print(f"空间敏感性N400: {sensitivity['space']}")
+        print(f"时间敏感性早/晚步长减半: {sensitivity['time']}")
+    elif args.skip_sensitivity:
+        print("已跳过敏感性检查")
+    if args.mechanism:
+        mechanisms = run_mechanisms(solution)
+        print(f"机制A/B/C时长(h): {mechanisms['A']['termination_time_s'] / 3600.0:.8f}, {mechanisms['B']['termination_time_s'] / 3600.0:.8f}, {mechanisms['C']['termination_time_s'] / 3600.0:.8f}")
     if args.no_write:
-        print("--no-write: 本阶段未生成任何 answer 文件")
+        print("--no-write: 未生成或覆盖answer文件")
     else:
-        write_result_xlsx(solution)
-        write_result_csv(solution)
-        write_paper_table(solution)
+        template_hash = hashlib.sha256(DEFAULT_TEMPLATE_PATH.read_bytes()).hexdigest()
+        write_result_xlsx(solution); write_result_csv(solution); write_paper_table(solution)
         output_summary = validate_written_outputs(solution)
+        if hashlib.sha256(DEFAULT_TEMPLATE_PATH.read_bytes()).hexdigest() != template_hash: raise RuntimeError("result4模板被修改")
         print(f"答案文件回读验收: {output_summary}")
-        print(f"已生成: {DEFAULT_XLSX_PATH}")
-        print(f"已生成: {DEFAULT_PAPER_PATH}")
-        print(f"已生成: {DEFAULT_CSV_PATH}")
+    print(f"烘干结束时间={summary['termination_time_h']:.12f} h")
     print(f"总耗时: {wall_time.perf_counter() - started:.2f}s")
 
 
