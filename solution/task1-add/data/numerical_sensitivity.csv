@@ -1,0 +1,3 @@
+comparison,base_grid,refined_grid,n_points,max_abs_difference_C,mean_abs_difference_C,max_time_s,max_radius_cm,max_z_cm
+midplane_key_points,dr=0.000125;dz=0.00125;dt=1,dr=0.000125;dz=0.000625;dt=0.5,35,5.906406386e-07,1.722825835e-07,100,2,12.5
+axial_profile_sample_points,dr=0.000125;dz=0.00125;dt=1,dr=0.000125;dz=0.000625;dt=0.5,126,0.002521885245,0.0004389338454,300,0,0

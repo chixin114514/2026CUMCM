@@ -1,0 +1,2 @@
+check,time_s,max_abs_error_C,mean_abs_error_C,status
+adiabatic_2d_vs_matching_1d_CN,20,1.563194019e-12,1.08726497e-12,pass
