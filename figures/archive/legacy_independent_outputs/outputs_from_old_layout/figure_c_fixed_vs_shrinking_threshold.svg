@@ -1,0 +1,905 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="506.255691pt" height="337.11875pt" viewBox="0 0 506.255691 337.11875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-12T00:08:14.862508</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M -0 337.11875 
+L 506.255691 337.11875 
+L 506.255691 0 
+L -0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 43.488 306.45 
+L 222.373385 306.45 
+L 222.373385 49.95 
+L 43.488 49.95 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m6308022506" d="M 0 0 
+L 0 3 
+" style="stroke: #000000; stroke-width: 0.7"/>
+      </defs>
+      <g>
+       <use xlink:href="#m6308022506" x="43.488" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="43.488" y="317.735156" transform="rotate(-0 43.488 317.735156)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m6308022506" x="73.302231" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="73.302231" y="317.735156" transform="rotate(-0 73.302231 317.735156)">10</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#m6308022506" x="103.116462" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="103.116462" y="317.735156" transform="rotate(-0 103.116462 317.735156)">20</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m6308022506" x="132.930692" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="132.930692" y="317.735156" transform="rotate(-0 132.930692 317.735156)">30</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m6308022506" x="162.744923" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="162.744923" y="317.735156" transform="rotate(-0 162.744923 317.735156)">40</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m6308022506" x="192.559154" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="192.559154" y="317.735156" transform="rotate(-0 192.559154 317.735156)">50</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m6308022506" x="222.373385" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="222.373385" y="317.735156" transform="rotate(-0 222.373385 317.735156)">60</text>
+     </g>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 8px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="132.930692" y="328.8875" transform="rotate(-0 132.930692 328.8875)">时间 (h)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_8">
+      <defs>
+       <path id="m1aa679be23" d="M 0 0 
+L -3 0 
+" style="stroke: #000000; stroke-width: 0.7"/>
+      </defs>
+      <g>
+       <use xlink:href="#m1aa679be23" x="43.488" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="36.988" y="308.842578" transform="rotate(-0 36.988 308.842578)">0.0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#m1aa679be23" x="43.488" y="258.595522" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="36.988" y="260.988101" transform="rotate(-0 36.988 260.988101)">0.5</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m1aa679be23" x="43.488" y="210.741045" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="36.988" y="213.133623" transform="rotate(-0 36.988 213.133623)">1.0</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#m1aa679be23" x="43.488" y="162.886567" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="36.988" y="165.279145" transform="rotate(-0 36.988 165.279145)">1.5</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m1aa679be23" x="43.488" y="115.03209" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="36.988" y="117.424668" transform="rotate(-0 36.988 117.424668)">2.0</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_13">
+      <g>
+       <use xlink:href="#m1aa679be23" x="43.488" y="67.177612" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="36.988" y="69.57019" transform="rotate(-0 36.988 69.57019)">2.5</text>
+     </g>
+    </g>
+    <g id="text_15">
+     <!-- 内部最大含水率，C$_{max}$ (kg kg$^{-1}$) -->
+     <g transform="translate(21.048 238.76) rotate(-90)">
+      <text>
+       <tspan x="0" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">内</tspan>
+       <tspan x="8" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">部</tspan>
+       <tspan x="16" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">最</tspan>
+       <tspan x="24" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">大</tspan>
+       <tspan x="32" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">含</tspan>
+       <tspan x="40" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">水</tspan>
+       <tspan x="48" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">率</tspan>
+       <tspan x="56" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">，</tspan>
+       <tspan x="64" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">C</tspan>
+       <tspan x="80.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="84.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">(</tspan>
+       <tspan x="88.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">k</tspan>
+       <tspan x="92.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">g</tspan>
+       <tspan x="96.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="100.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">k</tspan>
+       <tspan x="104.496094" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">g</tspan>
+       <tspan x="117.046484" y="-0.857813" style="font-size: 8px; font-family: 'SimHei'">)</tspan>
+       <tspan x="68.076562" y="0.454687" style="font-style: oblique; font-size: 5.6px; font-family: 'DejaVu Sans'">m</tspan>
+       <tspan x="73.531641" y="0.454687" style="font-style: oblique; font-size: 5.6px; font-family: 'DejaVu Sans'">a</tspan>
+       <tspan x="76.963281" y="0.454687" style="font-style: oblique; font-size: 5.6px; font-family: 'DejaVu Sans'">x</tspan>
+       <tspan x="108.572656" y="-3.920313" style="font-size: 5.6px; font-family: 'DejaVu Sans'">−</tspan>
+       <tspan x="113.264844" y="-3.920313" style="font-size: 5.6px; font-family: 'DejaVu Sans'">1</tspan>
+      </text>
+     </g>
+    </g>
+   </g>
+   <g id="line2d_14">
+    <path d="M 43.488 62.392164 
+L 45.425925 62.487873 
+L 45.724067 62.708004 
+L 46.02221 63.196119 
+L 46.370042 64.277631 
+L 46.767565 66.373657 
+L 47.264469 70.355149 
+L 47.960135 78.078862 
+L 49.301775 96.55069 
+L 51.488152 126.143899 
+L 53.028554 144.051045 
+L 54.668337 160.56084 
+L 56.506881 176.534664 
+L 58.146663 188.919403 
+L 59.786446 199.811082 
+L 61.62499 210.47306 
+L 63.364154 219.268713 
+L 65.40146 228.169646 
+L 67.140623 234.744851 
+L 69.177929 241.415765 
+L 71.662448 248.258955 
+L 73.451302 252.451007 
+L 75.78675 257.140746 
+L 77.178081 259.581325 
+L 80.457646 264.433769 
+L 82.147119 266.529795 
+L 84.383187 268.951231 
+L 87.46399 271.765075 
+L 91.29015 274.578918 
+L 97.252996 277.900019 
+L 98.99216 278.684832 
+L 99.836896 279.048526 
+L 105.700362 281.192407 
+L 106.594788 281.469963 
+L 107.986119 281.891082 
+L 109.178688 282.226063 
+L 110.222187 282.51319 
+L 111.861969 282.93431 
+L 112.756396 283.164011 
+L 115.78751 283.853116 
+L 116.483175 284.00625 
+L 126.669704 285.863004 
+L 127.365369 285.968284 
+L 129.750508 286.322407 
+L 130.545554 286.427687 
+L 132.483479 286.695672 
+L 133.328215 286.800951 
+L 135.017688 287.021082 
+L 135.912115 287.126362 
+L 137.402827 287.308209 
+L 138.346944 287.413489 
+L 139.738275 287.576194 
+L 140.732083 287.681474 
+L 141.974342 287.815466 
+L 143.01784 287.920746 
+L 144.21041 288.045168 
+L 145.303598 288.150448 
+L 146.446477 288.265299 
+L 147.639046 288.370578 
+L 148.732235 288.475858 
+L 149.924804 288.581138 
+L 150.968302 288.676847 
+L 152.260252 288.782127 
+L 153.25406 288.868265 
+L 154.5957 288.973545 
+L 155.589508 289.059683 
+L 156.980838 289.164963 
+L 157.924956 289.24153 
+L 159.415667 289.34681 
+L 160.359785 289.423377 
+L 161.949877 289.528657 
+L 162.844304 289.595653 
+L 164.434396 289.700933 
+L 165.328823 289.767929 
+L 167.018296 289.873209 
+L 167.863033 289.930634 
+L 169.602196 290.035914 
+L 170.446933 290.09334 
+L 172.285477 290.198619 
+L 173.080523 290.246474 
+L 174.968758 290.351754 
+L 175.763804 290.399608 
+L 177.701729 290.504888 
+L 178.496775 290.552743 
+L 180.583771 290.658022 
+L 181.378817 290.705877 
+L 183.565194 290.811157 
+L 184.31055 290.84944 
+L 186.496927 290.95472 
+L 187.242283 290.993004 
+L 189.577731 291.098284 
+L 190.323087 291.136567 
+L 192.757915 291.241847 
+L 193.503271 291.280131 
+L 196.136862 291.38541 
+L 196.882217 291.423694 
+L 199.615188 291.528974 
+L 200.360544 291.567257 
+L 203.242587 291.672537 
+L 203.938252 291.70125 
+L 206.820294 291.80653 
+L 207.51596 291.835243 
+L 210.497383 291.940522 
+L 211.193048 291.969235 
+L 214.373233 292.074515 
+L 214.836107 292.093657 
+L 214.836107 292.093657 
+" clip-path="url(#pbb10ad3639)" style="fill: none; stroke: #567487; stroke-width: 1.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_15">
+    <path d="M 43.53769 62.392164 
+L 48.755181 62.497444 
+L 49.252085 62.698433 
+L 49.699298 63.062127 
+L 50.245892 63.837369 
+L 50.891867 65.320858 
+L 51.438462 67.091474 
+L 52.134127 70.029739 
+L 53.028554 74.843899 
+L 54.072052 81.69666 
+L 55.562763 93.086026 
+L 58.246044 115.68291 
+L 61.426229 142.280429 
+L 64.357962 164.551903 
+L 66.494648 179.003955 
+L 68.531954 191.273843 
+L 70.768021 203.141754 
+L 72.556875 211.545 
+L 74.54449 219.852537 
+L 76.780558 228.026082 
+L 78.42034 233.337929 
+L 81.501144 241.913451 
+L 83.58814 246.842463 
+L 85.029162 249.895578 
+L 88.010585 255.398843 
+L 89.700058 258.107407 
+L 91.687673 260.969104 
+L 93.973431 263.869086 
+L 96.855473 267.037052 
+L 100.532562 270.425149 
+L 105.302838 273.966381 
+L 112.657015 278.091437 
+L 114.346488 278.857108 
+L 115.240915 279.249515 
+L 122.843544 282.063358 
+L 123.737971 282.340914 
+L 125.178992 282.781175 
+L 126.321871 283.106586 
+L 127.41506 283.412854 
+L 128.905771 283.805261 
+L 129.849888 284.054104 
+L 132.036265 284.580504 
+L 132.831312 284.771922 
+L 148.036569 287.595336 
+L 148.781925 287.700616 
+L 151.067683 288.035597 
+L 151.862729 288.140877 
+L 153.750963 288.399291 
+L 154.5957 288.504571 
+L 156.235483 288.715131 
+L 157.12991 288.82041 
+L 158.620621 289.002257 
+L 159.564738 289.107537 
+L 160.906379 289.260672 
+L 161.900187 289.365951 
+L 163.192137 289.509515 
+L 164.235635 289.614795 
+L 165.477894 289.748787 
+L 166.571083 289.854067 
+L 167.713962 289.968918 
+L 168.85684 290.074198 
+L 169.950029 290.179478 
+L 171.142598 290.284757 
+L 172.235787 290.390037 
+L 173.527737 290.495317 
+L 174.571235 290.591026 
+L 175.912875 290.696306 
+L 176.906683 290.782444 
+L 178.248323 290.887724 
+L 179.19244 290.964291 
+L 180.583771 291.069571 
+L 181.527888 291.146138 
+L 183.0186 291.251418 
+L 183.913027 291.318414 
+L 185.453429 291.423694 
+L 186.347856 291.49069 
+L 187.987638 291.59597 
+L 188.882065 291.662966 
+L 190.571538 291.768246 
+L 191.416275 291.825672 
+L 193.155438 291.930951 
+L 194.000175 291.988377 
+L 195.801257 292.093657 
+L 195.801257 292.093657 
+" clip-path="url(#pbb10ad3639)" style="fill: none; stroke: #4f9690; stroke-width: 1.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_16">
+    <path d="M 43.488 292.093657 
+L 222.373385 292.093657 
+" clip-path="url(#pbb10ad3639)" style="fill: none; stroke-dasharray: 3,2; stroke-dashoffset: 0; stroke: #b34d49"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 43.488 306.45 
+L 43.488 49.95 
+" style="fill: none; stroke: #000000; stroke-width: 0.75; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 43.488 306.45 
+L 222.373385 306.45 
+" style="fill: none; stroke: #000000; stroke-width: 0.75; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #b34d49" x="218.795677" y="260.28" transform="rotate(-0 218.795677 260.28)">阈值  C = 0.15</text>
+   </g>
+   <g id="patch_5">
+    <path d="M 218.150271 273.034694 
+Q 216.664319 281.580052 215.178366 290.125409 
+" style="fill: none; stroke: #567487; stroke-width: 0.7; stroke-linecap: round"/>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #567487" x="207.084407" y="268.166418" transform="rotate(-0 207.084407 268.166418)">57.47 h</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 205.633467 281.169127 
+Q 201.385885 285.888599 197.138303 290.60807 
+" style="fill: none; stroke: #4f9690; stroke-width: 0.7; stroke-linecap: round"/>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #4f9690" x="199.080823" y="276.780224" transform="rotate(-0 199.080823 276.780224)">51.09 h</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #567487" x="217.006823" y="67.905" transform="rotate(-0 217.006823 67.905)">固定半径</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #4f9690" x="217.006823" y="83.295" transform="rotate(-0 217.006823 83.295)">半径收缩</text>
+   </g>
+   <g id="text_21">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #24333d" x="25.599462" y="38.529844" transform="rotate(-0 25.599462 38.529844)">a</text>
+   </g>
+   <g id="text_22">
+    <text style="font-weight: 600; font-size: 8.5px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="43.488" y="43.95" transform="rotate(-0 43.488 43.95)">阈值由中心含水率控制</text>
+   </g>
+   <g id="PathCollection_1">
+    <defs>
+     <path id="C0_0_3a0a60a7d2" d="M 0 2.397916 
+C 0.635935 2.397916 1.245909 2.145256 1.695582 1.695582 
+C 2.145256 1.245909 2.397916 0.635935 2.397916 -0 
+C 2.397916 -0.635935 2.145256 -1.245909 1.695582 -1.695582 
+C 1.245909 -2.145256 0.635935 -2.397916 0 -2.397916 
+C -0.635935 -2.397916 -1.245909 -2.145256 -1.695582 -1.695582 
+C -2.145256 -1.245909 -2.397916 -0.635935 -2.397916 0 
+C -2.397916 0.635935 -2.145256 1.245909 -1.695582 1.695582 
+C -1.245909 2.145256 -0.635935 2.397916 0 2.397916 
+z
+"/>
+    </defs>
+    <g clip-path="url(#pbb10ad3639)">
+     <use xlink:href="#C0_0_3a0a60a7d2" x="214.836107" y="292.093657" style="fill: #567487; stroke: #ffffff; stroke-width: 0.5"/>
+    </g>
+    <g clip-path="url(#pbb10ad3639)">
+     <use xlink:href="#C0_0_3a0a60a7d2" x="195.801257" y="292.093657" style="fill: #4f9690; stroke: #ffffff; stroke-width: 0.5"/>
+    </g>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_7">
+    <path d="M 271.702385 155.941736 
+L 494.496 155.941736 
+L 494.496 49.95 
+L 271.702385 49.95 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 271.702385 152.016116 
+L 471.770771 152.016116 
+L 471.770771 122.988645 
+L 271.702385 122.988645 
+z
+" clip-path="url(#pd395e995dd)" style="fill: #567487"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 271.702385 82.90309 
+L 449.545421 82.90309 
+L 449.545421 53.87562 
+L 271.702385 53.87562 
+z
+" clip-path="url(#pd395e995dd)" style="fill: #4f9690"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_8">
+     <g id="line2d_17">
+      <g>
+       <use xlink:href="#m6308022506" x="271.702385" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_23">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="271.702385" y="167.226892" transform="rotate(-0 271.702385 167.226892)">0</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_18">
+      <g>
+       <use xlink:href="#m6308022506" x="306.513887" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_24">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="306.513887" y="167.226892" transform="rotate(-0 306.513887 167.226892)">10</text>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_19">
+      <g>
+       <use xlink:href="#m6308022506" x="341.325389" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_25">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="341.325389" y="167.226892" transform="rotate(-0 341.325389 167.226892)">20</text>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_20">
+      <g>
+       <use xlink:href="#m6308022506" x="376.136892" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_26">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="376.136892" y="167.226892" transform="rotate(-0 376.136892 167.226892)">30</text>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_21">
+      <g>
+       <use xlink:href="#m6308022506" x="410.948394" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_27">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="410.948394" y="167.226892" transform="rotate(-0 410.948394 167.226892)">40</text>
+     </g>
+    </g>
+    <g id="xtick_13">
+     <g id="line2d_22">
+      <g>
+       <use xlink:href="#m6308022506" x="445.759897" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_28">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="445.759897" y="167.226892" transform="rotate(-0 445.759897 167.226892)">50</text>
+     </g>
+    </g>
+    <g id="xtick_14">
+     <g id="line2d_23">
+      <g>
+       <use xlink:href="#m6308022506" x="480.571399" y="155.941736" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_29">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="480.571399" y="167.226892" transform="rotate(-0 480.571399 167.226892)">60</text>
+     </g>
+    </g>
+    <g id="text_30">
+     <!-- 达到 C$_{max}$ &lt; 0.15 的时间 (h) -->
+     <g transform="translate(328.819192 178.689236)">
+      <text>
+       <tspan x="0" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">达</tspan>
+       <tspan x="8" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">到</tspan>
+       <tspan x="16" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="20" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">C</tspan>
+       <tspan x="36.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="40.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">&lt;</tspan>
+       <tspan x="44.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="48.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">0</tspan>
+       <tspan x="52.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">.</tspan>
+       <tspan x="56.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">1</tspan>
+       <tspan x="60.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">5</tspan>
+       <tspan x="64.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="68.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">的</tspan>
+       <tspan x="76.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">时</tspan>
+       <tspan x="84.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">间</tspan>
+       <tspan x="92.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'"> </tspan>
+       <tspan x="96.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">(</tspan>
+       <tspan x="100.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">h</tspan>
+       <tspan x="104.496094" y="-0.46875" style="font-size: 8px; font-family: 'SimHei'">)</tspan>
+       <tspan x="24.076563" y="0.84375" style="font-style: oblique; font-size: 5.6px; font-family: 'DejaVu Sans'">m</tspan>
+       <tspan x="29.531641" y="0.84375" style="font-style: oblique; font-size: 5.6px; font-family: 'DejaVu Sans'">a</tspan>
+       <tspan x="32.963281" y="0.84375" style="font-style: oblique; font-size: 5.6px; font-family: 'DejaVu Sans'">x</tspan>
+      </text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_7">
+     <g id="line2d_24">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="137.50238" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_31">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="140.236755" transform="rotate(-0 265.202385 140.236755)">固定半径</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_25">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="68.389355" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_32">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="71.137402" transform="rotate(-0 265.202385 71.137402)">半径收缩</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_10">
+    <path d="M 271.702385 155.941736 
+L 271.702385 49.95 
+" style="fill: none; stroke: #000000; stroke-width: 0.75; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 271.702385 155.941736 
+L 494.496 155.941736 
+" style="fill: none; stroke: #000000; stroke-width: 0.75; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_33">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #24333d" x="474.555691" y="139.443787" transform="rotate(-0 474.555691 139.443787)">57.47 h</text>
+   </g>
+   <g id="text_34">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #24333d" x="452.330341" y="70.330761" transform="rotate(-0 452.330341 70.330761)">51.09 h</text>
+   </g>
+   <g id="text_35">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #24333d" x="249.423023" y="44.550174" transform="rotate(-0 249.423023 44.550174)">b</text>
+   </g>
+   <g id="text_36">
+    <text style="font-weight: 600; font-size: 8.5px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="271.702385" y="43.95" transform="rotate(-0 271.702385 43.95)">干燥时间对比</text>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #4f9690" x="490.040128" y="105.29743" transform="rotate(-0 490.040128 105.29743)">收缩使完成时间提前 6.38 h</text>
+   </g>
+  </g>
+  <g id="axes_3">
+   <g id="patch_12">
+    <path d="M 271.702385 306.45 
+L 494.496 306.45 
+L 494.496 200.458264 
+L 271.702385 200.458264 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_5">
+    <g id="xtick_15">
+     <g id="line2d_26">
+      <g>
+       <use xlink:href="#m6308022506" x="271.702385" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_38">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="271.702385" y="317.735156" transform="rotate(-0 271.702385 317.735156)">0</text>
+     </g>
+    </g>
+    <g id="xtick_16">
+     <g id="line2d_27">
+      <g>
+       <use xlink:href="#m6308022506" x="308.834654" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_39">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="308.834654" y="317.735156" transform="rotate(-0 308.834654 317.735156)">10</text>
+     </g>
+    </g>
+    <g id="xtick_17">
+     <g id="line2d_28">
+      <g>
+       <use xlink:href="#m6308022506" x="345.966923" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_40">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="345.966923" y="317.735156" transform="rotate(-0 345.966923 317.735156)">20</text>
+     </g>
+    </g>
+    <g id="xtick_18">
+     <g id="line2d_29">
+      <g>
+       <use xlink:href="#m6308022506" x="383.099192" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_41">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="383.099192" y="317.735156" transform="rotate(-0 383.099192 317.735156)">30</text>
+     </g>
+    </g>
+    <g id="xtick_19">
+     <g id="line2d_30">
+      <g>
+       <use xlink:href="#m6308022506" x="420.231462" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_42">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="420.231462" y="317.735156" transform="rotate(-0 420.231462 317.735156)">40</text>
+     </g>
+    </g>
+    <g id="xtick_20">
+     <g id="line2d_31">
+      <g>
+       <use xlink:href="#m6308022506" x="457.363731" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_43">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="457.363731" y="317.735156" transform="rotate(-0 457.363731 317.735156)">50</text>
+     </g>
+    </g>
+    <g id="xtick_21">
+     <g id="line2d_32">
+      <g>
+       <use xlink:href="#m6308022506" x="494.496" y="306.45" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_44">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="494.496" y="317.735156" transform="rotate(-0 494.496 317.735156)">60</text>
+     </g>
+    </g>
+    <g id="text_45">
+     <text style="font-size: 8px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="383.099192" y="328.8875" transform="rotate(-0 383.099192 328.8875)">时间 (h)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_6">
+    <g id="ytick_9">
+     <g id="line2d_33">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="297.617355" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_46">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="300.009933" transform="rotate(-0 265.202385 300.009933)">1.2</text>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_34">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="275.535744" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_47">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="277.928322" transform="rotate(-0 265.202385 277.928322)">1.4</text>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_35">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="253.454132" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_48">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="255.84671" transform="rotate(-0 265.202385 255.84671)">1.6</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_36">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="231.372521" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_49">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="233.765099" transform="rotate(-0 265.202385 233.765099)">1.8</text>
+     </g>
+    </g>
+    <g id="ytick_13">
+     <g id="line2d_37">
+      <g>
+       <use xlink:href="#m1aa679be23" x="271.702385" y="209.290909" style="stroke: #000000; stroke-width: 0.7"/>
+      </g>
+     </g>
+     <g id="text_50">
+      <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="265.202385" y="211.683487" transform="rotate(-0 265.202385 211.683487)">2.0</text>
+     </g>
+    </g>
+    <g id="text_51">
+     <text style="font-size: 8px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="249.671135" y="253.454132" transform="rotate(-90 249.671135 253.454132)">半径 R(t) (cm)</text>
+    </g>
+   </g>
+   <g id="line2d_38">
+    <path d="M 271.764272 209.754623 
+L 273.744659 224.184956 
+L 275.910708 234.717885 
+L 278.200532 246.388017 
+L 279.3145 251.0914 
+L 283.213388 259.681147 
+L 285.255663 264.483897 
+L 287.916809 269.463301 
+L 288.907003 271.020054 
+L 291.75381 275.270764 
+L 292.991552 277.048334 
+L 294.353069 278.803822 
+L 299.613474 284.291103 
+L 300.789329 284.997714 
+L 301.903297 285.715367 
+L 303.821798 286.951937 
+L 309.205977 289.712138 
+L 312.981091 291.169525 
+L 314.033172 291.611157 
+L 316.446769 292.361932 
+L 318.36527 292.814605 
+L 319.355463 293.057503 
+L 321.335851 293.521216 
+L 322.140384 293.697869 
+L 332.970629 295.519602 
+L 334.827242 295.63001 
+L 336.745743 295.861867 
+L 337.735937 295.972275 
+L 339.097453 296.104765 
+L 341.015954 296.215173 
+L 342.006148 296.281418 
+L 343.986535 296.391826 
+L 344.976729 296.458071 
+L 346.957117 296.568479 
+L 347.947311 296.634724 
+L 349.927698 296.745132 
+L 350.917892 296.811377 
+L 352.89828 296.921785 
+L 353.702812 296.954907 
+L 359.025104 297.065315 
+L 360.015298 297.13156 
+L 363.852299 297.241968 
+L 364.718719 297.286131 
+L 379.447853 297.396539 
+L 380.438046 297.462784 
+L 400.984569 297.573192 
+L 401.850988 297.617355 
+L 461.386393 297.617355 
+L 461.386393 297.617355 
+" clip-path="url(#p2e3fc7638c)" style="fill: none; stroke: #b98b50; stroke-width: 1.8; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_39">
+    <path d="M 271.702385 297.617355 
+L 494.496 297.617355 
+" clip-path="url(#p2e3fc7638c)" style="fill: none; stroke-dasharray: 1.4,1.4; stroke-dashoffset: 0; stroke: #a9b4b9; stroke-width: 0.7"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 271.702385 306.45 
+L 271.702385 200.458264 
+" style="fill: none; stroke: #000000; stroke-width: 0.75; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 271.702385 306.45 
+L 494.496 306.45 
+" style="fill: none; stroke: #000000; stroke-width: 0.75; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_52">
+    <text style="font-size: 7px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #b98b50" x="459.916333" y="293.753073" transform="rotate(-0 459.916333 293.753073)">1.20 cm</text>
+   </g>
+   <g id="text_53">
+    <text style="font-weight: 700; font-size: 9px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #24333d" x="249.423023" y="195.058439" transform="rotate(-0 249.423023 195.058439)">c</text>
+   </g>
+   <g id="text_54">
+    <text style="font-weight: 600; font-size: 8.5px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="271.702385" y="194.458264" transform="rotate(-0 271.702385 194.458264)">实测收缩</text>
+   </g>
+   <g id="PathCollection_2">
+    <defs>
+     <path id="mfb12e6799f" d="M 0 2.12132 
+C 0.562581 2.12132 1.102195 1.897805 1.5 1.5 
+C 1.897805 1.102195 2.12132 0.562581 2.12132 0 
+C 2.12132 -0.562581 1.897805 -1.102195 1.5 -1.5 
+C 1.102195 -1.897805 0.562581 -2.12132 0 -2.12132 
+C -0.562581 -2.12132 -1.102195 -1.897805 -1.5 -1.5 
+C -1.897805 -1.102195 -2.12132 -0.562581 -2.12132 0 
+C -2.12132 0.562581 -1.897805 1.102195 -1.5 1.5 
+C -1.102195 1.897805 -0.562581 2.12132 0 2.12132 
+z
+" style="stroke: #ffffff; stroke-width: 0.45"/>
+    </defs>
+    <g clip-path="url(#p2e3fc7638c)">
+     <use xlink:href="#mfb12e6799f" x="271.702385" y="209.290909" style="fill: #b98b50; stroke: #ffffff; stroke-width: 0.45"/>
+     <use xlink:href="#mfb12e6799f" x="461.401623" y="297.617355" style="fill: #b98b50; stroke: #ffffff; stroke-width: 0.45"/>
+    </g>
+   </g>
+  </g>
+  <g id="text_55">
+   <text style="font-weight: 600; font-size: 10px; font-family: 'SimHei', 'Hiragino Sans GB', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #24333d" x="7.2" y="15.16875" transform="rotate(-0 7.2 15.16875)">考虑收缩可使干燥阈值提前达到</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pbb10ad3639">
+   <rect x="43.488" y="49.95" width="178.885385" height="256.5"/>
+  </clipPath>
+  <clipPath id="pd395e995dd">
+   <rect x="271.702385" y="49.95" width="222.793615" height="105.991736"/>
+  </clipPath>
+  <clipPath id="p2e3fc7638c">
+   <rect x="271.702385" y="200.458264" width="222.793615" height="105.991736"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1850" height="470" viewBox="0 0 1850 470">
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 Z" fill="#111827"/>
+  </marker>
+  <style>
+    .title{font:700 28px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#111827}
+    .boxtext{font:600 21px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#111827}
+    .small{font:500 17px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#111827}
+    .engsmall{font:500 17px "Times New Roman","Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#111827}
+    .formula{font:italic 19px "Times New Roman","Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#111827}
+    .box{fill:#ffffff;stroke:#172554;stroke-width:2.2}
+    .round{fill:#ffffff;stroke:#172554;stroke-width:2.2}
+    .diamond{fill:#ffffff;stroke:#172554;stroke-width:2.2}
+    .arrow{fill:none;stroke:#111827;stroke-width:2.2;marker-end:url(#arrow)}
+    .label{font:600 18px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#111827}
+  </style>
+</defs>
+<rect width="1850" height="470" fill="#ffffff"/>
+<text x="925" y="42" text-anchor="middle" class="title">图3  问题三流程图</text>
+
+<!-- 开始上移，保持与主流程中心对齐 -->
+<rect x="40" y="186" width="140" height="64" rx="32" class="round"/>
+<text x="110" y="227" text-anchor="middle" class="boxtext">开始</text>
+
+<!-- 输出上移，文件名放到框外下方，避免覆盖 -->
+<rect x="1660" y="176" width="160" height="84" rx="42" class="round"/>
+<text x="1740" y="208" text-anchor="middle" class="boxtext">输出</text>
+<text x="1740" y="234" text-anchor="middle" class="engsmall">result3.xlsx</text>
+
+<rect x="240" y="175" width="220" height="86" class="box"/>
+<text x="350" y="208" text-anchor="middle" class="boxtext">继承问题2模型</text>
+<text x="350" y="238" text-anchor="middle" class="small">继续长期积分</text>
+
+<rect x="530" y="175" width="230" height="86" class="box"/>
+<text x="645" y="208" text-anchor="middle" class="boxtext">长期边界处理</text>
+<text x="645" y="238" text-anchor="middle" class="small">4 h 后使用稳定均值</text>
+
+<rect x="830" y="175" width="220" height="86" class="box"/>
+<text x="940" y="208" text-anchor="middle" class="boxtext">计算水分场</text>
+<text x="940" y="238" text-anchor="middle" class="formula">M(t)=max C(r,t)</text>
+
+<polygon points="1230,145 1365,218 1230,291 1095,218" class="diamond"/>
+<text x="1230" y="210" text-anchor="middle" class="boxtext">M(t) &lt; 0.15</text>
+<text x="1230" y="238" text-anchor="middle" class="small">是否成立</text>
+
+<rect x="1450" y="175" width="150" height="86" class="box"/>
+<text x="1525" y="208" text-anchor="middle" class="boxtext">二分定位</text>
+<text x="1525" y="238" text-anchor="middle" class="small">结束时刻</text>
+
+<text x="1260" y="125" class="label">是</text>
+<text x="1210" y="345" class="label">否</text>
+
+<path d="M180 218 L240 218" class="arrow"/>
+<path d="M460 218 L530 218" class="arrow"/>
+<path d="M760 218 L830 218" class="arrow"/>
+<path d="M1050 218 L1095 218" class="arrow"/>
+<path d="M1365 218 L1450 218" class="arrow"/>
+<path d="M1600 218 L1660 218" class="arrow"/>
+<path d="M1230 291 L1230 350 L940 350 L940 261" class="arrow"/>
+</svg>

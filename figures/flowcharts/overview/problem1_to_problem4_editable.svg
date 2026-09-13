@@ -1,0 +1,1798 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1771.2pt"
+   height="889.2pt"
+   viewBox="0 0 1771.2 889.2"
+   version="1.1"
+   id="svg781"
+   sodipodi:docname="A题_问题一至问题四_可编辑文字版.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <!-- Editable SVG: text has been restored as real <text> elements; boxes/arrows remain independent vector objects. -->
+  <sodipodi:namedview
+     id="namedview781"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="0.39876588"
+     inkscape:cx="1770.4624"
+     inkscape:cy="697.15091"
+     inkscape:window-width="1470"
+     inkscape:window-height="895"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="axes_1" />
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:date>2026-09-12T14:35:19.797767</dc:date>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+          </cc:Agent>
+        </dc:creator>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs1">
+    <rect
+       x="923.27792"
+       y="63.874573"
+       width="193.55931"
+       height="112.2644"
+       id="rect782" />
+    <style
+       type="text/css"
+       id="style1">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+  </defs>
+  <g
+     id="figure_1">
+    <g
+       id="axes_1">
+      <g
+         id="patch_3">
+        <path
+           d="M 137.664 194.112  L 419.904 194.112  L 419.904 123.552  L 137.664 123.552  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path3" />
+      </g>
+      <g
+         id="patch_4">
+        <path
+           d="M 539.856 194.112  L 822.096 194.112  L 822.096 123.552  L 539.856 123.552  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path4" />
+      </g>
+      <g
+         id="patch_5">
+        <path
+           d="M 942.048 194.112  L 1224.288 194.112  L 1224.288 123.552  L 942.048 123.552  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path5" />
+      </g>
+      <g
+         id="patch_6">
+        <path
+           d="M 1344.24 194.112  L 1626.48 194.112  L 1626.48 123.552  L 1344.24 123.552  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path6" />
+      </g>
+      <g
+         id="patch_9">
+        <path
+           d="M 419.904 158.832  Q 479.88 158.832 537.619932 158.832  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path10" />
+        <path
+           d="M 530.419932 155.232  L 537.619932 158.832  L 530.419932 162.432  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path11" />
+      </g>
+      <g
+         id="patch_10">
+        <path
+           d="M 822.096 158.832  Q 882.072 158.832 939.811932 158.832  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path12" />
+        <path
+           d="M 932.611932 155.232  L 939.811932 158.832  L 932.611932 162.432  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path13" />
+      </g>
+      <g
+         id="patch_11">
+        <path
+           d="M 1224.288 158.832  Q 1284.264 158.832 1342.003932 158.832  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path14" />
+        <path
+           d="M 1334.803932 155.232  L 1342.003932 158.832  L 1334.803932 162.432  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path15" />
+      </g>
+      <g
+         id="patch_13">
+        <path
+           d="M 278.784 194.112  Q 278.784 218.808 278.784 241.267932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path18" />
+        <path
+           d="M 282.384 234.067932  L 278.784 241.267932  L 275.184 234.067932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path19" />
+      </g>
+      <g
+         id="patch_14">
+        <path
+           d="M 172.944 311.2416  L 384.624 311.2416  L 384.624 253.3824  L 172.944 253.3824  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path20" />
+      </g>
+      <g
+         id="patch_15">
+        <path
+           d="M 278.784 311.2416  Q 278.784 333.8208 278.784 354.163932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path21" />
+        <path
+           d="M 282.384 346.963932  L 278.784 354.163932  L 275.184 346.963932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path22" />
+      </g>
+      <g
+         id="patch_16">
+        <path
+           d="M 172.944 415.6704  L 384.624 415.6704  L 384.624 360.6336  L 172.944 360.6336  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path23" />
+      </g>
+      <g
+         id="patch_17">
+        <path
+           d="M 278.784 415.6704  Q 278.784 430.1352 278.784 442.363932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path24" />
+        <path
+           d="M 282.384 435.163932  L 278.784 442.363932  L 275.184 435.163932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path25" />
+      </g>
+      <g
+         id="patch_18"
+         transform="translate(0,7.5)">
+        <path
+           d="M 139.428,508.8096 H 269.964 V 450.9504 H 139.428 Z"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:#ffffff;stroke:#000000;stroke-width:2;stroke-linejoin:miter"
+           id="path26" />
+      </g>
+      <g
+         id="patch_19"
+         transform="translate(0,7.5)">
+        <path
+           d="M 287.604,508.8096 H 418.14 V 450.9504 H 287.604 Z"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:#ffffff;stroke:#000000;stroke-width:2;stroke-linejoin:miter"
+           id="path27" />
+      </g>
+      <g
+         id="patch_20"
+         transform="translate(0,7.5)">
+        <path
+           d="m 204.696,444.6 q 0,3.1752 0,4.11433"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round"
+           id="path28" />
+        <path
+           d="m 208.296,441.51433 -3.6,7.2 -3.6,-7.2 z"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke:#000000;stroke-width:2;stroke-linecap:round"
+           id="path29" />
+      </g>
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.75;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         d="m 204.5572,448.36435 0.009,-3.43016"
+         id="path115-1"
+         inkscape:connector-type="polyline"
+         inkscape:connector-curvature="0" />
+      <g
+         id="patch_21"
+         transform="translate(0,7.5)">
+        <path
+           d="m 352.872,444.6 q 0,3.1752 0,4.11433"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round"
+           id="path30" />
+        <path
+           d="m 356.472,441.51433 -3.6,7.2 -3.6,-7.2 z"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke:#000000;stroke-width:2;stroke-linecap:round"
+           id="path31" />
+      </g>
+      <g
+         id="patch_22">
+        <path
+           d="M 278.784 529.272  Q 278.784 538.092 278.784 544.675932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path32" />
+        <path
+           d="M 282.384 537.475932  L 278.784 544.675932  L 275.184 537.475932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path33" />
+      </g>
+      <g
+         id="patch_23">
+        <path
+           d="M 278.784 529.272  Q 278.784 538.092 278.784 544.675932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path34" />
+        <path
+           d="M 282.384 537.475932  L 278.784 544.675932  L 275.184 537.475932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path35" />
+      </g>
+      <g
+         id="patch_24">
+        <path
+           d="M 172.944 607.5936  L 384.624 607.5936  L 384.624 549.7344  L 172.944 549.7344  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path36" />
+      </g>
+      <g
+         id="patch_25">
+        <path
+           d="M 278.784 607.5936  Q 278.784 630.1728 278.784 650.515932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path37" />
+        <path
+           d="M 282.384 643.315932  L 278.784 650.515932  L 275.184 643.315932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path38" />
+      </g>
+      <g
+         id="patch_26">
+        <path
+           d="M 172.944 712.0224  L 384.624 712.0224  L 384.624 656.9856  L 172.944 656.9856  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path39" />
+      </g>
+      <g
+         id="patch_27">
+        <path
+           d="M 278.784 712.0224  Q 278.784 731.7792 278.784 749.299932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path40" />
+        <path
+           d="M 282.384 742.099932  L 278.784 749.299932  L 275.184 742.099932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path41" />
+      </g>
+      <g
+         id="patch_28">
+        <path
+           d="M 177.869088 815.759712  L 379.698912 815.759712  Q 395.222112 815.759712 395.222112 800.236512  L 395.222112 773.395488  Q 395.222112 757.872288 379.698912 757.872288  L 177.869088 757.872288  Q 162.345888 757.872288 162.345888 773.395488  L 162.345888 800.236512  Q 162.345888 815.759712 177.869088 815.759712  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path42" />
+      </g>
+      <g
+         id="patch_29">
+        <path
+           d="M 680.976 194.112  Q 680.976 218.808 680.976 241.267932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path43" />
+        <path
+           d="M 684.576 234.067932  L 680.976 241.267932  L 677.376 234.067932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path44" />
+      </g>
+      <g
+         id="patch_30">
+        <path
+           d="M 571.608 311.2416  L 790.344 311.2416  L 790.344 253.3824  L 571.608 253.3824  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path45" />
+      </g>
+      <g
+         id="patch_31">
+        <path
+           d="M 680.976 311.2416  Q 680.976 334.5264 680.976 355.575132  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path46" />
+        <path
+           d="M 684.576 348.375132  L 680.976 355.575132  L 677.376 348.375132  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path47" />
+      </g>
+      <g
+         id="patch_32">
+        <path
+           d="M 553.968 427.6656  L 807.984 427.6656  L 807.984 362.7504  L 553.968 362.7504  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path48" />
+      </g>
+      <g
+         id="patch_33">
+        <path
+           d="M 680.976 427.6656  Q 680.976 448.4808 680.976 467.059932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path49" />
+        <path
+           d="M 684.576 459.859932  L 680.976 467.059932  L 677.376 459.859932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path50" />
+      </g>
+      <g
+         id="patch_34">
+        <path
+           d="M 569.844 529.9776  L 792.108 529.9776  L 792.108 472.1184  L 569.844 472.1184  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path51" />
+      </g>
+      <g
+         id="patch_35">
+        <path
+           d="M 680.976 529.9776  Q 680.976 547.2648 680.976 562.315932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path52" />
+        <path
+           d="M 684.576 555.115932  L 680.976 562.315932  L 677.376 555.115932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path53" />
+      </g>
+      <g
+         id="patch_36">
+        <path
+           d="M 569.844 623.8224  L 792.108 623.8224  L 792.108 568.7856  L 569.844 568.7856  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path54" />
+      </g>
+      <g
+         id="patch_37">
+        <path
+           d="M 680.976 623.8224  Q 680.976 638.2872 680.976 650.515932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path55" />
+        <path
+           d="M 684.576 643.315932  L 680.976 650.515932  L 677.376 643.315932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path56" />
+      </g>
+      <g
+         id="patch_38">
+        <path
+           d="M 680.976 649.224  L 786.816 691.56  L 680.976 733.896  L 575.136 691.56  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path57" />
+      </g>
+      <g
+         id="patch_39">
+        <path
+           d="M 822.096 501.048  Q 807.2784 501.048 794.696868 501.048  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path58" />
+        <path
+           d="M 801.896868 504.648  L 794.696868 501.048  L 801.896868 497.448  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path59" />
+      </g>
+      <g
+         id="patch_40">
+        <path
+           d="M 680.976 733.896  Q 680.976 746.244 680.976 756.355932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path60" />
+        <path
+           d="M 684.576 749.155932  L 680.976 756.355932  L 677.376 749.155932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path61" />
+      </g>
+      <g
+         id="patch_41">
+        <path
+           d="M 576.533088 822.815712  L 785.418912 822.815712  Q 800.942112 822.815712 800.942112 807.292512  L 800.942112 780.451488  Q 800.942112 764.928288 785.418912 764.928288  L 576.533088 764.928288  Q 561.009888 764.928288 561.009888 780.451488  L 561.009888 807.292512  Q 561.009888 822.815712 576.533088 822.815712  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path62" />
+      </g>
+      <g
+         id="patch_42">
+        <path
+           d="M 1083.168 194.112  Q 1083.168 218.808 1083.168 241.267932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path63" />
+        <path
+           d="M 1086.768 234.067932  L 1083.168 241.267932  L 1079.568 234.067932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path64" />
+      </g>
+      <g
+         id="patch_43">
+        <path
+           d="M 972.036 311.2416  L 1194.3 311.2416  L 1194.3 253.3824  L 972.036 253.3824  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path65" />
+      </g>
+      <g
+         id="patch_44">
+        <path
+           d="M 1083.168 311.2416  Q 1083.168 333.8208 1083.168 354.163932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path66" />
+        <path
+           d="M 1086.768 346.963932  L 1083.168 354.163932  L 1079.568 346.963932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path67" />
+      </g>
+      <g
+         id="patch_45">
+        <path
+           d="M 972.036 417.0816  L 1194.3 417.0816  L 1194.3 359.2224  L 972.036 359.2224  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path68" />
+      </g>
+      <g
+         id="patch_46">
+        <path
+           d="M 1083.168 417.0816  Q 1083.168 439.6608 1083.168 460.003932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path69" />
+        <path
+           d="M 1086.768 452.803932  L 1083.168 460.003932  L 1079.568 452.803932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path70" />
+      </g>
+      <g
+         id="patch_47">
+        <path
+           d="M 972.036 522.9216  L 1194.3 522.9216  L 1194.3 465.0624  L 972.036 465.0624  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path71" />
+      </g>
+      <g
+         id="patch_48">
+        <path
+           d="M 1083.168 522.9216  Q 1083.168 543.7368 1083.168 562.315932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path72" />
+        <path
+           d="M 1086.768 555.115932  L 1083.168 562.315932  L 1079.568 555.115932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path73" />
+      </g>
+      <g
+         id="patch_49">
+        <path
+           d="M 968.508 625.2336  L 1197.828 625.2336  L 1197.828 567.3744  L 968.508 567.3744  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path74" />
+      </g>
+      <g
+         id="patch_50">
+        <path
+           d="M 1083.168 625.2336  Q 1083.168 640.7568 1083.168 654.043932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path75" />
+        <path
+           d="M 1086.768 646.843932  L 1083.168 654.043932  L 1079.568 646.843932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path76" />
+      </g>
+      <g
+         id="patch_51">
+        <path
+           d="M 1083.168 653.4576  L 1189.008 695.088  L 1083.168 736.7184  L 977.328 695.088  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path77" />
+      </g>
+      <g
+         id="patch_52">
+        <path
+           d="M 1231.344 282.312  Q 1212.9984 282.312 1196.888868 282.312  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path78" />
+        <path
+           d="M 1204.088868 285.912  L 1196.888868 282.312  L 1204.088868 278.712  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path79" />
+      </g>
+      <g
+         id="patch_53">
+        <path
+           d="M 1083.168 736.7184  Q 1083.168 747.6552 1083.168 756.355932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path80" />
+        <path
+           d="M 1086.768 749.155932  L 1083.168 756.355932  L 1079.568 749.155932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path81" />
+      </g>
+      <g
+         id="patch_54">
+        <path
+           d="M 978.725088 822.815712  L 1187.610912 822.815712  Q 1203.134112 822.815712 1203.134112 807.292512  L 1203.134112 780.451488  Q 1203.134112 764.928288 1187.610912 764.928288  L 978.725088 764.928288  Q 963.201888 764.928288 963.201888 780.451488  L 963.201888 807.292512  Q 963.201888 822.815712 978.725088 822.815712  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path82" />
+      </g>
+      <g
+         id="patch_55">
+        <path
+           d="M 1485.36 194.112  Q 1485.36 218.808 1485.36 241.267932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path83" />
+        <path
+           d="M 1488.96 234.067932  L 1485.36 241.267932  L 1481.76 234.067932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path84" />
+      </g>
+      <g
+         id="patch_56">
+        <path
+           d="M 1374.228 311.2416  L 1596.492 311.2416  L 1596.492 253.3824  L 1374.228 253.3824  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path85" />
+      </g>
+      <g
+         id="patch_57">
+        <path
+           d="M 1485.36 311.2416  Q 1485.36 332.0568 1485.36 350.635932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path86" />
+        <path
+           d="M 1488.96 343.435932  L 1485.36 350.635932  L 1481.76 343.435932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path87" />
+      </g>
+      <g
+         id="patch_58">
+        <path
+           d="M 1374.228 413.5536  L 1596.492 413.5536  L 1596.492 355.6944  L 1374.228 355.6944  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path88" />
+      </g>
+      <g
+         id="patch_59">
+        <path
+           d="M 1485.36 413.5536  Q 1485.36 434.3688 1485.36 452.947932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path89" />
+        <path
+           d="M 1488.96 445.747932  L 1485.36 452.947932  L 1481.76 445.747932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path90" />
+      </g>
+      <g
+         id="patch_60">
+        <path
+           d="M 1368.936 515.8656  L 1601.784 515.8656  L 1601.784 458.0064  L 1368.936 458.0064  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path91" />
+      </g>
+      <g
+         id="patch_61">
+        <path
+           d="M 1485.36 515.8656  Q 1485.36 536.6808 1485.36 555.259932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path92" />
+        <path
+           d="M 1488.96 548.059932  L 1485.36 555.259932  L 1481.76 548.059932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path93" />
+      </g>
+      <g
+         id="patch_62">
+        <path
+           d="M 1365.408 618.8832  L 1605.312 618.8832  L 1605.312 559.6128  L 1365.408 559.6128  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path94" />
+      </g>
+      <g
+         id="patch_63">
+        <path
+           d="M 1485.36 618.8832  Q 1485.36 635.8176 1485.36 650.515932  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path95" />
+        <path
+           d="M 1488.96 643.315932  L 1485.36 650.515932  L 1481.76 643.315932  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path96" />
+      </g>
+      <g
+         id="patch_64">
+        <path
+           d="M 1485.36 649.9296  L 1591.2 691.56  L 1485.36 733.1904  L 1379.52 691.56  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path97" />
+      </g>
+      <g
+         id="patch_65">
+        <path
+           d="M 1633.536 589.248  Q 1619.424 589.248 1607.548068 589.248  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path98" />
+        <path
+           d="M 1614.748068 592.848  L 1607.548068 589.248  L 1614.748068 585.648  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path99" />
+      </g>
+      <g
+         id="patch_66">
+        <path
+           d="M 1485.36 733.1904  Q 1485.36 745.1856 1485.36 754.944732  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path100" />
+        <path
+           d="M 1488.96 747.744732  L 1485.36 754.944732  L 1481.76 747.744732  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="stroke: #000000; stroke-width: 2; stroke-linecap: round"
+           id="path101" />
+      </g>
+      <g
+         id="patch_67">
+        <path
+           d="M 1372.097088 829.871712  L 1598.622912 829.871712  Q 1614.146112 829.871712 1614.146112 814.348512  L 1614.146112 780.451488  Q 1614.146112 764.928288 1598.622912 764.928288  L 1372.097088 764.928288  Q 1356.573888 764.928288 1356.573888 780.451488  L 1356.573888 814.348512  Q 1356.573888 829.871712 1372.097088 829.871712  z "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: #ffffff; stroke: #000000; stroke-width: 2; stroke-linejoin: miter"
+           id="path102" />
+      </g>
+      <g
+         id="line2d_1">
+        <path
+           d="M 278.784,444.6 H 204.696"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:square"
+           id="path103" />
+      </g>
+      <g
+         id="line2d_2">
+        <path
+           d="M 278.784 444.6  L 352.872 444.6  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path104" />
+      </g>
+      <g
+         id="line2d_3"
+         transform="matrix(1,0,0,0.64426922,0,188.63407)">
+        <path
+           d="M 204.696,508.8096 V 529.272"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:square"
+           id="path105" />
+      </g>
+      <g
+         id="line2d_4">
+        <path
+           d="M 204.696 529.272  L 278.784 529.272  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path106" />
+      </g>
+      <g
+         id="line2d_5"
+         transform="matrix(1,0,0,0.62809964,0,197.20835)">
+        <path
+           d="M 352.872,508.8096 V 529.272"
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:square"
+           id="path107" />
+      </g>
+      <g
+         id="line2d_6">
+        <path
+           d="M 352.872 529.272  L 278.784 529.272  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path108" />
+      </g>
+      <g
+         id="line2d_7">
+        <path
+           d="M 786.816 691.56  L 822.096 691.56  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path109" />
+      </g>
+      <g
+         id="line2d_8">
+        <path
+           d="M 822.096 691.56  L 822.096 501.048  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path110" />
+      </g>
+      <g
+         id="line2d_9">
+        <path
+           d="M 1189.008 695.088  L 1231.344 695.088  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path111" />
+      </g>
+      <g
+         id="line2d_10">
+        <path
+           d="M 1231.344 695.088  L 1231.344 282.312  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path112" />
+      </g>
+      <g
+         id="line2d_11">
+        <path
+           d="M 1591.2 691.56  L 1633.536 691.56  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path113" />
+      </g>
+      <g
+         id="line2d_12">
+        <path
+           d="M 1633.536 691.56  L 1633.536 589.248  "
+           clip-path="url(#p1d8f0ea9cf)"
+           style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"
+           id="path114" />
+      </g>
+      <g
+         id="text_1"
+         style="stroke-width:0;stroke-dasharray:none"
+         inkscape:label="A题药材烘干问题：递进式建模流程">
+        <text
+           x="776.914"
+           y="65.335426"
+           font-size="31px"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC', 'Noto Serif CJK JP', 'Songti SC', SimSun, serif"
+           id="text1">全流程建模思路</text>
+      </g>
+      <g
+         id="text_3"
+         inkscape:label="问题一  预热平衡">
+        <text
+           x="207.534"
+           y="153.9208"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text2">问题一  预热平衡</text>
+      </g>
+      <g
+         id="text_4"
+         inkscape:label="建立固定半径基础模型">
+        <text
+           x="183.784"
+           y="174.3832"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text3">建立固定半径基础模型</text>
+      </g>
+      <g
+         id="text_5"
+         inkscape:label="问题二  全过程">
+        <text
+           x="619.226"
+           y="153.9208"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text4">问题二  全过程</text>
+      </g>
+      <g
+         id="text_6"
+         inkscape:label="引入状态物性与双向耦合">
+        <text
+           x="576.476"
+           y="174.3832"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text5">引入状态物性与双向耦合</text>
+      </g>
+      <g
+         id="text_7"
+         inkscape:label="问题三  烘干时长">
+        <text
+           x="1011.918"
+           y="153.9208"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text6">问题三  烘干时长</text>
+      </g>
+      <g
+         id="text_8"
+         inkscape:label="长期积分与全场阈值判定">
+        <text
+           x="978.668"
+           y="174.3832"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text7">长期积分与全场阈值判定</text>
+      </g>
+      <g
+         id="text_9"
+         inkscape:label="问题四  尺寸收缩">
+        <text
+           x="1414.11"
+           y="153.9208"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text8">问题四  尺寸收缩</text>
+      </g>
+      <g
+         id="text_10"
+         inkscape:label="建立移动边界热湿模型">
+        <text
+           x="1390.36"
+           y="174.3832"
+           font-size="19"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text9">建立移动边界热湿模型</text>
+      </g>
+      <g
+         id="text_15"
+         inkscape:label="读取附件1">
+        <text
+           x="240.823531"
+           y="276.8408"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text10">读取附件1</text>
+      </g>
+      <g
+         id="text_16"
+         inkscape:label="分段线性插值">
+        <text
+           x="227.784"
+           y="297.3032"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text11">分段线性插值</text>
+      </g>
+      <g
+         id="text_17"
+         inkscape:label="构造动态烘房边界">
+        <text
+           x="210.784"
+           y="382.6808"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text12">构造动态烘房边界</text>
+      </g>
+      <g
+         id="text_18"
+         inkscape:label="T∞(t), C∞(t)">
+        <text
+           x="233.809"
+           y="403.212106"
+           font-size="17.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text13">T∞(t), C∞(t)</text>
+      </g>
+      <g
+         id="text_19"
+         inkscape:label="求解径向温度方程"
+         transform="translate(0,4.5)">
+        <text
+           x="140.696"
+           y="484.35999"
+           font-size="16px"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC', 'Noto Serif CJK JP', 'Songti SC', SimSun, serif"
+           id="text14">求解径向温度方程</text>
+      </g>
+      <g
+         id="text_20"
+         inkscape:label="求解径向水分方程"
+         transform="translate(0,7.5)">
+        <text
+           x="288.87201"
+           y="484.35999"
+           font-size="16px"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC', 'Noto Serif CJK JP', 'Songti SC', SimSun, serif"
+           id="text15">求解径向水分方程</text>
+      </g>
+      <g
+         id="text_21"
+         inkscape:label="FVM 空间离散">
+        <text
+           x="225.72025"
+           y="572.9128"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text16">FVM 空间离散</text>
+      </g>
+      <g
+         id="text_22"
+         inkscape:label="Crank–Nicolson 时间推进">
+        <text
+           x="178.944"
+           y="593.3752"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text17">Crank–Nicolson 时间推进</text>
+      </g>
+      <g
+         id="text_23"
+         inkscape:label="水分非线性">
+        <text
+           x="238.784"
+           y="678.7528"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text18">水分非线性</text>
+      </g>
+      <g
+         id="text_24"
+         inkscape:label="Picard 迭代更新扩散系数">
+        <text
+           x="186.144"
+           y="699.2152"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text19">Picard 迭代更新扩散系数</text>
+      </g>
+      <g
+         id="text_25"
+         inkscape:label="得到预热阶段">
+        <text
+           x="227.784"
+           y="781.3448"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text20">得到预热阶段</text>
+      </g>
+      <g
+         id="text_26"
+         inkscape:label="T(r,t), C(r,t)">
+        <text
+           x="232.234"
+           y="801.876106"
+           font-size="17.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text21">T(r,t), C(r,t)</text>
+      </g>
+      <g
+         id="text_27"
+         inkscape:label="采用附录3经验公式">
+        <text
+           x="607.935766"
+           y="287.072"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text22">采用附录3经验公式</text>
+      </g>
+      <g
+         id="text_28"
+         inkscape:label="更新状态相关物性">
+        <text
+           x="612.976"
+           y="389.7368"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text23">更新状态相关物性</text>
+      </g>
+      <g
+         id="text_29"
+         inkscape:label="ρ(C), cₚ(C), k(C), D(T,C)">
+        <text
+           x="587.351"
+           y="409.0267"
+           font-size="17.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text24">ρ(C), cₚ(C), k(C), D(T,C)</text>
+      </g>
+      <g
+         id="text_30"
+         inkscape:label="构造同一半时间层状态">
+        <text
+           x="600.976"
+           y="495.2968"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text25">构造同一半时间层状态</text>
+      </g>
+      <g
+         id="text_31"
+         inkscape:label="同步冻结全部物性">
+        <text
+           x="616.976"
+           y="515.7592"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text26">同步冻结全部物性</text>
+      </g>
+      <g
+         id="text_32"
+         inkscape:label="分别求解温度与水分">
+        <text
+           x="608.976"
+           y="590.5528"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text27">分别求解温度与水分</text>
+      </g>
+      <g
+         id="text_33"
+         inkscape:label="同步 Picard 更新">
+        <text
+           x="618.336"
+           y="611.0152"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text28">同步 Picard 更新</text>
+      </g>
+      <g
+         id="text_34"
+         inkscape:label="T、C 是否同时收敛？">
+        <text
+           x="603.79975"
+           y="696.04"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text29">T、C 是否同时收敛？</text>
+      </g>
+      <g
+         id="text_35"
+         inkscape:label="否">
+        <g
+           id="patch_71">
+          <path
+             d="M 813.556 612.355  L 830.636 612.355  L 830.636 594.365  L 813.556 594.365  z "
+             style="fill: #ffffff"
+             id="path446" />
+        </g>
+        <text
+           x="815.096"
+           y="607.175"
+           font-size="14"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text30">否</text>
+      </g>
+      <g
+         id="text_36"
+         inkscape:label="是">
+        <g
+           id="patch_72">
+          <path
+             d="M 690.076 754.8862  L 707.156 754.8862  L 707.156 736.8962  L 690.076 736.8962  z "
+             style="fill: #ffffff"
+             id="path447" />
+        </g>
+        <text
+           x="691.616"
+           y="749.7062"
+           font-size="14"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text31">是</text>
+      </g>
+      <g
+         id="text_37"
+         inkscape:label="接受新时间层">
+        <text
+           x="632.976"
+           y="788.1208"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text32">接受新时间层</text>
+      </g>
+      <g
+         id="text_38"
+         inkscape:label="得到 0–3 h 温度与水分场">
+        <text
+           x="591.2485"
+           y="808.5832"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text33">得到 0–3 h 温度与水分场</text>
+      </g>
+      <g
+         id="text_39"
+         inkscape:label="继续积分至长期干燥阶段">
+        <text
+           x="989.668"
+           y="287.072"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text34">继续积分至长期干燥阶段</text>
+      </g>
+      <g
+         id="text_40"
+         inkscape:label="4 h 后切换为">
+        <text
+           x="1036.928"
+           y="382.4008"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text35">4 h 后切换为</text>
+      </g>
+      <g
+         id="text_41"
+         inkscape:label="稳定烘房环境边界">
+        <text
+           x="1019.168"
+           y="402.8632"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text36">稳定烘房环境边界</text>
+      </g>
+      <g
+         id="text_42"
+         inkscape:label="扫描全部径向节点">
+        <text
+           x="1015.168"
+           y="498.752"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text37">扫描全部径向节点</text>
+      </g>
+      <g
+         id="text_43"
+         inkscape:label="计算全场最大水分">
+        <text
+           x="1019.168"
+           y="590.5528"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text38">计算全场最大水分</text>
+      </g>
+      <g
+         id="text_44"
+         inkscape:label="Cₘₐₓ(t) = maxᵣ C(r,t)">
+        <text
+           x="1017.498"
+           y="607.9377"
+           font-size="16.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text39">Cₘₐₓ(t) = maxᵣ C(r,t)</text>
+      </g>
+      <g
+         id="text_45"
+         inkscape:label="是否满足烘干要求？">
+        <text
+           x="1011.168"
+           y="690.3952"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text40">是否满足烘干要求？</text>
+      </g>
+      <g
+         id="text_46"
+         inkscape:label="Cₘₐₓ(t) &lt; 0.15">
+        <text
+           x="1037.0505"
+           y="713.752969"
+           font-size="16.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text41">Cₘₐₓ(t) &lt; 0.15</text>
+      </g>
+      <g
+         id="text_47"
+         inkscape:label="否">
+        <g
+           id="patch_73">
+          <path
+             d="M 1222.804 499.459  L 1239.884 499.459  L 1239.884 481.469  L 1222.804 481.469  z "
+             style="fill: #ffffff"
+             id="path551" />
+        </g>
+        <text
+           x="1224.344"
+           y="494.279"
+           font-size="14"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text42">否</text>
+      </g>
+      <g
+         id="text_48"
+         inkscape:label="是">
+        <g
+           id="patch_74">
+          <path
+             d="M 1092.268 756.2974  L 1109.348 756.2974  L 1109.348 738.3074  L 1092.268 738.3074  z "
+             style="fill: #ffffff"
+             id="path552" />
+        </g>
+        <text
+           x="1093.808"
+           y="751.1174"
+           font-size="14"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text43">是</text>
+      </g>
+      <g
+         id="text_49"
+         inkscape:label="局部二分重新积分">
+        <text
+           x="1019.168"
+           y="788.1208"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text44">局部二分重新积分</text>
+      </g>
+      <g
+         id="text_50"
+         inkscape:label="定位终止时刻并形成 result3.xlsx"
+         transform="translate(12.000001)">
+        <text
+           x="961.35052"
+           y="808.58319"
+           font-size="16px"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC', 'Noto Serif CJK JP', 'Songti SC', SimSun, serif"
+           id="text45">定位终止时刻并形成 result3.xlsx</text>
+      </g>
+      <g
+         id="text_51"
+         inkscape:label="读取附件2">
+        <text
+           x="1446.310469"
+           y="276.8408"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text46">读取附件2</text>
+      </g>
+      <g
+         id="text_52"
+         inkscape:label="R(t)">
+        <text
+           x="1471.71"
+           y="297.372106"
+           font-size="17.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text47">R(t)</text>
+      </g>
+      <g
+         id="text_53"
+         inkscape:label="建立固定材料坐标">
+        <text
+           x="1417.36"
+           y="379.1528"
+           font-size="17"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text48">建立固定材料坐标</text>
+      </g>
+      <g
+         id="text_54"
+         inkscape:label="x = r/R(t)">
+        <text
+           x="1453.51"
+           y="399.684106"
+           font-size="17.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text49">x = r/R(t)</text>
+      </g>
+      <g
+         id="text_55"
+         inkscape:label="采用附录4物性">
+        <text
+           x="1432.61625"
+           y="481.1848"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text50">采用附录4物性</text>
+      </g>
+      <g
+         id="text_56"
+         inkscape:label="重建移动边界方程">
+        <text
+           x="1421.36"
+           y="501.6472"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text51">重建移动边界方程</text>
+      </g>
+      <g
+         id="text_57"
+         inkscape:label="FVM + Crank–Nicolson">
+        <text
+           x="1391.6325"
+           y="583.4968"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text52">FVM + Crank–Nicolson</text>
+      </g>
+      <g
+         id="text_58"
+         inkscape:label="同步 Picard 求解">
+        <text
+           x="1422.72"
+           y="603.9592"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text53">同步 Picard 求解</text>
+      </g>
+      <g
+         id="text_59"
+         inkscape:label="全场水分是否达标？">
+        <text
+           x="1413.36"
+           y="686.8672"
+           font-size="16"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text54">全场水分是否达标？</text>
+      </g>
+      <g
+         id="text_60"
+         inkscape:label="Cₘₐₓ(t) &lt; 0.15">
+        <text
+           x="1439.2425"
+           y="710.224969"
+           font-size="16.5"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'DejaVu Serif', STIXGeneral, 'Times New Roman', serif"
+           font-style="italic"
+           id="text55">Cₘₐₓ(t) &lt; 0.15</text>
+      </g>
+      <g
+         id="text_61"
+         inkscape:label="否">
+        <g
+           id="patch_75">
+          <path
+             d="M 1624.996 647.635  L 1642.076 647.635  L 1642.076 629.645  L 1624.996 629.645  z "
+             style="fill: #ffffff"
+             id="path676" />
+        </g>
+        <text
+           x="1626.536"
+           y="642.455"
+           font-size="14"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text56">否</text>
+      </g>
+      <g
+         id="text_62"
+         inkscape:label="是">
+        <g
+           id="patch_76">
+          <path
+             d="M 1494.46 754.8862  L 1511.54 754.8862  L 1511.54 736.8962  L 1494.46 736.8962  z "
+             style="fill: #ffffff"
+             id="path677" />
+        </g>
+        <text
+           x="1496"
+           y="749.7062"
+           font-size="14"
+           font-weight="400"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text57">是</text>
+      </g>
+      <g
+         id="text_63"
+         inkscape:label="二分定位终止时刻">
+        <text
+           x="1423.36"
+           y="791.5088"
+           font-size="15.5"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC','Noto Serif CJK JP','Songti SC','SimSun',serif"
+           id="text58">二分定位终止时刻</text>
+      </g>
+      <g
+         id="text_64"
+         inkscape:label="映射真实物理距离并形成 result4.xlsx"
+         transform="translate(10.500001)">
+        <text
+           x="1351.8492"
+           y="811.97119"
+           font-size="15.5px"
+           font-weight="700"
+           fill="#000000"
+           stroke="none"
+           xml:space="preserve"
+           style="white-space:pre"
+           font-family="'Noto Serif CJK SC', 'Noto Serif CJK JP', 'Songti SC', SimSun, serif"
+           id="text59">映射真实物理距离并形成 result4.xlsx</text>
+      </g>
+      <path
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.75;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         d="m 352.88124,449.01433 0.009,-3.43016"
+         id="path115"
+         inkscape:connector-type="polyline"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+  <defs
+     id="defs781">
+    <clipPath
+       id="p1d8f0ea9cf">
+      <rect
+         x="3.6"
+         y="3.6"
+         width="1764"
+         height="882"
+         id="rect781" />
+    </clipPath>
+  </defs>
+</svg>

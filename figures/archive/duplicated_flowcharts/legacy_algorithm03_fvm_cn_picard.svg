@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="640" viewBox="0 0 2000 640">
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9.6" refY="5.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5.5 L0,11 Z" fill="#000"/>
+    </marker>
+    <style>
+      .title { font: 700 30px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif; fill:#000; }
+      .txt   { font: 600 21px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif; fill:#000; }
+      .sm    { font: 500 17px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif; fill:#000; }
+      .box, .round, .diamond { fill:#fff; stroke:#000; stroke-width:2.2; }
+      .arr { fill:none; stroke:#000; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#fff"/>
+  <text x="1000" y="45" text-anchor="middle" class="title">图3　FVM + Crank–Nicolson + Picard 数值求解流程图</text>
+
+  <!--
+    先画连线，再画节点。节点的白色填充会遮住箭头末端可能进入框体的部分，
+    从而保证箭头只“接触”边界，不覆盖框内文字。
+  -->
+
+  <!-- Main flow -->
+  <path d="M180 245 H240" class="arr"/>
+  <path d="M460 245 H530" class="arr"/>
+  <path d="M770 245 H840" class="arr"/>
+  <path d="M1080 245 H1150" class="arr"/>
+  <path d="M1370 245 H1440" class="arr"/>
+  <path d="M1690 245 H1760" class="arr"/>
+  <path d="M1850 300 V365" class="arr"/>
+
+  <!-- Converged branch: decision -> accept -> output -->
+  <path d="M1720 445 H1660" class="arr"/>
+  <path d="M1480 445 H1420" class="arr"/>
+
+  <!-- Not converged branch: routed below all result nodes, then back into Picard from below -->
+  <path d="M1850 520 V575 H1120 V330 H1260 V300" class="arr"/>
+
+  <!-- Main flow nodes -->
+  <rect x="40" y="210" width="140" height="70" rx="35" class="round"/>
+  <text x="110" y="253" text-anchor="middle" class="txt">开始</text>
+
+  <rect x="240" y="190" width="220" height="110" class="box"/>
+  <text x="350" y="228" text-anchor="middle" class="txt">建立径向网格</text>
+  <text x="350" y="258" text-anchor="middle" class="sm">划分控制体</text>
+
+  <rect x="530" y="190" width="240" height="110" class="box"/>
+  <text x="650" y="228" text-anchor="middle" class="txt">FVM 空间离散</text>
+  <text x="650" y="258" text-anchor="middle" class="sm">计算体积与界面通量</text>
+
+  <rect x="840" y="190" width="240" height="110" class="box"/>
+  <text x="960" y="228" text-anchor="middle" class="txt">CN 时间离散</text>
+  <text x="960" y="258" text-anchor="middle" class="sm">对 n 与 n+1 时间层取平均</text>
+
+  <rect x="1150" y="190" width="220" height="110" class="box"/>
+  <text x="1260" y="228" text-anchor="middle" class="txt">Picard 初始化</text>
+  <text x="1260" y="258" text-anchor="middle" class="sm">令当前迭代值取上一轮结果</text>
+
+  <rect x="1440" y="190" width="250" height="110" class="box"/>
+  <text x="1565" y="228" text-anchor="middle" class="txt">组装线性方程组</text>
+  <text x="1565" y="258" text-anchor="middle" class="sm">冻结当前物性与系数</text>
+
+  <rect x="1760" y="190" width="180" height="110" class="box"/>
+  <text x="1850" y="228" text-anchor="middle" class="txt">求解</text>
+  <text x="1850" y="258" text-anchor="middle" class="sm">得到当前迭代解</text>
+
+  <!-- Decision and result nodes -->
+  <polygon points="1850,370 1980,445 1850,520 1720,445" class="diamond"/>
+  <text x="1850" y="438" text-anchor="middle" class="txt">是否收敛？</text>
+  <text x="1850" y="468" text-anchor="middle" class="sm">误差小于设定容限</text>
+
+  <rect x="1480" y="410" width="180" height="70" rx="35" class="round"/>
+  <text x="1570" y="453" text-anchor="middle" class="txt">接受时间步</text>
+
+  <rect x="1240" y="410" width="180" height="70" rx="35" class="round"/>
+  <text x="1330" y="453" text-anchor="middle" class="txt">输出结果</text>
+
+  <!-- Branch labels, placed away from arrowheads -->
+  <text x="1688" y="427" text-anchor="middle" class="sm">是</text>
+  <text x="1600" y="560" text-anchor="middle" class="sm">否，继续 Picard 迭代</text>
+</svg>

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="620" viewBox="0 0 2200 620">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#000"/>
+    </marker>
+    <style>
+      .title { font: 700 34px "Noto Serif CJK SC","Songti SC","SimSun",serif; fill:#000; }
+      .head  { font: 700 24px "Noto Serif CJK SC","Songti SC","SimSun",serif; fill:#000; }
+      .body  { font: 500 20px "Noto Serif CJK SC","Songti SC","SimSun",serif; fill:#000; }
+      .math  { font: italic 23px "Times New Roman","STIX Two Math","Noto Serif",serif; fill:#000; }
+      .small { font: 500 18px "Noto Serif CJK SC","Songti SC","SimSun",serif; fill:#000; }
+      .box   { fill:#fff; stroke:#000; stroke-width:2.2; }
+      .round { fill:#fff; stroke:#000; stroke-width:2.2; }
+      .arr   { fill:none; stroke:#000; stroke-width:2.2; stroke-linecap:square; stroke-linejoin:miter; marker-end:url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="2200" height="620" fill="#fff"/>
+  <text x="1100" y="48" text-anchor="middle" class="title">移动边界热湿模型算法流程</text>
+
+  <!-- Arrows are drawn first, so nodes always cover line endings cleanly. -->
+  <!-- Start branches -->
+  <path class="arr" d="M185 275 L245 140"/>
+  <path class="arr" d="M185 275 L245 410"/>
+
+  <!-- Upper preprocessing chain -->
+  <path class="arr" d="M525 140 L635 140"/>
+  <path class="arr" d="M935 140 L985 140 L985 230 L1040 230"/>
+
+  <!-- Lower preprocessing chain -->
+  <path class="arr" d="M525 410 L635 410"/>
+  <path class="arr" d="M935 410 L985 410 L985 310 L1040 310"/>
+
+  <!-- PDE transform to solver -->
+  <path class="arr" d="M1390 270 L1490 270"/>
+
+  <!-- Solver outputs -->
+  <path class="arr" d="M1815 245 L1870 175"/>
+  <path class="arr" d="M1815 295 L1870 365"/>
+
+  <!-- C output to mapping -->
+  <path class="arr" d="M1975 410 L1975 475"/>
+
+  <!-- T output routed around the right side, avoiding the C box completely -->
+  <path class="arr" d="M2080 167.5 L2150 167.5 L2150 525 L2110 525"/>
+
+  <!-- Nodes -->
+  <rect x="35" y="240" width="150" height="70" rx="35" class="round"/>
+  <text x="110" y="284" text-anchor="middle" class="head">开始</text>
+
+  <rect x="245" y="90" width="280" height="100" class="box"/>
+  <text x="385" y="128" text-anchor="middle" class="head">读取附件2</text>
+  <text x="385" y="162" text-anchor="middle" class="body">半径数据 <tspan class="math">R(t)</tspan></text>
+
+  <rect x="635" y="90" width="300" height="100" class="box"/>
+  <text x="785" y="128" text-anchor="middle" class="head">插值实时半径</text>
+  <text x="785" y="162" text-anchor="middle" class="body">得到 <tspan class="math">R(t)</tspan>, <tspan class="math">R(tₙ₊½)</tspan></text>
+
+  <rect x="245" y="355" width="280" height="110" class="box"/>
+  <text x="385" y="392" text-anchor="middle" class="head">读取环境与物性</text>
+  <text x="385" y="428" text-anchor="middle" class="math">T∞(t), C∞(t)</text>
+  <text x="385" y="455" text-anchor="middle" class="small">附录4物性</text>
+
+  <rect x="635" y="355" width="300" height="110" class="box"/>
+  <text x="785" y="392" text-anchor="middle" class="head">材料坐标变换</text>
+  <text x="785" y="426" text-anchor="middle" class="math">x = r / R(t)</text>
+  <text x="785" y="458" text-anchor="middle" class="math">0 ≤ x ≤ 1</text>
+
+  <rect x="1040" y="195" width="350" height="150" class="box"/>
+  <text x="1215" y="236" text-anchor="middle" class="head">变换控制方程</text>
+  <text x="1215" y="277" text-anchor="middle" class="body" textLength="260" lengthAdjust="spacingAndGlyphs">空间算子出现 <tspan class="math">1 / R²(t)</tspan></text>
+  <text x="1215" y="317" text-anchor="middle" class="body" textLength="270" lengthAdjust="spacingAndGlyphs">Robin 边界出现 <tspan class="math">1 / R(t)</tspan></text>
+
+  <rect x="1490" y="195" width="325" height="150" class="box"/>
+  <text x="1652.5" y="242" text-anchor="middle" class="head">固定域数值求解</text>
+  <text x="1652.5" y="286" text-anchor="middle" class="body">FVM + CN + 同步 Picard</text>
+
+  <rect x="1870" y="115" width="210" height="105" class="box"/>
+  <text x="1975" y="179" text-anchor="middle" class="head">得到 <tspan class="math">T(x,t)</tspan></text>
+
+  <rect x="1870" y="305" width="210" height="105" class="box"/>
+  <text x="1975" y="369" text-anchor="middle" class="head">得到 <tspan class="math">C(x,t)</tspan></text>
+
+  <rect x="1840" y="475" width="270" height="100" rx="50" class="round"/>
+  <text x="1975" y="535" text-anchor="middle" class="head">映射回 <tspan class="math">r = xR(t)</tspan></text>
+</svg>

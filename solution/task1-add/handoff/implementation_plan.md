@@ -1,6 +1,6 @@
 # 问题一二维轴向温度对照实验实施计划
 
-> **执行约束：** 具体代码、数值计算和数据整理由 `luna-worker` 完成；根 Agent 只规划、检查和验收。所有新增文件限定在 `solution/task1-add/`，不得改写问题一正式求解器、正式 CSV、`figures/deliverables/result1.xlsx` 或既有交接文档。
+> **执行约束：** 具体代码、数值计算和数据整理由 `luna-worker` 完成；根 Agent 只规划、检查和验收。所有新增文件限定在 `solution/task1-add/`，不得改写问题一正式求解器、正式 CSV、`figures/publication/tables/result1.xlsx` 或既有交接文档。
 
 **目标：** 用独立二维轴对称温度实验，判断现有一维径向温度模型忽略轴向导热是否造成显著误差。
 

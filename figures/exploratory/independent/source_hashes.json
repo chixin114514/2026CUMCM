@@ -1,0 +1,46 @@
+{
+  "solution/task1/answer/task1_result.csv": {
+    "sha256": "0a379dc82be409320c32981de9520a23e85d1b78ef6251c6b41d5f2354cfee37",
+    "rows": 37821,
+    "columns": [
+      "time_s",
+      "radius_cm",
+      "temperature_C",
+      "moisture_kgkg"
+    ]
+  },
+  "solution/task2/answer/task2_all_results.csv": {
+    "sha256": "4a9e5d34bd66029777cc140b1a7b7acdd8b6cd8e5302519760c203018b1b26e3",
+    "rows": 226821,
+    "columns": [
+      "time_s",
+      "time_h",
+      "radius_cm",
+      "temperature_C",
+      "moisture_kgkg"
+    ]
+  },
+  "solution/task3/answer/task3_all_results.csv": {
+    "sha256": "603f959f1707c30b1ba25ac5100b74132da02f6cc833b92c4d245a64e19ac99f",
+    "rows": 72429,
+    "columns": [
+      "time_s",
+      "radius_cm",
+      "moisture_kgkg"
+    ]
+  },
+  "solution/task4/answer/task4_all_answers.csv": {
+    "sha256": "e85ff898ab5213b437957e8908a5abc98f999e41976d8966a2af995406a56380",
+    "rows": 44287,
+    "columns": [
+      "record_type",
+      "time_s",
+      "time_h",
+      "radius_cm",
+      "r_cm",
+      "is_surface",
+      "temperature_C",
+      "moisture_kgkg"
+    ]
+  }
+}

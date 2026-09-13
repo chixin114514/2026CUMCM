@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2080" height="620" viewBox="0 0 2080 620">
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 Z" fill="#000"/>
+  </marker>
+  <style>
+    .title{font:700 30px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#000}
+    .note{font:600 18px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#000}
+    .head{font:600 21px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#000}
+    .body{font:500 17px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#000}
+    .small{font:500 17px "Noto Serif CJK SC","Songti SC","SimSun","Microsoft YaHei",serif;fill:#000}
+    .math{font-family:"Times New Roman","Times",serif;font-size:20px;font-style:italic;font-weight:400;fill:#000}
+    .box{fill:#fff;stroke:#000;stroke-width:2.1}
+    .line{fill:none;stroke:#000;stroke-width:2.1;stroke-linejoin:miter;stroke-linecap:square}
+    .arr{fill:none;stroke:#000;stroke-width:2.1;stroke-linejoin:miter;stroke-linecap:square;marker-end:url(#arrow)}
+  </style>
+</defs>
+<rect width="2080" height="620" fill="#fff"/>
+<text x="1040" y="43" text-anchor="middle" class="title">二分定位烘干结束时刻算法流程</text>
+
+<!-- nodes -->
+<rect x="25" y="235" width="130" height="70" rx="35" class="box"/>
+<text x="90" y="278" text-anchor="middle" class="head">开始</text>
+
+<rect x="200" y="215" width="280" height="110" class="box"/>
+<text x="340" y="247" text-anchor="middle" class="head">检测阈值跨越</text>
+<text x="340" y="277" text-anchor="middle" class="math">M(t<tspan font-size="14px" dy="5">n</tspan><tspan font-size="20px" dy="-5">) ≥ 0.15</tspan></text><text x="340" y="307" text-anchor="middle" class="math">M(t<tspan font-size="14px" dy="5">n+1</tspan><tspan font-size="20px" dy="-5">) &lt; 0.15</tspan></text>
+<rect x="550" y="215" width="260" height="110" class="box"/>
+<text x="680" y="247" text-anchor="middle" class="head">建立二分区间</text>
+<text x="680" y="288" text-anchor="middle" class="math">t<tspan font-size="14px" dy="5">L</tspan><tspan font-size="20px" dy="-5"> = t</tspan><tspan font-size="14px" dy="5">n</tspan><tspan font-size="20px" dy="-5">,  t</tspan><tspan font-size="14px" dy="5">R</tspan><tspan font-size="20px" dy="-5"> = t</tspan><tspan font-size="14px" dy="5">n+1</tspan></text>
+<rect x="880" y="215" width="260" height="110" class="box"/>
+<text x="1010" y="247" text-anchor="middle" class="head">取中点</text>
+<g class="math" transform="translate(-14 0)">
+  <text x="975" y="282">t<tspan font-size="14px" dy="5">m</tspan><tspan font-size="20px" dy="-5"> =</tspan></text>
+  <text x="1042" y="269" text-anchor="middle">t<tspan font-size="14px" dy="5">L</tspan><tspan font-size="20px" dy="-5"> + t</tspan><tspan font-size="14px" dy="5">R</tspan></text>
+  <line x1="1011" y1="276" x2="1073" y2="276" stroke="#000" stroke-width="1.2"/>
+  <text x="1042" y="296" text-anchor="middle">2</text>
+</g>
+<rect x="1210" y="215" width="300" height="110" class="box"/>
+<text x="1360" y="247" text-anchor="middle" class="head">从同一左端状态重积分</text>
+<text x="1358" y="278" text-anchor="end" class="body">积分到</text>
+<text x="1379" y="278" text-anchor="middle" class="math">t<tspan font-size="14px" dy="5">m</tspan></text>
+<text x="1360" y="307" text-anchor="middle" class="math">M(t<tspan font-size="14px" dy="5">m</tspan><tspan font-size="20px" dy="-5">) = </tspan><tspan font-style="normal">max</tspan><tspan font-style="italic"> C</tspan></text>
+<polygon points="1680,197.5 1810,270 1680,342.5 1550,270" class="box"/>
+<text x="1680" y="258" text-anchor="middle" class="math">M(t<tspan font-size="14px" dy="5">m</tspan><tspan font-size="20px" dy="-5">) &lt; 0.15 ?</tspan></text><text x="1680" y="292" text-anchor="middle" class="small">是否已达标</text>
+
+<polygon points="1955,205 2060,270 1955,335 1850,270" class="box"/>
+<text x="1955" y="252" text-anchor="middle" class="head">区间足够小？</text>
+<text x="1955" y="288" text-anchor="middle" class="math">t<tspan font-size="14px" dy="5">R</tspan><tspan font-size="20px" dy="-5"> − t</tspan><tspan font-size="14px" dy="5">L</tspan><tspan font-size="20px" dy="-5"> ≤ 0.1 </tspan><tspan font-style="normal">s</tspan></text>
+<rect x="1885" y="70" width="140" height="70" rx="35" class="box"/>
+<text x="1955" y="113" text-anchor="middle"><tspan class="head">输出</tspan><tspan class="math"> t</tspan><tspan class="math" font-size="14px" dy="5">R</tspan></text>
+<rect x="1570" y="440" width="220" height="90" class="box"/>
+<text x="1680" y="474" text-anchor="middle" class="head">更新左端点</text>
+<text x="1680" y="508" text-anchor="middle" class="math">t<tspan font-size="14px" dy="5">L</tspan><tspan font-size="20px" dy="-5"> = t</tspan><tspan font-size="14px" dy="5">m</tspan></text>
+<rect x="1845" y="440" width="220" height="90" class="box"/>
+<text x="1955" y="474" text-anchor="middle" class="head">更新右端点</text>
+<text x="1955" y="508" text-anchor="middle" class="math">t<tspan font-size="14px" dy="5">R</tspan><tspan font-size="20px" dy="-5"> = t</tspan><tspan font-size="14px" dy="5">m</tspan></text>
+<!-- main flow -->
+<path d="M155 270 H200" class="arr"/>
+<path d="M480 270 H550" class="arr"/>
+<path d="M810 270 H880" class="arr"/>
+<path d="M1140 270 H1210" class="arr"/>
+<path d="M1510 270 H1550" class="arr"/>
+
+<!-- decisions -->
+<path d="M1810 270 H1850" class="arr"/>
+<text x="1830" y="248" text-anchor="middle" class="small">是</text>
+<path d="M1680 342.5 V440" class="arr"/>
+<text x="1654" y="402" text-anchor="middle" class="small">否</text>
+<path d="M1955 205 V140" class="arr"/>
+<text x="1980" y="176" text-anchor="middle" class="small">是</text>
+<path d="M1955 335 V440" class="arr"/>
+<text x="1980" y="403" text-anchor="middle" class="small">否</text>
+
+<!-- return loop -->
+<path d="M1680 530 V565 H1450" class="line"/>
+<path d="M1955 530 V585 H1450 V565" class="line"/>
+<circle cx="1450" cy="565" r="3.2" fill="#000"/>
+<path d="M1450 565 H1010 V325" class="arr"/>
+</svg>

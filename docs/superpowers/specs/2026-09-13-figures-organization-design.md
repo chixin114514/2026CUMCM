@@ -57,7 +57,7 @@ figures/
 | `figures/7_二分定位_算法流程.svg` | `figures/flowcharts/algorithm_flows/algorithm07_bisection_end_time.svg` | 同上 |
 | `figures/A题_问题一至问题四_可编辑文字版.svg` | `figures/flowcharts/overview/problem1_to_problem4_editable.svg` | 归入总览 |
 
-当前 `figures/问题流程图&算法流程图2/` 中与上述文件内容相同的副本全部移入 `figures/archive/duplicated_flowcharts/`，并以 `legacy_` 前缀保存，避免正式入口出现重复文件。
+当前 `figures/问题流程图&算法流程图2/` 中与上述文件同名的副本或历史版本全部移入 `figures/archive/duplicated_flowcharts/`，并以 `legacy_` 前缀保存，避免正式入口出现重复文件；其中算法 4 的两个版本内容不同，均保留并以历史版本归档。
 
 ### 正式交付图和表格
 
@@ -96,7 +96,7 @@ figures/
 整理完成后执行以下检查：
 
 1. `find figures -name '.DS_Store' -o -path '*/问题流程图&算法流程图2*' -o -name '图'` 不返回正式目录中的残留入口。
-2. 用 `shasum -a 256` 对移动前后的同名图件比对，确认内容未改变；重复副本至少保留一份归档文件。
+2. 用 `shasum -a 256` 对移动前后的同名图件比对，确认内容未改变；对重复副本确认哈希一致，对算法 4 的历史版本记录哈希差异并保留两份文件。
 3. `rg -n 'figures/图|figures/deliverables|figures/independent_visualization|问题流程图&算法流程图2' --glob '!*.md' --glob '!*.json'` 不返回失效代码路径；Markdown 中的旧路径全部更新或明确标为历史路径。
 4. 执行 `python figures/exploratory/independent/plot_independent_figures.py`，确认四张独立可视化仍写入 `figures/exploratory/independent/outputs/`。
 5. 对所有新增或修改的 Markdown 执行链接路径检查，确认 README 中的主图、表格和复核文档均可读。
