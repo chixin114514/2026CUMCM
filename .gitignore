@@ -1,0 +1,5 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+solution/sensitivity/figures/**/*.tiff
+figures/exploratory/independent/outputs/figure_d_moving_boundary_coordinates.svg
