@@ -1,0 +1,22 @@
+{"tasks": [1, 2], "jobs": 4, "out": "solution/sensitivity/results"}
+[sensitivity] 计算基准工况: tasks=[1, 2], workers=4
+  base task1 完成
+  base task2 完成
+[sensitivity] 开始 16 个扰动工况，workers=4
+  [ok] task1 dt_s=0.5 dT=1.4745964094231567e-07 dC=1.9440744569720891e-07 t_dry= diff_h= (2.578s)
+  [ok] task1 dr_m=0.0001 dT=1.47226587507987e-05 dC=0.00022302286180142517 t_dry= diff_h= (3.802s)
+  [ok] task1 dr_m=0.000025 dT=3.6807885912537586e-06 dC=5.562002850290071e-05 t_dry= diff_h= (5.596s)
+  [ok] task1 picard_tol_C=1e-08 dT=0.0 dC=1.865174681370263e-14 t_dry= diff_h= (3.743s)
+  [ok] task1 dt_s=0.125 dT=3.7024889820713724e-08 dC=4.8603186808549026e-08 t_dry= diff_h= (7.704s)
+  [ok] task1 picard_tol_C=1e-12 dT=0.0 dC=3.907985046680551e-14 t_dry= diff_h= (4.754s)
+  [ok] task1 linear_residual_tol=1e-08 dT=0.0 dC=0.0 t_dry= diff_h= (4.082s)
+  [ok] task1 linear_residual_tol=1e-12 dT=0.0 dC=0.0 t_dry= diff_h= (4.065s)
+  [ok] task2 dr_m=0.000025 dT=5.145807762119148e-07 dC=4.670196442901897e-07 t_dry= diff_h= (11.988s)
+  [ok] task2 dr_m=0.00000625 dT=1.2691324968727713e-07 dC=1.1675546041090001e-07 t_dry= diff_h= (20.824s)
+  [ok] task2 time_step_s=0.5 dT=4.534421833568558e-07 dC=9.319883309544252e-09 t_dry= diff_h= (27.877s)
+  [ok] task2 picard_tol_T=1e-06 dT=0.0 dC=0.0 t_dry= diff_h= (14.428s)
+  [ok] task2 picard_tol_T=1e-10 dT=0.0 dC=0.0 t_dry= diff_h= (14.377s)
+  [ok] task2 picard_tol_C=1e-08 dT=1.1731060567399254e-11 dC=9.903189379656396e-14 t_dry= diff_h= (11.572s)
+  [ok] task2 picard_tol_C=1e-12 dT=1.1780798558902461e-11 dC=2.142730437526552e-13 t_dry= diff_h= (15.111s)
+  [ok] task2 time_step_s=0.25 dT=5.687411359645012e-07 dC=1.1649802900137729e-08 t_dry= diff_h= (49.424s)
+[sensitivity] 汇总已写入 solution/sensitivity/results/sensitivity_summary.csv

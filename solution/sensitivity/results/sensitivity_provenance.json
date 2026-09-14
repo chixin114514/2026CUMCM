@@ -1,0 +1,46 @@
+{
+  "tasks": [
+    1,
+    2
+  ],
+  "defaults": {
+    "1": {
+      "dr_m": 5e-05,
+      "dt_s": 0.25,
+      "picard_tol_C": 1e-10,
+      "linear_residual_tol": 1e-10
+    },
+    "2": {
+      "time_step_s": 1.0,
+      "dr_m": 1.25e-05,
+      "picard_t": 1e-08,
+      "picard_c": 1e-10
+    }
+  },
+  "source_sha256": {
+    "sensitivity_runner": {
+      "path": "/root/2026CUMCM_reaudit_task12_sync/solution/sensitivity/run_sensitivity.py",
+      "sha256": "c3bb18d181116df59c6ee2ba98b69a6ea383fd031b2d50254fb0dbc3fb01882f"
+    },
+    "attachment_1": {
+      "path": "/root/2026CUMCM_reaudit_task12_sync/problem/附件/附件1.xlsx",
+      "sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7"
+    },
+    "task1_solver": {
+      "path": "/root/2026CUMCM_reaudit_task12_sync/solution/task1/script/solve_task1.py",
+      "sha256": "f16f493f055c796c3c3f6ac4b8e3f360a08d83e695f00574588d470ee6a455dd"
+    },
+    "task1_handoff": {
+      "path": "/root/2026CUMCM_reaudit_task12_sync/handoff/task1_handoff.md",
+      "sha256": "81a5a278028a15416994c73c0078be5e2812e7248867fd19813e6cb27f5fe199"
+    },
+    "task2_solver": {
+      "path": "/root/2026CUMCM_reaudit_task12_sync/solution/task2/script/solve_task2.py",
+      "sha256": "47fea0e95c6dc27f5b4bda51675155c4d0a3bf10d0d28fd29cd0753c02e3b54d"
+    },
+    "task2_handoff": {
+      "path": "/root/2026CUMCM_reaudit_task12_sync/handoff/task2_handoff.md",
+      "sha256": "bbd7d2967900984eb7c4f1a3c404138163f506cdd9899cff33faf60e810642db"
+    }
+  }
+}

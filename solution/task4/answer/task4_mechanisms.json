@@ -1,0 +1,113 @@
+{
+  "contract": "同一N=800、1/5 s、同步Picard-CN和事件二分平台；只改变物性公式或半径",
+  "common_input_sources": {
+    "air_attachment": {
+      "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件1.xlsx",
+      "sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7"
+    },
+    "property_source": "题面附录3/4公式；唯一实现位置 solve_task4.py::material_properties"
+  },
+  "cases": {
+    "A": {
+      "description": "固定 R=2 cm + 题面附录3物性",
+      "termination_time_s": 207011.328125,
+      "termination_time_h": 57.503146701388886,
+      "termination_bracket_width_s": 0.078125,
+      "termination_max_kgkg": 0.1499999853475118,
+      "input_sources": {
+        "air_attachment": {
+          "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件1.xlsx",
+          "sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7"
+        },
+        "property_formula": {
+          "appendix": 3,
+          "source": "题面附录3公式；solve_task4.py::material_properties"
+        },
+        "radius_attachment": null,
+        "radius_model": {
+          "type": "fixed",
+          "radius_m": 0.02,
+          "source": "机制对照设定 R=2 cm"
+        }
+      },
+      "configuration": {
+        "n_intervals": 800,
+        "time_step_early_s": 1.0,
+        "time_step_long_s": 5.0,
+        "output_dt_s": 60.0,
+        "event_tol_s": 0.1,
+        "appendix": 3,
+        "fixed_radius_m": 0.02
+      }
+    },
+    "B": {
+      "description": "固定 R=2 cm + 题面附录4物性",
+      "termination_time_s": 467446.25,
+      "termination_time_h": 129.84618055555555,
+      "termination_bracket_width_s": 0.078125,
+      "termination_max_kgkg": 0.1499999916788573,
+      "input_sources": {
+        "air_attachment": {
+          "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件1.xlsx",
+          "sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7"
+        },
+        "property_formula": {
+          "appendix": 4,
+          "source": "题面附录4公式；solve_task4.py::material_properties"
+        },
+        "radius_attachment": null,
+        "radius_model": {
+          "type": "fixed",
+          "radius_m": 0.02,
+          "source": "机制对照设定 R=2 cm"
+        }
+      },
+      "configuration": {
+        "n_intervals": 800,
+        "time_step_early_s": 1.0,
+        "time_step_long_s": 5.0,
+        "output_dt_s": 60.0,
+        "event_tol_s": 0.1,
+        "appendix": 4,
+        "fixed_radius_m": 0.02
+      }
+    },
+    "C": {
+      "description": "附件2 R(t) + 题面附录4物性",
+      "termination_time_s": 183914.765625,
+      "termination_time_h": 51.08743489583333,
+      "termination_bracket_width_s": 0.078125,
+      "termination_max_kgkg": 0.14999996209042374,
+      "input_sources": {
+        "air_attachment": {
+          "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件1.xlsx",
+          "sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7"
+        },
+        "property_formula": {
+          "appendix": 4,
+          "source": "题面附录4公式；solve_task4.py::material_properties"
+        },
+        "radius_attachment": {
+          "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件2.xlsx",
+          "sha256": "5563acbfa4b4afb10cc6c03e2207e5369bf39da27576672aff14cc5c32e704af"
+        },
+        "radius_model": "附件2分段线性插值 R(t)"
+      },
+      "configuration": {
+        "n_intervals": 800,
+        "time_step_early_s": 1.0,
+        "time_step_long_s": 5.0,
+        "output_dt_s": 60.0,
+        "event_tol_s": 0.1,
+        "appendix": 4,
+        "fixed_radius_m": null
+      }
+    }
+  },
+  "split": {
+    "property_effect_B_minus_A_s": 260434.921875,
+    "property_effect_B_minus_A_h": 72.34303385416666,
+    "shrink_effect_C_minus_B_s": -283531.484375,
+    "shrink_effect_C_minus_B_h": -78.75874565972222
+  }
+}

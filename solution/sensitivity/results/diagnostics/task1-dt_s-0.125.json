@@ -1,0 +1,62 @@
+{
+  "task": 1,
+  "caliber": {
+    "spatial_game": "守恒型径向有限体积（含中心半控制体）",
+    "temporal": "Crank-Nicolson",
+    "interface_property": "调和平均",
+    "nonlinear": "Picard（水分扩散系数）",
+    "dr_m": 5e-05,
+    "dt_s": 0.125,
+    "n_steps": 14400,
+    "output_shape": [
+      1801,
+      21
+    ],
+    "picard_tol": 1e-10,
+    "linear_residual_tol": 1e-10
+  },
+  "picard": {
+    "max_iterations": 4,
+    "mean_iterations": 3.0029166666666667,
+    "max_final_delta": 9.935741118738406e-11,
+    "converged_steps": 14400,
+    "failed_steps": 0
+  },
+  "linear_solver": {
+    "max_normalized_inf_residual": 2.316616830441779e-16,
+    "tol": 1e-10
+  },
+  "physics": {
+    "temperature_min_C": 27.9999999999997,
+    "temperature_max_C": 36.785559668967785,
+    "moisture_min_kgkg": 1.510237899751824,
+    "moisture_max_kgkg": 2.5500000000000007,
+    "moisture_positive": true,
+    "finite": true,
+    "center_inner_face_radius_m": 0.0,
+    "min_heat_boundary_driver_C": 0.0,
+    "max_moisture_boundary_driver_kgkg": -1.477167899751824,
+    "final_surface_center_temperature_gap_C": 3.210215215481533,
+    "final_center_surface_moisture_gap_kgkg": 1.0397544836811663,
+    "volume_average_moisture_initial_kgkg": 2.5500000000000003,
+    "volume_average_moisture_final_kgkg": 2.291245519415687,
+    "volume_average_moisture_monotone_decreasing": true
+  },
+  "conservation": {
+    "moisture": {
+      "quantity": "约去 2πL 的全域水分储量 Σ V_i C_i",
+      "max_abs_balance_residual": 1.2675384834517575e-19,
+      "max_relative_balance_residual": 4.802834028805214e-12,
+      "worst_time_s": 651.0,
+      "boundary_flux_integral": -5.1289265823615076e-05,
+      "volume_average_change_kgkg": 0.2587544805843134
+    },
+    "energy": {
+      "quantity": "约去 2πL 的全域焓 Σ V_i ρc_p T_i（恒物性）",
+      "max_abs_balance_residual": 1.48956402767908e-11,
+      "max_relative_balance_residual": 4.190662618978079e-09,
+      "worst_time_s": 1368.75,
+      "boundary_flux_integral": 3056.4003296801875
+    }
+  }
+}

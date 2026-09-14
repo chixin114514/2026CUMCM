@@ -1,0 +1,174 @@
+{
+  "task": 4,
+  "verified_at": "2026-09-12T16:17:48+08:00",
+  "status": "verified_remote_artifacts_handoff_missing",
+  "verification": {
+    "method": "只读 sha256sum/stat/日志尾部核验；未在本次核验中运行 solver",
+    "herdr": {
+      "workspace_label": "2026CUMCM",
+      "workspace_id": "w5",
+      "tab_label": "Server",
+      "tab_id": "w5:tA",
+      "pane_id": "w5:pC"
+    },
+    "remote_host": "root@192.168.188.3:7999",
+    "remote_root": "/root/2026CUMCM_reaudit_task4",
+    "remote_read_only": true
+  },
+  "sources": {
+    "solver": {
+      "local_path": "solution/task4/script/solve_task4.py",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/script/solve_task4.py",
+      "local_sha256": "6f95869d8d245d6e247eb4bf0e1bd2797d802722ac0fa7ea92c19650bcda4417",
+      "remote_sha256": "6f95869d8d245d6e247eb4bf0e1bd2797d802722ac0fa7ea92c19650bcda4417",
+      "hash_equal": true,
+      "remote_stat": "93185|2026-09-12 14:23:00.631508300 +0800"
+    },
+    "attachment_1": {
+      "local_path": "problem/附件/附件1.xlsx",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件1.xlsx",
+      "local_sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7",
+      "remote_sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7",
+      "hash_equal": true,
+      "remote_stat": "16586|2026-09-12 12:15:36.891494545 +0800"
+    },
+    "attachment_2": {
+      "local_path": "problem/附件/附件2.xlsx",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件2.xlsx",
+      "local_sha256": "5563acbfa4b4afb10cc6c03e2207e5369bf39da27576672aff14cc5c32e704af",
+      "remote_sha256": "5563acbfa4b4afb10cc6c03e2207e5369bf39da27576672aff14cc5c32e704af",
+      "hash_equal": true,
+      "remote_stat": "11485|2026-09-12 12:15:36.891494545 +0800"
+    },
+    "handoff": {
+      "local_path": "handoff/task4_handoff.md",
+      "local_sha256": "651ffd6c6d9099e76fff06c7c50c9def507823455fa2f8189a7572c53dcbd80a",
+      "local_stat": "20776|2026-09-11T21:45:35+0800",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/handoff/task4_handoff.md",
+      "remote_status": "missing (远端目录 find 未发现 handoff/provenance 文件)",
+      "hash_equal": false
+    }
+  },
+  "outputs": [
+    {
+      "kind": "formal_result",
+      "local_path": "solution/task4/answer/result4.xlsx",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/answer/result4.xlsx",
+      "local_sha256": "9d920dbd91f16bbab31f1190eb12fc06558799a6701dba65e716db514250910c",
+      "remote_sha256": "9d920dbd91f16bbab31f1190eb12fc06558799a6701dba65e716db514250910c",
+      "hash_equal": true,
+      "remote_stat": "300555|2026-09-12 14:32:07.141509284 +0800"
+    },
+    {
+      "kind": "formal_result",
+      "local_path": "solution/task4/answer/task4_all_answers.csv",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/answer/task4_all_answers.csv",
+      "local_sha256": "e85ff898ab5213b437957e8908a5abc98f999e41976d8966a2af995406a56380",
+      "remote_sha256": "e85ff898ab5213b437957e8908a5abc98f999e41976d8966a2af995406a56380",
+      "hash_equal": true,
+      "remote_stat": "2802809|2026-09-12 14:32:07.401509284 +0800"
+    },
+    {
+      "kind": "formal_result",
+      "local_path": "solution/task4/answer/task4_paper_table.xlsx",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/answer/task4_paper_table.xlsx",
+      "local_sha256": "50413818aad62243067935db9d730788a4e421b2d805c9819de7eb4ce4cc8393",
+      "remote_sha256": "50413818aad62243067935db9d730788a4e421b2d805c9819de7eb4ce4cc8393",
+      "hash_equal": true,
+      "remote_stat": "5366|2026-09-12 14:32:07.401509284 +0800"
+    },
+    {
+      "kind": "diagnostics_json",
+      "local_path": "solution/task4/answer/task4_diagnostics.json",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/answer/task4_diagnostics.json",
+      "local_sha256": "2c5fb0ab8be276b352f10bb5a9131499770a0dbabc0aff9a9d89760fc332eedf",
+      "remote_sha256": "2c5fb0ab8be276b352f10bb5a9131499770a0dbabc0aff9a9d89760fc332eedf",
+      "hash_equal": true,
+      "remote_stat": "3470|2026-09-12 14:32:12.231509293 +0800"
+    },
+    {
+      "kind": "diagnostics_csv",
+      "local_path": "solution/task4/answer/task4_diagnostics.csv",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/answer/task4_diagnostics.csv",
+      "local_sha256": "fb6162639b0cff05b17bd62719238a3e9523e1e2f556c4858f248527c808eb26",
+      "remote_sha256": "fb6162639b0cff05b17bd62719238a3e9523e1e2f556c4858f248527c808eb26",
+      "hash_equal": true,
+      "remote_stat": "13632119|2026-09-12 14:32:12.711509294 +0800"
+    },
+    {
+      "kind": "mechanism_artifact",
+      "local_path": "solution/task4/answer/task4_mechanisms.json",
+      "remote_path": "/root/2026CUMCM_reaudit_task4/solution/task4/answer/task4_mechanisms.json",
+      "local_sha256": "62c37e405c124fd0bfb2a7ce9218a83dc67c85a3ed04a2e60a03cc8da31ef9dd",
+      "remote_sha256": "62c37e405c124fd0bfb2a7ce9218a83dc67c85a3ed04a2e60a03cc8da31ef9dd",
+      "hash_equal": true,
+      "remote_stat": "3955|2026-09-12 14:32:06.361509282 +0800"
+    }
+  ],
+  "runs": {
+    "base": {
+      "remote_log": "/root/2026CUMCM_reaudit_task4/base_final.log",
+      "local_log": "solution/task4/answer/task4_base_latest.log",
+      "sha256": "d6cc830a3546bbbf1a1078feeaadd696399ee04a0532c25edc1a5a35a13762fe",
+      "local_sha256": "d6cc830a3546bbbf1a1078feeaadd696399ee04a0532c25edc1a5a35a13762fe",
+      "hash_equal": true,
+      "remote_stat": "4823|2026-09-12 14:24:31.861508464 +0800",
+      "exit_code": 0,
+      "elapsed_s_reported": 58,
+      "total_s_reported": 58.35
+    },
+    "sensitivity": {
+      "remote_log": "/root/2026CUMCM_reaudit_task4/sensitivity_final.log",
+      "local_log": "solution/task4/answer/task4_sensitivity_latest.log",
+      "sha256": "76d616624277ccf333bcd13325cd0f92490d3bbc0c236aea1124c8f382c4b235",
+      "local_sha256": "76d616624277ccf333bcd13325cd0f92490d3bbc0c236aea1124c8f382c4b235",
+      "hash_equal": true,
+      "remote_stat": "5676|2026-09-12 14:28:20.891508877 +0800",
+      "exit_code": 0,
+      "elapsed_s_reported": 199,
+      "total_s_reported": 198.68,
+      "termination_time_difference_s_vs_time_step_refinement": 0.0
+    },
+    "mechanism": {
+      "remote_log": "/root/2026CUMCM_reaudit_task4/mechanisms_final.log",
+      "local_log": "solution/task4/answer/task4_mechanisms_latest.log",
+      "sha256": "5748982b60fc8fde2c12fa949364a5dfa0bab456cc3387e0386215cf59c329be",
+      "local_sha256": "5748982b60fc8fde2c12fa949364a5dfa0bab456cc3387e0386215cf59c329be",
+      "hash_equal": true,
+      "remote_stat": "4492|2026-09-12 14:32:12.711509294 +0800",
+      "exit_code": 0,
+      "elapsed_s_reported": 222,
+      "total_s_reported": 221.40,
+      "cases": {
+        "A_fixed_radius_appendix3_s": 207011.328125,
+        "B_fixed_radius_appendix4_s": 467446.25,
+        "C_shrinking_radius_appendix4_s": 183914.765625,
+        "property_effect_B_minus_A_s": 260434.921875,
+        "shrink_effect_C_minus_B_s": -283531.484375
+      }
+    }
+  },
+  "result_summary": {
+    "termination_time_s": 183914.765625,
+    "termination_time_h": 51.08743489583333,
+    "termination_radius_cm": 1.2,
+    "termination_max_kgkg": 0.14999996209042374,
+    "termination_bracket_width_s": 0.078125,
+    "max_picard_iterations": 5,
+    "mean_picard_iterations": 4.419994617311554,
+    "max_linear_residual": 5.39455633163502e-16,
+    "max_moisture_balance_residual": 1.072682524402846e-16,
+    "max_temperature_balance_residual": 6.189247194754444e-07,
+    "n_intervals": 800,
+    "dt_early_s": 1.0,
+    "dt_long_s": 5.0,
+    "sample_count": 3066
+  },
+  "findings": {
+    "remote_solver_matches_requested_final_sha256": true,
+    "remote_inputs_attachment_1_and_2_match_local": true,
+    "remote_outputs_and_three_run_logs_match_local_copies": true,
+    "remote_handoff_present": false,
+    "remote_handoff_note": "远端 /root/2026CUMCM_reaudit_task4 未发现 handoff/task4_handoff.md；本地 handoff 已记录其 SHA-256"
+  }
+}

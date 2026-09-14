@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="457.62614pt" height="210.671391pt" viewBox="0 0 457.62614 210.671391" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-12T16:51:07.329068</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 210.671391 
+L 457.62614 210.671391 
+L 457.62614 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 81.2 193.586625 
+L 394.72832 193.586625 
+L 394.72832 23.090625 
+L 81.2 23.090625 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g clip-path="url(#p6d780e52b6)">
+    <image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAbQAAADtCAYAAADXwoDNAAAD60lEQVR4nO3XsUmDARhF0Si/IUKsHN1hXEBsrNNpZWEXq0RCRF1C+PB6zgSvu7yL/X7/vQKAP+5yegAA/AZBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBB0ABIEDQAEgQNgARBAyBhmR4A/8H6+mZ6AuR5aAAkCBoACYIGQIKgAZAgaAAkCBoACYIGQIKgAZAgaAAkCBoACYIGQIKgAZAgaAAkCBoACYIGQIKgAZAgaAAkCBoACYIGQIKgAZAgaAAkCBoACYIGQIKgAZAgaAAkCBoACYIGQIKgAZAgaAAkLIev9fQGyDufPqcnQJ6HBkCCoAGQIGgAJAgaAAmCBkCCoAGQIGgAJAgaAAmCBkCCoAGQIGgAJAgaAAmCBkCCoAGQIGgAJAgaAAmCBkCCoAGQIGgAJAgaAAmCBkCCoAGQIGgAJAgaAAmCBkCCoAGQIGgAJAgaAAmCBkDCcne/m94AedvN1fQEyPPQAEgQNAASBA2ABEEDIEHQAEgQNAASBA2ABEEDIEHQAEgQNAASBA2ABEEDIEHQAEgQNAASBA2ABEEDIEHQAEgQNAASBA2ABEEDIEHQAEgQNAASBA2ABEEDIEHQAEgQNAASBA2ABEEDIGG53W6mN0Dey9v79ATI89AASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASFgOp/P0Bsg7Hj+mJ0CehwZAgqABkCBoACQIGgAJggZAgqABkCBoACQIGgAJggZAgqABkCBoACQIGgAJggZAgqABkCBoACQIGgAJggZAgqABkCBoACQIGgAJggZAgqABkCBoACQIGgAJggZAgqABkCBoACQIGgAJy+75dXoD5D08Pk1PgDwPDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYAEQQMgQdAASBA0ABIEDYBVwQ+pEBp7OrLDQgAAAABJRU5ErkJggg==" id="image172a94182d" transform="scale(1 -1) translate(0 -170.64)" x="81.2" y="-22.946625" width="313.92" height="170.64"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 7.5px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="159.58208" y="202.475297" transform="rotate(-0 159.58208 202.475297)">温度偏差</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 7.5px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="316.34624" y="202.504594" transform="rotate(-0 316.34624 202.504594)">水分偏差</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_3"/>
+     <g id="text_3">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="36.561664" transform="rotate(-0 78.2 36.561664)">问题一｜空间步长</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_4"/>
+     <g id="text_4">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="57.873664" transform="rotate(-0 78.2 57.873664)">问题二｜空间步长</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_5"/>
+     <g id="text_5">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="79.185664" transform="rotate(-0 78.2 79.185664)">问题一｜时间步长</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_6"/>
+     <g id="text_6">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="100.497664" transform="rotate(-0 78.2 100.497664)">问题二｜时间步长</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_7"/>
+     <g id="text_7">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="121.823531" transform="rotate(-0 78.2 121.823531)">问题二｜水分迭代容差</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_8"/>
+     <g id="text_8">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="143.121664" transform="rotate(-0 78.2 143.121664)">问题一｜Picard 容差</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_9"/>
+     <g id="text_9">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="164.530734" transform="rotate(-0 78.2 164.530734)">问题一｜线性残差容差</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_10"/>
+     <g id="text_10">
+      <text style="font-size: 7.1px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: end" x="78.2" y="185.759531" transform="rotate(-0 78.2 185.759531)">问题二｜温度迭代容差</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 81.2 193.586625 
+L 81.2 23.090625 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 81.2 193.586625 
+L 394.72832 193.586625 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(146.98208 32.229457)">4×10^-7</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(145.40708 38.758324)">最坏：2倍</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(299.02124 32.229457)">8.75×10^-5</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(302.17124 38.758324)">最坏：2倍</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(142.25708 53.541457)">1.03×10^-8</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(145.40708 60.070324)">最坏：2倍</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(299.02124 53.541457)">1.83×10^-7</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(302.17124 60.070324)">最坏：2倍</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(142.25708 74.853457)">4.01×10^-9</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(145.40708 81.382324)">最坏：2倍</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(299.02124 74.853457)">7.62×10^-8</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(302.17124 81.382324)">最坏：2倍</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(142.25708 96.165457)">1.81×10^-8</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(142.25708 102.694324)">最坏：0.5倍</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(299.02124 96.165457)">7.31×10^-9</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #ffffff" transform="translate(299.02124 102.694324)">最坏：0.5倍</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(140.68208 117.477457)">2.38×10^-13</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(140.68208 124.006324)">最坏：0.01倍</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(297.44624 117.477457)">8.49×10^-14</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(297.44624 124.006324)">最坏：0.01倍</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(158.00708 138.761156)">0</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(140.68208 145.346625)">各水平均为零</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(297.44624 138.789457)">1.55×10^-14</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(297.44624 145.318324)">最坏：0.01倍</text>
+   </g>
+   <g id="text_23">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(158.00708 160.073156)">0</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(140.68208 166.658625)">各水平均为零</text>
+   </g>
+   <g id="text_24">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(314.77124 160.073156)">0</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(297.44624 166.658625)">各水平均为零</text>
+   </g>
+   <g id="text_25">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(158.00708 181.385156)">0</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(140.68208 187.970625)">各水平均为零</text>
+   </g>
+   <g id="text_26">
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(314.77124 181.385156)">0</text>
+    <text style="font-size: 6.3px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; fill: #1e2a35" transform="translate(297.44624 187.970625)">各水平均为零</text>
+   </g>
+   <g id="text_27">
+    <text style="font-weight: 700; font-size: 10px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="81.2" y="15.090625" transform="rotate(-0 81.2 15.090625)">问题一、二：关键点归一化误差增益</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_5">
+    <path d="M 401.36384 193.586625 
+L 409.88864 193.586625 
+L 409.88864 23.090625 
+L 401.36384 23.090625 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAAwAAADnCAYAAAAq9remAAABHklEQVR4nO2ZS46EMBBD3Sj3P+1Isxh1vTlCyy0ZGULWMa7YqQ/w+vn9Q8Za1m5JSyZiYSIO7/nSwgzp+IIBE6C8rG2HPnwGpVUaE7EqfZAHkC5/W9cJlw/1XW/CDGzptNp63LpDmaHu0Ksv4w5zv55pJtTj0OXLzNRl3KE9y/2W0wx9ssplIMwwYzcUTAbiKhEfQ0n7gC3r5ENKqzQ7Oj35u8QdVNJ+pZJGp+UCCDPMjqWSvnyg7wzv2bBUcoLTik8CuACFQ8Ij0C0SiBOmGeIhyWTQhqVy/KZIH0B9IREGDF6TW4+sV3V66kJiT4D6UpQdAQozzEz6fxyFAPWFRNg4/NcB0gxc3wcanVY4JB5AxzSjx7iP65vv3m3TzD+X1eRjDQXbCgAAAABJRU5ErkJggg==" id="image8d32bc14c6" transform="scale(1 -1) translate(0 -166.32)" x="401.04" y="-23.76" width="8.64" height="166.32"/>
+   <g id="matplotlib.axis_3"/>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_9">
+     <g id="line2d_11">
+      <defs>
+       <path id="m047bf472c0" d="M 0 0 
+L 2 0 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m047bf472c0" x="409.88864" y="193.586625" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_28">
+      <text style="font-size: 6.8px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="415.38864" y="195.910844" transform="rotate(-0 415.38864 195.910844)">10^-14</text>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m047bf472c0" x="409.88864" y="159.487425" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_29">
+      <text style="font-size: 6.8px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="415.38864" y="161.811644" transform="rotate(-0 415.38864 161.811644)">10^-12</text>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_13">
+      <g>
+       <use xlink:href="#m047bf472c0" x="409.88864" y="125.388225" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_30">
+      <text style="font-size: 6.8px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="415.38864" y="127.712444" transform="rotate(-0 415.38864 127.712444)">10^-10</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#m047bf472c0" x="409.88864" y="91.289025" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_31">
+      <text style="font-size: 6.8px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="415.38864" y="93.613244" transform="rotate(-0 415.38864 93.613244)">10^-8</text>
+     </g>
+    </g>
+    <g id="ytick_13">
+     <g id="line2d_15">
+      <g>
+       <use xlink:href="#m047bf472c0" x="409.88864" y="57.189825" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_32">
+      <text style="font-size: 6.8px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="415.38864" y="59.514044" transform="rotate(-0 415.38864 59.514044)">10^-6</text>
+     </g>
+    </g>
+    <g id="ytick_14">
+     <g id="line2d_16">
+      <g>
+       <use xlink:href="#m047bf472c0" x="409.88864" y="23.090625" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_33">
+      <text style="font-size: 6.8px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: start" x="415.38864" y="25.414844" transform="rotate(-0 415.38864 25.414844)">10^-4</text>
+     </g>
+    </g>
+    <g id="text_34">
+     <text style="font-size: 7.2px; font-family: 'SimHei', 'Arial Unicode MS', 'DejaVu Sans', sans-serif; text-anchor: middle" x="449.498015" y="108.338625" transform="rotate(-90 449.498015 108.338625)">归一化误差增益（对数十倍）</text>
+    </g>
+   </g>
+   <g id="LineCollection_1"/>
+   <g id="patch_6">
+    <path d="M 401.36384 193.586625 
+L 405.62624 193.586625 
+L 409.88864 193.586625 
+L 409.88864 23.090625 
+L 405.62624 23.090625 
+L 401.36384 23.090625 
+L 401.36384 193.586625 
+z
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p6d780e52b6">
+   <rect x="81.2" y="23.090625" width="313.52832" height="170.496"/>
+  </clipPath>
+ </defs>
+</svg>

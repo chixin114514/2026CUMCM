@@ -1,0 +1,63 @@
+{
+  "task": 2,
+  "caliber": {
+    "spatial_game": "守恒型径向有限体积（含中心半控制体）",
+    "temporal": "Crank-Nicolson",
+    "interface_property": "调和平均",
+    "nonlinear": "同步半时间层 Picard",
+    "n_intervals": 1600,
+    "dr_m": 1.25e-05,
+    "dt_s": 1.0,
+    "n_steps": 10800,
+    "output_shape": [
+      10801,
+      21
+    ],
+    "picard_tol_temperature_C": 1e-08,
+    "picard_tol_moisture_kgkg": 1e-08,
+    "linear_residual_tol": 1e-09
+  },
+  "picard": {
+    "max_iterations": 3,
+    "mean_iterations": 3.0,
+    "max_final_delta_temperature_C": 4.264506969775539e-09,
+    "max_final_delta_moisture_kgkg": 4.680337006846003e-09,
+    "converged_steps": 10800,
+    "failed_steps": 0
+  },
+  "linear_solver": {
+    "max_normalized_inf_residual": 4.544838896174343e-16,
+    "tol": 1e-09
+  },
+  "physics": {
+    "temperature_min_C": 27.999999999997396,
+    "temperature_max_C": 49.966412846375285,
+    "moisture_min_kgkg": 1.00812306693382,
+    "moisture_max_kgkg": 2.5500000000000265,
+    "moisture_positive": true,
+    "finite": true,
+    "min_heat_boundary_driver_C": -0.07962693676066834,
+    "max_moisture_boundary_driver_kgkg": -0.9583530669338199,
+    "final_surface_center_temperature_gap_C": 0.11691725009762166,
+    "final_center_surface_moisture_gap_kgkg": 0.7580540403003799,
+    "volume_average_moisture_initial_kgkg": 2.5499999999999994,
+    "volume_average_moisture_final_kgkg": 1.3815892535943557,
+    "volume_average_moisture_monotone_decreasing": true
+  },
+  "conservation": {
+    "moisture": {
+      "quantity": "约去 2πL 的全域水分储量 Σ V_i C_i",
+      "max_abs_balance_residual": 3.4617177763099187e-19,
+      "max_relative_balance_residual": 1.884299749035311e-11,
+      "worst_time_s": 7517.0,
+      "boundary_flux_integral": -0.00023349460730429447
+    },
+    "energy": {
+      "quantity": "半时间层物性冻结下的全局焓变 Σ V_i (ρc_p)_mid T_i",
+      "max_abs_balance_residual": 4.51522950972727e-10,
+      "max_relative_balance_residual": 3.279654002802028e-06,
+      "worst_time_s": 10231.0,
+      "boundary_flux_integral": 13330.731201091976
+    }
+  }
+}

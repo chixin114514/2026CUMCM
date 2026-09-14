@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import importlib.util
 import json
 import os
@@ -46,19 +47,22 @@ TABLE6_RADII_LABEL = ["0.0", "0.5", "1.0", "surface"]
 
 # ---------------------------------------------------------------------------
 # 参数配置：default 即题目要求的“当前代码值”，knobs 每项为 (标签, 覆写字典)。
+# 问题一、二的基准口径与 handoff 正文一致：
+#   问题一 守恒 FVM + CN + Picard，dr=5e-5 m，dt=0.25 s；
+#   问题二 守恒 FVM + CN + 同步 Picard，N=1600（dr=1.25e-5 m），dt=1 s。
 # ---------------------------------------------------------------------------
-T1_DEFAULT = dict(dr_m=0.000125, max_step_s=30.0, rtol=1e-8, atol=1e-10)
+T1_DEFAULT = dict(dr_m=0.00005, dt_s=0.25, picard_tol_C=1e-10, linear_residual_tol=1e-10)
 T1_KNOBS: dict[str, list[tuple[str, dict[str, Any]]]] = {
-    "dr_m": [("0.00025", dict(dr_m=0.00025)), ("0.000125", dict(dr_m=0.000125)), ("0.0000625", dict(dr_m=0.0000625))],
-    "max_step_s": [("60", dict(max_step_s=60.0)), ("30", dict(max_step_s=30.0)), ("15", dict(max_step_s=15.0))],
-    "rtol": [("1e-06", dict(rtol=1e-6)), ("1e-08", dict(rtol=1e-8)), ("1e-10", dict(rtol=1e-10))],
-    "atol": [("1e-08", dict(atol=1e-8)), ("1e-10", dict(atol=1e-10)), ("1e-12", dict(atol=1e-12))],
+    "dr_m": [("0.0001", dict(dr_m=0.0001)), ("0.00005", dict(dr_m=0.00005)), ("0.000025", dict(dr_m=0.000025))],
+    "dt_s": [("0.5", dict(dt_s=0.5)), ("0.25", dict(dt_s=0.25)), ("0.125", dict(dt_s=0.125))],
+    "picard_tol_C": [("1e-08", dict(picard_tol_C=1e-8)), ("1e-10", dict(picard_tol_C=1e-10)), ("1e-12", dict(picard_tol_C=1e-12))],
+    "linear_residual_tol": [("1e-08", dict(linear_residual_tol=1e-8)), ("1e-10", dict(linear_residual_tol=1e-10)), ("1e-12", dict(linear_residual_tol=1e-12))],
 }
 
-T2_DEFAULT = dict(time_step_s=0.5, dr_m=0.00005, picard_t=1e-8, picard_c=1e-10)
+T2_DEFAULT = dict(time_step_s=1.0, dr_m=0.0000125, picard_t=1e-8, picard_c=1e-10)
 T2_KNOBS: dict[str, list[tuple[str, dict[str, Any]]]] = {
     "time_step_s": [("1", dict(time_step_s=1.0)), ("0.5", dict(time_step_s=0.5)), ("0.25", dict(time_step_s=0.25))],
-    "dr_m": [("0.0001", dict(dr_m=0.0001)), ("0.00005", dict(dr_m=0.00005)), ("0.000025", dict(dr_m=0.000025))],
+    "dr_m": [("0.000025", dict(dr_m=0.000025)), ("0.0000125", dict(dr_m=0.0000125)), ("0.00000625", dict(dr_m=0.00000625))],
     "picard_tol_T": [("1e-06", dict(picard_t=1e-6)), ("1e-08", dict(picard_t=1e-8)), ("1e-10", dict(picard_t=1e-10))],
     "picard_tol_C": [("1e-08", dict(picard_c=1e-8)), ("1e-10", dict(picard_c=1e-10)), ("1e-12", dict(picard_c=1e-12))],
 }
@@ -86,6 +90,40 @@ DEFAULTS = {1: T1_DEFAULT, 2: T2_DEFAULT, 3: T3_DEFAULT, 4: T4_DEFAULT}
 KNOBS = {1: T1_KNOBS, 2: T2_KNOBS, 3: T3_KNOBS, 4: T4_KNOBS}
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _write_provenance(out_dir: Path, tasks: list[int]) -> None:
+    """Persist the exact source files and numerical defaults used by a run."""
+
+    source_paths: dict[str, Path] = {
+        "sensitivity_runner": Path(__file__).resolve(),
+        "attachment_1": ROOT / "problem" / "附件" / "附件1.xlsx",
+    }
+    for task in tasks:
+        source_paths[f"task{task}_solver"] = MODULE_PATHS[task]
+        handoff = ROOT / "handoff" / f"task{task}_handoff.md"
+        if handoff.is_file():
+            source_paths[f"task{task}_handoff"] = handoff
+    payload = {
+        "tasks": tasks,
+        "defaults": {str(task): DEFAULTS[task] for task in tasks},
+        "source_sha256": {
+            name: {"path": str(path), "sha256": _sha256(path)}
+            for name, path in source_paths.items()
+            if path.is_file()
+        },
+    }
+    (out_dir / "sensitivity_provenance.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def _load(task: int, unique: str) -> Any:
     spec = importlib.util.spec_from_file_location(f"solver_task{task}_{unique}", MODULE_PATHS[task])
     if spec is None or spec.loader is None:
@@ -107,7 +145,7 @@ def _cfg(task: int, overrides: dict[str, Any] | None = None) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 def _base_task1() -> dict[str, Any]:
     m = _load(1, "base")
-    sol = m.solve_task1(**_t1_kwargs(T1_DEFAULT))
+    sol = _t1_solve(m, T1_DEFAULT)
     T, C = _t1_key(sol)
     m.validate_solution(sol)
     return {"T": T, "C": C}
@@ -138,15 +176,19 @@ def _base_task4() -> dict[str, Any]:
     return {"t_dry_h": float(sol["termination_time_s"]) / 3600.0, "hours": hours, "values": values}
 
 
-def _t1_kwargs(config: dict[str, Any]) -> dict[str, Any]:
-    return dict(dr_m=config["dr_m"], max_step_s=config["max_step_s"], rtol=config["rtol"], atol=config["atol"])
+def _t1_solve(m: Any, config: dict[str, Any]) -> dict[str, Any]:
+    # 问题一的 Picard 容差与线性残差容差是模块级全局，运行前临时改写。
+    m.PICARD_TOL = config["picard_tol_C"]
+    m.LINEAR_RESIDUAL_TOL = config["linear_residual_tol"]
+    return m.solve_task1(dr_m=config["dr_m"], dt_s=config["dt_s"])
 
 
 def _t1_key(sol: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
     time_s = np.asarray(sol["time_s"], dtype=float)
-    radius_m = np.asarray(sol["radius_m"], dtype=float)
     t_idx = np.searchsorted(time_s, KEY_TIMES_S, side="left")
-    r_idx = np.searchsorted(radius_m, KEY_RADII_CM * 1e-2, side="left")
+    if not np.allclose(time_s[t_idx], KEY_TIMES_S, rtol=0.0, atol=1.0e-9):
+        raise ValueError("问题一输出缺少关键时间点")
+    r_idx = np.array([0, 5, 10, 15, 20], dtype=int)
     T = np.asarray(sol["temperature_C"], dtype=float)[np.ix_(t_idx, r_idx)]
     C = np.asarray(sol["moisture_kgkg"], dtype=float)[np.ix_(t_idx, r_idx)]
     return T, C
@@ -184,6 +226,33 @@ def _t4_solve(m: Any, config: dict[str, Any]) -> tuple[dict[str, Any], dict[str,
     return sol, summary
 
 
+def _write_task12_diagnostics(
+    module: Any,
+    solution: dict[str, Any],
+    out_dir: Path,
+    stem: str,
+) -> None:
+    """Persist the solver's Picard/physics/conservation audit for one run.
+
+    The formal answer diagnostics live beside each task answer.  Sensitivity
+    runs are independent numerical experiments, so keep their per-step logs
+    under a dedicated subdirectory instead of mixing them with the pointwise
+    comparison CSV files consumed by the plotting audit.
+    """
+
+    diagnostics_dir = out_dir / "diagnostics"
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    write_diagnostics = getattr(module, "write_diagnostics", None)
+    diagnostics_summary = getattr(module, "diagnostics_summary", None)
+    if not callable(write_diagnostics) or not callable(diagnostics_summary):
+        raise AttributeError("当前 Task1/Task2 solver 未提供诊断日志接口")
+    write_diagnostics(
+        solution,
+        diagnostics_dir / f"{stem}.json",
+        diagnostics_dir / f"{stem}.csv",
+    )
+
+
 # ---------------------------------------------------------------------------
 # 单次运行：返回标量摘要，并在需要时写出逐点比较 CSV。
 # ---------------------------------------------------------------------------
@@ -219,12 +288,21 @@ def _execute(job: dict[str, Any]) -> dict[str, Any]:
     try:
         if task == 1:
             m = _load(1, f"{parameter}_{label}")
-            sol = m.solve_task1(**_t1_kwargs(config))
+            sol = _t1_solve(m, config)
             T, C = _t1_key(sol)
             _write_task12_csv(out_dir / row["run_file"], task, parameter, label, KEY_TIMES_S, KEY_RADII_CM, T, C, base["T"], base["C"])
             row["max_abs_dT_C"] = float(np.max(np.abs(T - base["T"])))
             row["max_abs_dC_kgkg"] = float(np.max(np.abs(C - base["C"])))
+            iterations = np.asarray(sol["picard_iterations"], dtype=int)
+            row["max_picard_iterations"] = int(np.max(iterations))
+            row["mean_picard_iterations"] = float(np.mean(iterations))
             m.validate_solution(sol)
+            _write_task12_diagnostics(
+                m,
+                sol,
+                out_dir,
+                f"task1-{parameter}-{label}",
+            )
         elif task == 2:
             m = _load(2, f"{parameter}_{label}")
             sol = _t2_solve(m, config)
@@ -235,6 +313,13 @@ def _execute(job: dict[str, Any]) -> dict[str, Any]:
             iterations = np.asarray(sol["iteration_counts"], dtype=int)
             row["max_picard_iterations"] = int(np.max(iterations))
             row["mean_picard_iterations"] = float(np.mean(iterations))
+            m.validate_solution(sol)
+            _write_task12_diagnostics(
+                m,
+                sol,
+                out_dir,
+                f"task2-{parameter}-{label}",
+            )
         elif task == 3:
             m = _load(3, f"{parameter}_{label}")
             sol, summary = _t3_solve(m, config)
@@ -384,6 +469,7 @@ def _run_base_reuse(job: dict[str, Any]) -> dict[str, Any]:
 
 def run(tasks: list[int], out_dir: Path, jobs: int) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+    _write_provenance(out_dir, tasks)
     bases: dict[int, dict[str, Any]] = {}
 
     print(f"[sensitivity] 计算基准工况: tasks={tasks}, workers={jobs}", flush=True)

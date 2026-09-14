@@ -1,0 +1,238 @@
+{
+  "task": 3,
+  "verified_at": "2026-09-12T17:14:31+08:00",
+  "status": "complete",
+  "verification": {
+    "method": "只读 sha256sum/stat/日志尾部与 diagnostics 元数据核验；本次核验未运行 solver",
+    "herdr": {
+      "workspace_label": "2026CUMCM",
+      "workspace_id": "w5",
+      "tab_label": "Server",
+      "tab_id": "w5:tA",
+      "pane_id": "w5:pD"
+    },
+    "remote_host": "root@192.168.188.3:7999",
+    "remote_root": "/root/2026CUMCM_reaudit_task3_diagnostics",
+    "legacy_remote_root": "/root/2026CUMCM_reaudit_task3",
+    "remote_read_only": true,
+    "solver_executed_in_verification": false
+  },
+  "sources": {
+    "solver": {
+      "local_path": "solution/task3/script/solve_task3.py",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/solution/task3/script/solve_task3.py",
+      "local_sha256": "36973602ba00800672031671be69db41211cbde34a4a6dc4cecaf4b61fec926c",
+      "remote_sha256": "36973602ba00800672031671be69db41211cbde34a4a6dc4cecaf4b61fec926c",
+      "hash_equal": true,
+      "local_stat": "82421|2026-09-12T16:42:41+0800",
+      "remote_stat": "82421|2026-09-12 16:43:06.301523427 +0800"
+    },
+    "attachment_1": {
+      "local_path": "problem/附件/附件1.xlsx",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/problem/附件/附件1.xlsx",
+      "local_sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7",
+      "remote_sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7",
+      "hash_equal": true,
+      "remote_stat": "16586|2026-09-12 11:59:05.961492762 +0800"
+    },
+    "task2_input_csv": {
+      "local_path": "solution/task2/answer/task2_all_results.csv",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/solution/task2/answer/task2_all_results.csv",
+      "local_sha256": "4a9e5d34bd66029777cc140b1a7b7acdd8b6cd8e5302519760c203018b1b26e3",
+      "remote_sha256": "4a9e5d34bd66029777cc140b1a7b7acdd8b6cd8e5302519760c203018b1b26e3",
+      "hash_equal": true,
+      "remote_stat": "7705478|2026-09-12 12:02:00.411493076 +0800"
+    },
+    "handoff": {
+      "local_path": "handoff/task3_handoff.md",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/handoff/task3_handoff.md",
+      "local_sha256": "68b2359e0a525059f935ce49509d28e56ae43814533423334845d8a20fda23d0",
+      "remote_sha256": "68b2359e0a525059f935ce49509d28e56ae43814533423334845d8a20fda23d0",
+      "hash_equal": true,
+      "remote_stat": "18896|2026-09-12 11:59:25.231492796 +0800"
+    }
+  },
+  "outputs": [
+    {
+      "kind": "formal_result",
+      "local_path": "solution/task3/answer/result3.xlsx",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/solution/task3/answer/result3.xlsx",
+      "local_sha256": "46dd788b0a7d897b41a6d224c1996433572813adc6c7065b0b25643163715a5a",
+      "remote_sha256": "46dd788b0a7d897b41a6d224c1996433572813adc6c7065b0b25643163715a5a",
+      "hash_equal": true,
+      "remote_stat": "352670|2026-09-12 16:59:39.881525215 +0800"
+    },
+    {
+      "kind": "formal_result",
+      "local_path": "solution/task3/answer/task3_all_results.csv",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/solution/task3/answer/task3_all_results.csv",
+      "local_sha256": "603f959f1707c30b1ba25ac5100b74132da02f6cc833b92c4d245a64e19ac99f",
+      "remote_sha256": "603f959f1707c30b1ba25ac5100b74132da02f6cc833b92c4d245a64e19ac99f",
+      "hash_equal": true,
+      "remote_stat": "1337249|2026-09-12 16:59:40.001525215 +0800"
+    },
+    {
+      "kind": "diagnostics_json",
+      "local_path": "solution/task3/answer/task3_diagnostics.json",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/solution/task3/answer/task3_diagnostics.json",
+      "local_sha256": "ae1ba668abad81146b8f8c0ae71e6f9833a4559f15dbc6be57e0d7ab7c5bb203",
+      "remote_sha256": "ae1ba668abad81146b8f8c0ae71e6f9833a4559f15dbc6be57e0d7ab7c5bb203",
+      "hash_equal": true,
+      "remote_stat": "482394|2026-09-12 16:59:40.211525215 +0800"
+    },
+    {
+      "kind": "diagnostics_csv",
+      "local_path": "solution/task3/answer/task3_diagnostics.csv",
+      "remote_path": "/root/2026CUMCM_reaudit_task3_diagnostics/solution/task3/answer/task3_diagnostics.csv",
+      "local_sha256": "f2fa368161a8dabc85ef58a81e390869ec924c92e4c590a2d84bb1f92ebbf295",
+      "remote_sha256": "f2fa368161a8dabc85ef58a81e390869ec924c92e4c590a2d84bb1f92ebbf295",
+      "hash_equal": true,
+      "remote_stat": "5032376|2026-09-12 16:59:40.411525216 +0800"
+    }
+  ],
+  "runs": {
+    "base_fresh": {
+      "remote_log": "/root/2026CUMCM_reaudit_task3_diagnostics/run_task3_diagnostics.log",
+      "local_log": null,
+      "sha256": "914bede55e115c954b05757c3746970c742d9a2d4652f874bcbeb2318f13fc98",
+      "remote_stat": "3662|2026-09-12 16:44:56.691523625 +0800",
+      "exit_code": 0,
+      "elapsed_s_reported": 44.25,
+      "configuration": {
+        "n_intervals": 1600,
+        "dt_early_s": 1.0,
+        "dt_long_s": 10.0,
+        "output_dt_s": 60.0,
+        "event_tol_s": 0.1
+      },
+      "termination_time_s": 206898.984375,
+      "termination_time_h": 57.47194010416667,
+      "termination_bracket_width_s": 0.078125,
+      "termination_lower_max_kgkg": 0.15000000120652396,
+      "termination_upper_max_kgkg": 0.1499999784528686,
+      "max_picard_iterations": 7,
+      "mean_picard_iterations": 5.050609212481427,
+      "diagnostics_source_hash_matches_solver": true
+    },
+    "final_sensitivity": {
+      "remote_log": "/root/2026CUMCM_reaudit_task3_diagnostics/run_task3_final_sensitivity.log",
+      "local_log": null,
+      "sha256": "f06f12fad0cf828b3a04b35a77d259400ae0584b06889e346b6a78d14a164c14",
+      "remote_stat": "4405|2026-09-12 17:01:05.301525369 +0800",
+      "exit_code": 0,
+      "elapsed_s_reported": 230.87,
+      "solver_sha256": "36973602ba00800672031671be69db41211cbde34a4a6dc4cecaf4b61fec926c",
+      "grid_tdry_h": {
+        "N200": 58.94496528,
+        "N400": 57.67790799,
+        "N800": 57.5031467,
+        "N1600": 57.4719401
+      },
+      "dt_long_10_to_5": {
+        "base_h": 57.4719401,
+        "refined_h": 57.4719401,
+        "difference_h": 0.0,
+        "common_table5_max_difference_kgkg": 1.3968977e-08
+      }
+    },
+    "final_no_write": {
+      "remote_log": "/root/2026CUMCM_reaudit_task3_diagnostics/run_task3_final_no_write.log",
+      "local_log": null,
+      "sha256": "49c9770aef103042051dabf4984d781cb25a63b19e235fab5a3670886c6f9687",
+      "remote_stat": "3110|2026-09-12 17:03:30.131525629 +0800",
+      "exit_code": 0,
+      "elapsed_s_reported": 42.84,
+      "solver_sha256": "36973602ba00800672031671be69db41211cbde34a4a6dc4cecaf4b61fec926c",
+      "no_write_assertion": "未生成或覆盖答案文件",
+      "termination_time_s": 206898.984375,
+      "termination_time_h": 57.47194010416667,
+      "termination_bracket_width_s": 0.078125,
+      "final_solver_match": true
+    },
+    "final_artifact_readback": {
+      "remote_log": "/root/2026CUMCM_reaudit_task3_diagnostics/task3_final_artifact_readback.log",
+      "local_log": null,
+      "sha256": "11221a87f9f635ed148ebc6bdadbf3c9e663afc11021143f024f6de5ccc1450b",
+      "remote_stat": "244|2026-09-12 17:09:31.961526280 +0800",
+      "exit_code": 0,
+      "solver_sha256": "36973602ba00800672031671be69db41211cbde34a4a6dc4cecaf4b61fec926c",
+      "no_write_unchanged": true,
+      "csv_xlsx_max_diff": 0.0,
+      "csv_rows": 72429,
+      "xlsx_shape": [3450, 22],
+      "event_lower_time_s": 206898.90625,
+      "event_upper_time_s": 206898.984375,
+      "event_bracket_width_s": 0.078125,
+      "task2_4dp_temperature_max_diff": 0.0,
+      "task2_4dp_moisture_max_diff": 0.0,
+      "final_solver_match": true
+    }
+  },
+  "diagnostics_summary": {
+    "source_hashes_recorded_by_diagnostics": {
+      "solver": "36973602ba00800672031671be69db41211cbde34a4a6dc4cecaf4b61fec926c",
+      "handoff": "68b2359e0a525059f935ce49509d28e56ae43814533423334845d8a20fda23d0",
+      "air_attachment": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7",
+      "task2_result_csv": "4a9e5d34bd66029777cc140b1a7b7acdd8b6cd8e5302519760c203018b1b26e3"
+    },
+    "picard": {
+      "max_iterations": 7,
+      "mean_iterations": 5.050609212481427,
+      "converged_steps": 33650,
+      "failed_steps": 0,
+      "bisection_reintegrations": 7,
+      "max_final_delta_temperature_C": 5.0881965307780774e-11,
+      "max_final_delta_moisture_kgkg": 9.998571415259505e-11
+    },
+    "linear_solver": {
+      "max_temperature_normalized_inf_residual": 4.435124824004053e-16,
+      "max_moisture_normalized_inf_residual": 5.4562737971667e-16,
+      "max_normalized_inf_residual": 5.4562737971667e-16,
+      "tol": 1e-09
+    },
+    "conservation": {
+      "moisture_max_relative_balance_residual": 1.0407489017226426e-11,
+      "energy_max_relative_balance_residual": 1.595247798721248e-10,
+      "moisture_event_max_abs_balance_residual": 4.694056105782365e-22,
+      "energy_event_max_abs_balance_residual": 3.805528465939924e-11
+    },
+    "physics": {
+      "finite": true,
+      "temperature_min_C": 27.999999999997513,
+      "temperature_max_C": 50.039866713246056,
+      "moisture_min_kgkg": 0.052654279408240905,
+      "moisture_max_kgkg": 2.550000000000048,
+      "moisture_nonnegative": true,
+      "radial_moisture_nonincreasing": true,
+      "event_radial_moisture_nonincreasing": true,
+      "center_zero_flux_discretisation": true
+    },
+    "termination": {
+      "time_s": 206898.984375,
+      "time_h": 57.47194010416667,
+      "lower_time_s": 206898.90625,
+      "upper_time_s": 206898.984375,
+      "bracket_width_s": 0.078125,
+      "threshold_kgkg": 0.15,
+      "lower_max_kgkg": 0.15000000120652396,
+      "upper_max_kgkg": 0.1499999784528686,
+      "event_max_index": 0,
+      "event_profile_node_count": 1601
+    },
+    "task2_consistency": {
+      "rows_compared": 226821,
+      "max_abs_difference_4dp_temperature_C": 0.0,
+      "max_abs_difference_4dp_moisture_kgkg": 0.0
+    }
+  },
+  "findings": {
+    "final_solver_input_output_hashes_verified": true,
+    "fresh_base_exit_code_zero": true,
+    "final_sensitivity_exit_code_zero": true,
+    "final_no_write_exit_code_zero": true,
+    "final_artifact_readback_exit_code_zero": true,
+    "final_diagnostics_present_and_hash_verified": true,
+    "final_solver_match_in_sensitivity_no_write_readback": true,
+    "historical_only_audit_finding_removed": true
+  }
+}

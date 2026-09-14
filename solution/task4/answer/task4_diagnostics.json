@@ -1,0 +1,101 @@
+{
+  "task": 4,
+  "caliber": {
+    "coordinate": "材料坐标 xi=r/R(t)",
+    "spatial_scheme": "守恒型径向有限体积（中心半控制体）",
+    "temporal_scheme": "Crank-Nicolson",
+    "interface_property": "调和平均",
+    "nonlinear_scheme": "同步中点物性 Picard",
+    "n_intervals": 800,
+    "dt_early_s": 1.0,
+    "dt_long_s": 5.0,
+    "output_dt_s": 60.0,
+    "event_tol_s": 0.1,
+    "appendix": 4,
+    "step_count": 48303,
+    "sample_count": 3066,
+    "picard_tol_temperature_C": 1e-08,
+    "picard_tol_moisture_kgkg": 1e-10,
+    "linear_residual_tol": 1e-09
+  },
+  "input_sources": {
+    "air_attachment": {
+      "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件1.xlsx",
+      "sha256": "7ef32870abeef420b89560b2530ff60dfe4255917805151d89988d0311af9dd7"
+    },
+    "property_formula": {
+      "appendix": 4,
+      "source": "题面附录4公式；solve_task4.py::material_properties"
+    },
+    "radius_attachment": {
+      "path": "/root/2026CUMCM_reaudit_task4/problem/附件/附件2.xlsx",
+      "sha256": "5563acbfa4b4afb10cc6c03e2207e5369bf39da27576672aff14cc5c32e704af"
+    },
+    "radius_model": "附件2分段线性插值 R(t)"
+  },
+  "picard": {
+    "max_iterations": 5,
+    "mean_iterations": 4.419994617311554,
+    "max_final_delta_temperature_C": 5.861977570020827e-11,
+    "max_final_delta_moisture_kgkg": 9.997330741029486e-11,
+    "converged_steps": 48303,
+    "failed_steps": 0,
+    "event_candidate_count": 6,
+    "event_max_iterations": 4
+  },
+  "linear_solver": {
+    "max_temperature_normalized_inf_residual": 4.718226937800034e-16,
+    "max_moisture_normalized_inf_residual": 5.39455633163502e-16,
+    "max_normalized_inf_residual": 5.39455633163502e-16,
+    "tol": 1e-09
+  },
+  "physics": {
+    "finite": true,
+    "temperature_min_C": 27.99999999999947,
+    "temperature_max_C": 50.05009895100676,
+    "temperature_bounds_C": [
+      28.0,
+      50.246
+    ],
+    "temperature_range_ok": true,
+    "moisture_min_kgkg": 0.05261447829040394,
+    "moisture_max_kgkg": 2.550000000000008,
+    "moisture_nonnegative": true,
+    "moisture_bounded_by_initial": true,
+    "center_boundary_zero_flux": true,
+    "radius_min_m": 0.012,
+    "radius_max_m": 0.019999294444444444,
+    "radius_monotone_nonincreasing": true,
+    "max_radius_increase_m": 0.0,
+    "temperature_boundary_driver_min_C": -0.22032308336078898,
+    "temperature_inward_fraction": 0.9669585740016148,
+    "moisture_boundary_driver_max_kgkg": -0.0026208213887787125,
+    "moisture_outward_fraction": 1.0
+  },
+  "conservation": {
+    "coordinate_measure": "Σ m_i C_i / Σ m_i and Σ m_i (rho cp)_mid T_i; 2πL canceled",
+    "moisture": {
+      "max_abs_balance_residual": 1.072682524402846e-16,
+      "max_relative_balance_residual": 1.076066993575539e-12,
+      "worst_time_s": 10638.0,
+      "boundary_flux_integral": -1.2157938243095205,
+      "event_max_abs_balance_residual": 8.38244980426537e-19
+    },
+    "energy": {
+      "max_abs_balance_residual": 6.189247194754444e-07,
+      "max_relative_balance_residual": 8.138581198214094e-11,
+      "worst_time_s": 17230.0,
+      "boundary_flux_integral": 35109687.28329479,
+      "event_max_abs_balance_residual": 1.768386676996724e-07
+    }
+  },
+  "termination": {
+    "time_s": 183914.765625,
+    "lower_time_s": 183914.6875,
+    "upper_max_kgkg": 0.14999996209042374,
+    "lower_max_kgkg": 0.1500000022084151,
+    "bracket_width_s": 0.078125,
+    "max_xi": 0.0,
+    "max_radius_m": 0.0
+  }
+}
